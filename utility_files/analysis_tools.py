@@ -131,8 +131,10 @@ def positions_measured(prof, bin):
     N_bunches, Bunch_positions, Bunch_peaks, Bunch_lengths, Bunch_intensities, Bunch_positionsFit, \
     Bunch_peaksFit, Bunch_Exponent, Goodness_of_fit, x_71, y_71 \
         = getBeamPattern_3(bin, gen_prof.T,
-                           distance=2**7 * 4, fit_option='fwhm', heightFactor=100,
-                           save_72_fits=True, wind_len=5)
+                           distance=5 * 4, fit_option='fwhm', heightFactor=4e-5,
+                           save_72_fits=False, wind_len=5)
+
+    return Bunch_positionsFit[0,:]
 
 
 
@@ -141,7 +143,34 @@ def positions_simulated(prof, bin):
     N_bunches, Bunch_positions, Bunch_peaks, Bunch_lengths, Bunch_intensities, Bunch_positionsFit, \
     Bunch_peaksFit, Bunch_Exponent, Goodness_of_fit, x_71, y_71 \
         = getBeamPattern_3(bin, gen_prof.T,
-                           distance=2**7 * 4, fit_option='fwhm', heightFactor=100,
-                           save_72_fits=True, wind_len=5)
+                           distance=2**7 * 4, fit_option='fwhm', heightFactor=4e-5,
+                           save_72_fits=False, wind_len=5)
 
     return Bunch_positionsFit[0,:]
+
+
+def find_offset_fit(pos1, pos2):
+    x = np.linspace(0, len(pos1), len(pos1))
+
+    sl, inter, pval, rval, err = linregress(x, pos1)
+
+    fit_line = sl * x + inter
+
+    print(sl)
+
+    offset_fit1 = pos1 - fit_line
+    offset_fit2 = pos2 - fit_line
+    return offset_fit1, offset_fit2
+
+
+def find_offset_trf(pos1, pos2, t_rf):
+    x = np.linspace(0, len(pos1), len(pos1))
+
+    line = 5 * t_rf * x + pos1[0]
+
+    print(5 * t_rf)
+
+    offset1 = pos1 - line
+    offset2 = pos2 - line
+
+    return offset1, offset2

@@ -3,6 +3,7 @@ Tools to analyse data
 
 author: Birk Emil Karlsen-Bæck
 '''
+import matplotlib.pyplot as plt
 import numpy as np
 from blond_common.fitting.profile import binomial_amplitudeN_fit, FitOptions
 from blond_common.interfaces.beam.analytic_distribution import binomialAmplitudeN
@@ -174,3 +175,23 @@ def find_offset_trf(pos1, pos2, t_rf):
     offset2 = pos2 - line
 
     return offset1, offset2
+
+
+
+def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False):
+    if norm:
+        Va = Va / np.sum(np.abs(Va))
+        Vg = Vg / np.sum(np.abs(Vg))
+        Vb = Vb / np.sum(np.abs(Vb))
+
+    Va = np.array([0 + 0 * 1j, np.mean(Va[start:end])], dtype=complex)
+    Vg = np.array([0 + 0 * 1j, np.mean(Vg[start:end])], dtype=complex)
+    Vb = np.array([0 + 0 * 1j, np.mean(Vb[start:end])], dtype=complex)
+
+    plt.figure()
+    plt.title(titstr)
+    plt.plot(Va.real, Va.imag, color='r', label='Vant')
+    plt.plot(Vg.real, Vg.imag, color='black', label='Vgen')
+    plt.plot(Vb.real, Vb.imag, color='b', label='Vbeam')
+    plt.legend()
+    plt.grid()

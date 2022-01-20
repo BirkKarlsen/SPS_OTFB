@@ -178,7 +178,7 @@ def find_offset_trf(pos1, pos2, t_rf):
 
 
 
-def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False):
+def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False, wind = 3.1e6):
     if norm:
         Va = Va / np.sum(np.abs(Va))
         Vg = Vg / np.sum(np.abs(Vg))
@@ -193,5 +193,7 @@ def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False):
     plt.plot(Va.real, Va.imag, color='r', label='Vant')
     plt.plot(Vg.real, Vg.imag, color='black', label='Vgen')
     plt.plot(Vb.real, Vb.imag, color='b', label='Vbeam')
+    plt.xlim((-wind, wind))
+    plt.ylim((-wind, wind))
     plt.legend()
     plt.grid()

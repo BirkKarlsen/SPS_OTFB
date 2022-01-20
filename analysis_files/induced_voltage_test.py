@@ -91,7 +91,7 @@ omega_c = 2 * np.pi * f_rf
 OTFB_3 = SPSOneTurnFeedback(rf, beam, profile, 3,
                             Commissioning=CavityFeedbackCommissioning(open_FF=True))
 OTFB_4 = SPSOneTurnFeedback(rf, beam, profile, 4,
-                            Commissioning=CavityFeedbackCommissioning(open_FF=True),
+                            Commissioning=CavityFeedbackCommissioning(open_FF=True, rot_IQ=-1),
                             n_cavities=1, df=0.2275e6)
 OTFB_5 = SPSOneTurnFeedback(rf, beam, profile, 5,
                             Commissioning=CavityFeedbackCommissioning(open_FF=True))

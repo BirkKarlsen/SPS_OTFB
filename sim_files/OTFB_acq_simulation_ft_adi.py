@@ -49,7 +49,7 @@ import matplotlib as mpl
 mpl.use('Agg') # TODO: uncomment
 import matplotlib.pyplot as plt
 import numpy as np
-import data_utilities as dut
+import utility_files.data_utilities as dut
 import os.path
 from datetime import date
 
@@ -176,7 +176,7 @@ print()
 if LXPLUS:
     lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/BLonD_OTFB_development/"
 else:
-    lxdir = ""
+    lxdir = "../"
 
 # Objects -------------------------------------------------------------------------------------------------------------
 print('Initializing Objects...\n')
@@ -190,7 +190,7 @@ rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
 
 # SINGLE BUNCH FIRST
 # Beam
-bunch_intensities = np.load(lxdir + 'beam_parameters/avg_bunch_intensities_red.npy')
+bunch_intensities = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_intensities_red.npy')
 
 bunch_intensities = intensity_ramp[0] * bunch_intensities / np.sum(bunch_intensities)  # normalize to 3385.8196 * 10**10
 n_macro = N_m * N_bunches * bunch_intensities / np.sum(bunch_intensities)
@@ -240,10 +240,10 @@ SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
 
 # Initialize the bunch
-bunch_lengths_fl = np.load(lxdir + 'beam_parameters/avg_bunch_length_full_length_red.npy')
-bunch_lengths_fwhm = np.load(lxdir + 'beam_parameters/avg_bunch_length_FWHM.npy')
-exponents = np.load(lxdir + 'beam_parameters/avg_exponent_red.npy')
-positions = np.load(lxdir + 'beam_parameters/avg_positions_red.npy')
+bunch_lengths_fl = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_full_length_red.npy')
+bunch_lengths_fwhm = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_FWHM.npy')
+exponents = np.load(lxdir + 'data_files/beam_parameters/avg_exponent_red.npy')
+positions = np.load(lxdir + 'data_files/beam_parameters/avg_positions_red.npy')
 
 if fit_type == 'fwhm':
     bunch_length_list = bunch_lengths_fwhm * 1e-9
@@ -268,11 +268,11 @@ if GENERATE:
                                                  n_iterations=10)
     beam.dt += 1000 * rfstation.t_rf[0,0]
 
-    np.save(lxdir + f'without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE.npy', beam.dE)
-    np.save(lxdir + f'without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt.npy', beam.dt)
+    np.save(lxdir + f'data_files/without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE.npy', beam.dE)
+    np.save(lxdir + f'data_files/without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt.npy', beam.dt)
 else:
-    beam.dE = np.load(lxdir + f'without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE.npy')
-    beam.dt = np.load(lxdir + f'without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt.npy')
+    beam.dE = np.load(lxdir + f'data_files/without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE.npy')
+    beam.dt = np.load(lxdir + f'data_files/without_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt.npy')
 
 # TODO: do this without intensity ramp!!!
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
@@ -284,7 +284,7 @@ profile.track()
 total_imp.induced_voltage_sum()
 
 today = date.today()
-sim_dir = f'with_impedance/{today.strftime("%b-%d-%Y")}/{mstdir}{N_t}turns_{fit_type}_{N_bunches}/'
+sim_dir = f'data_files/with_impedance/{today.strftime("%b-%d-%Y")}/{mstdir}{N_t}turns_{fit_type}_{N_bunches}/'
 sdir = lxdir + sim_dir + f'sim_data/'
 
 if SAVE_RESULTS:

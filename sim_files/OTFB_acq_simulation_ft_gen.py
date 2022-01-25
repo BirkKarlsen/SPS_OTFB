@@ -121,7 +121,7 @@ if args.impedances is not None:
 if args.master_directory is not None:
     mstdir = args.master_directory
 else:
-    mstdir = "" # TODO: change back to empty string
+    mstdir = "ch_2/" # TODO: change back to empty string
 
 if args.alpha_comb is not None:
     a_comb = args.alpha_comb
@@ -218,7 +218,7 @@ V_part = 0.5442095845867135
 
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=-1)
+                                            rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=tx_g, a_comb=a_comb,
                          G_llrf=llrf_g, df=domega)   # TODO: change back to only 20

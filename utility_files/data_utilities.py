@@ -30,7 +30,16 @@ def save_osc(max_arr, min_arr, sdir):
 
 
 def save_data(OTFB, dir, i):
+    r'''
+    Saves the antenna voltage, induced generator and beam voltages, the generator current
+    and the generator power for turn i in the directory dir.
 
+    Parameters
+    ----------
+    :param OTFB: class - The SPSCavityFeedback object that contain the signals
+    :param dir: string - the name of the diretory to save the data in
+    :param i: int - the turn number
+    '''
     # 3-section signals:
     np.save(dir + f'3sec_Vant_{i}', OTFB.OTFB_1.V_ANT[-OTFB.OTFB_1.n_coarse:])
     np.save(dir + f'3sec_power_{i}', OTFB.OTFB_1.P_GEN[-OTFB.OTFB_1.n_coarse:])
@@ -45,6 +54,12 @@ def save_data(OTFB, dir, i):
     np.save(dir + f'4sec_Vindgen_{i}', OTFB.OTFB_2.V_IND_COARSE_GEN[-OTFB.OTFB_2.n_coarse:])
     np.save(dir + f'4sec_Vindbeam_{i}', OTFB.OTFB_2.V_IND_COARSE_BEAM[-OTFB.OTFB_2.n_coarse:])
 
+def save_profile(Profile, dir, i):
+    profile_data = np.zeros((Profile.n_macroparticles.shape[0], 2))
+    profile_data[:, 0] = Profile.n_macroparticles
+    profile_data[:, 1] = Profile.bin_centers
+
+    np.save(dir + f'profile_{i}', profile_data)
 
 
 def pos_from_fwhm(profile, t, max_pos, window, N_interp):

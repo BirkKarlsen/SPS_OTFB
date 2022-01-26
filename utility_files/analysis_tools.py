@@ -178,7 +178,101 @@ def find_offset_trf(pos1, pos2, t_rf):
 
 
 
+def import_OTFB_signals(data_dir, cfg_dir, turn):
+    r'''
+    Imports the antenna, generator induced and beam induced voltages from a directory from a specified turn for both
+    the 3-section and 4-section cavities.
+
+    :param data_dir: string
+        Directory of the data
+    :param cfg_dir: string
+        Directory of the specific simulation
+    :param turn: int
+        Turn to import from
+    :return:
+        Return all the signals that where imported
+    '''
+    Vant3 = np.load(data_dir + cfg_dir + f'3sec_Vant_{turn}.npy')
+    Vgen3 = np.load(data_dir + cfg_dir + f'3sec_Vindgen_{turn}.npy')
+    Vbeam3 = np.load(data_dir + cfg_dir + f'3sec_Vindbeam_{turn}.npy')
+
+    Vant4 = np.load(data_dir + cfg_dir + f'4sec_Vant_{turn}.npy')
+    Vgen4 = np.load(data_dir + cfg_dir + f'4sec_Vindgen_{turn}.npy')
+    Vbeam4 = np.load(data_dir + cfg_dir + f'4sec_Vindbeam_{turn}.npy')
+
+    return Vant3, Vgen3, Vbeam3, Vant4, Vgen4, Vbeam4
+
+
+def plot_compare_IQs(sigs1, sigs2, titstr='', start=1000, end=3040, norm = False):
+    r'''
+    Plots the IQ-vectors from two differene simulations in the same plots. Both one with the signals as they are
+    and one where the sign of the second set of signals are reversed.
+
+    :param sigs1: 2D numpy-array - Signals from first simulation
+    :param sigs2: 2D numpy-array - Signals from second simulation
+    :param titstr: string - Title for the plot
+    :param start: int - Start index for the averaging of the signals to make the IQ-vectors
+    :param end: int - End indec for the averaging of the signals to make the IQ-vectors
+    :param norm: bool - Option to make the vectors normalized in the plots
+    '''
+    if norm:
+        for i in range(len(sigs1[0,:])):
+            sigs1[:, i] = sigs1[:, i] / np.sum(np.abs(sigs1[:, i]))
+            sigs2[:, i] = sigs2[:, i] / np.sum(np.abs(sigs2[:, i]))
+
+    vecs1 = np.zeros((2, sigs1.shape[1]), dtype=complex)
+    vecs2 = np.zeros((2, sigs2.shape[1]), dtype=complex)
+
+    for i in range(len(sigs1[0,:])):
+        vecs1[:, i] = np.array([0 + 0 * 1j, np.mean(sigs1[start:end, i])], dtype=complex)
+        vecs2[:, i] = np.array([0 + 0 * 1j, np.mean(sigs2[start:end, i])], dtype=complex)
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    fig.suptitle(titstr)
+
+    ax[0].plot(vecs1[:,0].real, vecs1[:,0].imag, color='r', label='Vant +1')
+    ax[0].plot(vecs1[:,1].real, vecs1[:,1].imag, color='black', label='Vgen +1')
+    ax[0].plot(vecs1[:,2].real, vecs1[:,2].imag, color='b', label='Vbeam +1')
+    ax[0].plot(vecs2[:,0].real, vecs2[:,0].imag, color='r', label='Vant -1', linestyle='--')
+    ax[0].plot(vecs2[:,1].real, vecs2[:,1].imag, color='black', label='Vgen -1', linestyle='--')
+    ax[0].plot(vecs2[:,2].real, vecs2[:,2].imag, color='b', label='Vbeam -1', linestyle='--')
+    ax[0].legend()
+
+    ax[1].plot(vecs1[:,0].real, vecs1[:,0].imag, color='r', label='Vant +1')
+    ax[1].plot(vecs1[:,1].real, vecs1[:,1].imag, color='black', label='Vgen +1')
+    ax[1].plot(vecs1[:,2].real, vecs1[:,2].imag, color='b', label='Vbeam +1')
+    ax[1].plot(-vecs2[:,0].real, -vecs2[:,0].imag, color='r', label='Vant -1', linestyle='--')
+    ax[1].plot(-vecs2[:,1].real, -vecs2[:,1].imag, color='black', label='Vgen -1', linestyle='--')
+    ax[1].plot(-vecs2[:,2].real, -vecs2[:,2].imag, color='b', label='Vbeam -1', linestyle='--')
+    ax[1].legend()
+
+    #handles, labels = ax.get_legend_handles_labels()
+    #fig.legend(handles, labels, loc='upper center')
+
+
+
 def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False, wind = 3.1e6):
+    r'''
+    Makes a figure object that plots mean of the antenna, generator induced and beam induced voltages from index start
+    to index end. Option to normalize the length of the vectors and change the x- and y-limits of the plot.
+
+    :param Va: numpy-array
+        Antenna voltage
+    :param Vg: numpy-array
+        Generator induced voltage
+    :param Vb: numpy-array
+        Beam induced voltage
+    :param titstr: string
+        Title of the plot
+    :param start: int
+        The first index to include in the mean of the arrays
+    :param end: int
+        The last index to include in the mean of the arrays
+    :param norm: bool
+        option to normalize the length of the vectors
+    :param wind: float
+        the x- and y-limits of the plot
+    '''
     if norm:
         Va = Va / np.sum(np.abs(Va))
         Vg = Vg / np.sum(np.abs(Vg))
@@ -197,3 +291,41 @@ def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False, wind = 
     plt.ylim((-wind, wind))
     plt.legend()
     plt.grid()
+
+
+def import_profiles_from_turn(data_dir, cfg_dir, turn):
+    r'''
+    Loads the profile for turn turn from the data_dir with configuration cfg_dir and simulation length length_dir.
+
+    :param data_dir: string
+        Directory of the data
+    :param cfg_dir: string
+        Directory of the configuration
+    :param turn: int
+        Turn from which the profile is recorded from
+    :return:
+        profile-array and time-array
+    '''
+
+    p_profile = np.load(data_dir + cfg_dir + f'profile_{turn}.npy')
+    return p_profile[:, 0], p_profile[:, 1]
+
+
+def plot_profiles(p_profile, p_bin, m_profile, m_bin):
+    r'''
+    Makes a figure-object that plots two profiles.
+
+    :param p_profile: numpy-array
+        Profile array with positive sign
+    :param p_bin: numpy-array
+        Time array with the positive signed profile
+    :param m_profile: numpy-array
+        Profile array with negative sign
+    :param m_bin: numpy-array
+        Time array with the negative signed profile
+    '''
+    plt.figure()
+
+    plt.plot(p_bin, p_profile, color='r', label='1')
+    plt.plot(m_bin, m_profile, color='b', label='-1')
+    plt.legend()

@@ -12,8 +12,8 @@
 
 
 /data_files/
-/sim_files/with_impedance/
-/sim_files/without_impedance/
+/data_files/with_impedance/
+/data_files/without_impedance/
 
 
 *.DS_Store

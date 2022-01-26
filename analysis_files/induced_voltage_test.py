@@ -91,7 +91,7 @@ omega_c = 2 * np.pi * f_rf
 OTFB_3 = SPSOneTurnFeedback(rf, beam, profile, 3,
                             Commissioning=CavityFeedbackCommissioning(open_FF=True))
 OTFB_4 = SPSOneTurnFeedback(rf, beam, profile, 4,
-                            Commissioning=CavityFeedbackCommissioning(open_FF=True, rot_IQ=1),
+                            Commissioning=CavityFeedbackCommissioning(open_FF=True, rot_IQ=-1),
                             n_cavities=1, df=0.2275e6)
 OTFB_5 = SPSOneTurnFeedback(rf, beam, profile, 5,
                             Commissioning=CavityFeedbackCommissioning(open_FF=True))
@@ -133,29 +133,14 @@ TWC200_4.wake_calc(profile.bin_centers - profile.bin_centers[0])
 wake1 = (TWC200_4.wake)
 Vind = -profile.Beam.ratio * profile.Beam.Particle.charge * e * \
        np.convolve(wake1, profile.n_macroparticles, mode='full')[:140]
-plt.plot(convtime[:140], Vind, color='teal', label='Time domain w conv')
+#plt.plot(convtime[:140], Vind, color='teal', label='Time domain w conv')
 
-# Wake from impulse response
-OTFB_4.TWC.impulse_response_gen(omega_c, profile.bin_centers)
-OTFB_5.TWC.impulse_response_gen(omega_c, profile.bin_centers)
-OTFB_4.TWC.compute_wakes(profile.bin_centers)
-OTFB_5.TWC.compute_wakes(profile.bin_centers)
-wake2 = (OTFB_4.TWC.W_beam)
-Vind = -profile.Beam.ratio * profile.Beam.Particle.charge * e * \
-       np.convolve(wake2, profile.n_macroparticles, mode='full')[:140]
-plt.plot(convtime[:140], Vind, color='turquoise', label='Wake, OTFB')
+
 plt.xlabel("Time [s]")
 plt.ylabel("Induced voltage [V]")
 plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
 plt.legend(loc=2)
 
-plt.figure()
-plt.plot(profile.bin_centers, wake1, label='from impedances')
-plt.plot(profile.bin_centers, wake2, label='from OTFB')
-plt.xlabel("Time [s]")
-plt.ylabel("Wake field [Ohms/s]")
-plt.ticklabel_format(style='sci', axis='y', scilimits=(0, 0))
-plt.legend(loc=4)
 
 
 plt.show()

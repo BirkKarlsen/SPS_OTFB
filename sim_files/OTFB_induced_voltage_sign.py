@@ -45,13 +45,12 @@ args = parser.parse_args()
 # Imports -------------------------------------------------------------------------------------------------------------
 
 print('Importing...\n')
-import matplotlib as mpl
-mpl.use('Agg') # TODO: uncomment
 import matplotlib.pyplot as plt
 import numpy as np
 import utility_files.data_utilities as dut
 import os.path
 from datetime import date
+import utility_files.analysis_tools as at
 
 from blond.llrf.cavity_feedback import SPSCavityFeedback, CavityFeedbackCommissioning
 from blond.input_parameters.rf_parameters import RFStation
@@ -62,6 +61,7 @@ from blond.beam.distributions_multibunch import matched_from_distribution_densit
 from blond.trackers.tracker import FullRingAndRF, RingAndRFTracker
 from blond.impedances.impedance import InducedVoltageFreq, TotalInducedVoltage
 from blond.impedances.impedance_sources import InputTable
+from blond.utils import bmath as bm
 
 # SPS Impedance
 from SPS.impedance_scenario import scenario, impedance2blond
@@ -121,7 +121,7 @@ if args.impedances is not None:
 if args.master_directory is not None:
     mstdir = args.master_directory
 else:
-    mstdir = "rev_sign_3/" # TODO: change back to empty string
+    mstdir = "rev_sign_2/" # TODO: change back to empty string
 
 if args.alpha_comb is not None:
     a_comb = args.alpha_comb
@@ -223,6 +223,7 @@ OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=tx_g, a_comb=a_comb,
                          G_llrf=llrf_g, df=domega)   # TODO: change back to only 20
 
+
 # Impedance of the SPS
 if SPS_IMP:
     freqRes = 43.3e3          # Hz
@@ -283,12 +284,10 @@ else:
     beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
     beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy')
 
-# TODO: do this without intensity ramp!!!
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
                                   CavityFeedback=OTFB, Profile=profile)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
-# TODO: Theo did a track of the OTFB as well
 profile.track()
 total_imp.induced_voltage_sum()
 
@@ -297,7 +296,6 @@ sim_dir = f'data_files/with_impedance/{today.strftime("%b-%d-%Y")}/{mstdir}{N_t}
 sdir = lxdir + sim_dir + f'sim_data/'
 
 if SAVE_RESULTS:
-
     np.save(lxdir + f'data_files/with_impedance/profile_data/generated_profile_{fit_type}_{N_bunches}_r', profile.n_macroparticles)
     np.save(lxdir + f'data_files/with_impedance/profile_data/generated_profile_bins_{fit_type}_{N_bunches}_r', profile.bin_centers)
     if not os.path.exists(lxdir + sim_dir + f'fig/'):
@@ -306,21 +304,52 @@ if SAVE_RESULTS:
     if not os.path.exists(sdir):
         os.makedirs(lxdir + sim_dir + f'sim_data/')
 
+
+
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
+    nn = 2
+    for i in range(nn):
+        SPS_tracker.track()
+        profile.track()
+        total_imp.induced_voltage_sum()
+        OTFB.track()
 
-    if STDY_OSC:
-        max_pow = np.zeros(N_t)
-        min_pow = np.zeros(N_t)
+    voltages = np.ascontiguousarray(SPS_rf_tracker.voltage[:, SPS_rf_tracker.counter[0]])
+    omega_rf = np.ascontiguousarray(SPS_rf_tracker.omega_rf[:, SPS_rf_tracker.counter[0]])
+    phi_rf = np.ascontiguousarray(SPS_rf_tracker.phi_rf[:, SPS_rf_tracker.counter[0]])
 
-    # Parameters to save turn-by-turn
-    fwhm_arr = np.zeros((N_bunches, N_t//dt_ptrack))
-    pos_arr = np.zeros((N_bunches, N_t//dt_ptrack))
-    pos_fit_arr = np.zeros((N_bunches, N_t//dt_ptrack))
-    max_pow_arr = np.zeros((2, N_t//dt_ptrack))
-    max_V_arr = np.zeros((2, N_t//dt_ptrack))
-    int_arr = np.zeros(N_t//dt_ptrack)
+    un_comp_rf_voltage = bm.rf_volt_comp(voltages, omega_rf, phi_rf,
+                                              SPS_rf_tracker.profile.bin_centers)
+
+    plt.figure()
+    plt.plot(SPS_rf_tracker.rf_voltage, label='OTFB induced')
+    plt.plot(SPS_rf_tracker.total_voltage, label='total voltage')
+    plt.plot(un_comp_rf_voltage, label='uncomp rf volt')
+    plt.xlim((140500, 142000))
+    plt.legend()
+
+
+    plt.figure()
+    plt.plot(SPS_rf_tracker.totalInducedVoltage.induced_voltage)
+
+    plt.figure()
+    plt.plot(SPS_rf_tracker.cavityFB.V_corr, label='Tracker')
+    plt.plot(OTFB.V_corr, label='OTFB')
+
+    plt.figure()
+    plt.plot(SPS_rf_tracker.cavityFB.phi_corr, label='Tracker')
+    plt.plot(OTFB.phi_corr, label='OTFB')
+    plt.plot(- OTFB.alpha_sum, label='alpha sum') #- OTFB.rf.phi_rf[0, OTFB.rf.counter[0]])
+    plt.legend()
+
+    at.plot_IQ(OTFB.OTFB_1.V_ANT[-OTFB.OTFB_1.n_coarse:],
+               OTFB.OTFB_1.V_IND_COARSE_GEN[-OTFB.OTFB_1.n_coarse:],
+               OTFB.OTFB_1.V_IND_COARSE_BEAM[-OTFB.OTFB_1.n_coarse:],
+               wind=4e6)
+
+    plt.show()
 
     n = 0
     for i in range(N_t):
@@ -336,35 +365,14 @@ if not GENERATE:
             OTFB.OTFB_1.calc_power()
             OTFB.OTFB_2.calc_power()
 
-            max_pow[i], min_pow[i] = dut.oscillation_study(OTFB.OTFB_1.P_GEN[-h:])
 
         if i % dt_ptrack == 0:
             # Power
             OTFB.OTFB_1.calc_power()
             OTFB.OTFB_2.calc_power()
-            max_pow_arr[0, n] = np.max(OTFB.OTFB_1.P_GEN[-h:])
-            max_pow_arr[1, n] = np.max(OTFB.OTFB_2.P_GEN[-h:])
 
-            # Antenna voltage
-            max_V_arr[0, n] = np.max(np.abs(OTFB.OTFB_1.V_ANT[-h:]))
-            max_V_arr[1, n] = np.max(np.abs(OTFB.OTFB_2.V_ANT[-h:]))
-
-            # Beam params
-            fwhm_arr[:, n], pos_arr[:, n], pos_fit_arr[:, n], x_72, y_72 = dut.bunch_params(profile,
-                                                                                            get_72=False)
-            int_arr[n] = beam.intensity
             n += 1
 
-        if i % dt_save == 0:
-            dut.plot_params(fwhm_arr, pos_arr, pos_fit_arr,
-                            max_pow_arr, max_V_arr, lxdir + sim_dir,
-                            rfstation.t_rf[0,0], i, n - 1,
-                            MB = not SINGLE_BATCH)
-
-            dut.save_params(fwhm_arr, pos_arr, pos_fit_arr,
-                            max_pow_arr, max_V_arr, lxdir + sim_dir)
-
-            dut.plot_ramp(int_arr, i, n - 1, lxdir + sim_dir)
 
         if i % dt_plot == 0:
             OTFB.OTFB_1.calc_power()
@@ -379,15 +387,7 @@ if not GENERATE:
     OTFB.OTFB_1.calc_power()
     OTFB.OTFB_2.calc_power()
     dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_t)
-    dut.plot_ramp(int_arr, N_t, n - 1, lxdir + sim_dir)
 
-    dut.plot_params(fwhm_arr, pos_arr, pos_fit_arr,
-                    max_pow_arr, max_V_arr, lxdir + sim_dir,
-                    rfstation.t_rf[0, 0], N_t, n - 1,
-                    MB = not SINGLE_BATCH)
-
-    dut.save_params(fwhm_arr, pos_arr, pos_fit_arr,
-                    max_pow_arr, max_V_arr, lxdir + sim_dir)
 
     if SAVE_RESULTS:
         dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
@@ -401,9 +401,6 @@ if not GENERATE:
             os.makedirs(lxdir + sim_dir + f'profile_data/')
         np.save(lxdir + sim_dir + f'profile_data/generated_profile_{fit_type}_{N_bunches}_end_{N_t}', profile.n_macroparticles)
         np.save(lxdir + sim_dir + f'profile_data/generated_profile_bins_{fit_type}_{N_bunches}_end_{N_t}', profile.bin_centers)
-
-        if STDY_OSC:
-            dut.save_osc(max_pow, min_pow, lxdir + sim_dir)
 
         np.save(lxdir + sim_dir + f"sim_data/induced_voltage", SPS_rf_tracker.totalInducedVoltage.induced_voltage)
         np.save(lxdir + sim_dir + f"sim_data/induced_voltage_time", SPS_rf_tracker.totalInducedVoltage.time_array)

@@ -12,8 +12,8 @@ import scipy as sp
 t_rf = 4.99015937e-09
 
 # Importing the profiles - Sim files are from with_impedance/Jan-02-2022/central_freq1/30000turns_fwhm_288/
-sim_p = np.load('../data_files/profiles/generated_profile_fwhm_288_end_30000.npy')
-sim_b = np.load('../data_files/profiles/generated_profile_bins_fwhm_288_end_30000.npy')
+sim_p = np.load('../data_files/profiles/generated_profile_fwhm_288_end_10000.npy')
+sim_b = np.load('../data_files/profiles/generated_profile_bins_fwhm_288_end_10000.npy')
 sim_p = sim_p / np.sum(sim_p)
 
 mea_p = at.import_measured_profile('../data_files/profiles/MD_104.npy', 0)

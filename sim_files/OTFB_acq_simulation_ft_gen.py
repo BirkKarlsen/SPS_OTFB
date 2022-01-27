@@ -36,6 +36,8 @@ parser.add_argument("--central_freq", '-cf', type=int,
                     help="Option to choose the central frequnecy of the 4-section, (1) 200.1, (2) 200.222, or (3) 199.995")
 parser.add_argument("--corr_sign", "-cs", type=int,
                     help="Sign of the corrections in phase from the OTFB, default is +1 (+1).")
+parser.add_argument("--rot_iq", "-ri", type=int,
+                    help="Option to rotate the IQ-signals by 180 degrees (-1), default is 1")
 
 
 
@@ -71,11 +73,12 @@ fit_type = 'fwhm'
 SINGLE_BATCH = False
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = True
-LXPLUS = False                              # TODO: change back before copy to lxplus
+LXPLUS = True                              # TODO: change back before copy to lxplus
 SPS_IMP = True
 STDY_OSC = False
 TRACK_IMP = True
 OMEGA_SCENARIO = 3
+ROT_IQ = 1
 
 if not LXPLUS:
     plt.rcParams.update({
@@ -100,9 +103,9 @@ phi = 0                                         # 200 MHz phase [-]
 N_m = int(5e5)                                  # Number of macro-particles for tracking
 N_t = 100                                      # Number of turns to track
 
-dt_plot = 2 # TODO: 1000
-dt_track = 10 # TODO: 1000
-dt_save = 10 # TODO: 1000
+dt_plot = 1000 # TODO: 1000
+dt_track = 1000 # TODO: 1000
+dt_save = 1000 # TODO: 1000
 dt_ptrack = 10
 
 
@@ -121,7 +124,7 @@ if args.impedances is not None:
 if args.master_directory is not None:
     mstdir = args.master_directory
 else:
-    mstdir = "rev_sign_3/" # TODO: change back to empty string
+    mstdir = ""
 
 if args.alpha_comb is not None:
     a_comb = args.alpha_comb
@@ -131,7 +134,7 @@ else:
 if args.llrf_gain is not None:
     llrf_g = args.llrf_gain
 else:
-    llrf_g = 20 # TODO: 10
+    llrf_g = 20
 
 if args.tx_gain is not None:
     tx_g = args.tx_gain
@@ -158,6 +161,8 @@ if SINGLE_BATCH:
 else:
     N_bunches = 288                             # Number of bunches
 
+if args.rot_iq is not None:
+    ROT_IQ = args.rot_iq
 
 print('Fit type:', fit_type)
 print('Number of Bunches:', N_bunches)
@@ -171,7 +176,7 @@ print()
 
 
 if LXPLUS:
-    lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/BLonD_OTFB_development/"
+    lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/"
 else:
     lxdir = "../"
 
@@ -218,7 +223,7 @@ V_part = 0.5442095845867135
 
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=-1)
+                                            rot_IQ=ROT_IQ, phase_corr_sign=phase_sign)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=tx_g, a_comb=a_comb,
                          G_llrf=llrf_g, df=domega)   # TODO: change back to only 20
@@ -283,12 +288,11 @@ else:
     beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
     beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy')
 
-# TODO: do this without intensity ramp!!!
+
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
                                   CavityFeedback=OTFB, Profile=profile)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
-# TODO: Theo did a track of the OTFB as well
 profile.track()
 total_imp.induced_voltage_sum()
 

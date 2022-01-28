@@ -199,7 +199,6 @@ SPS_ring = Ring(C, alpha, p_s, Proton(), N_t)
 rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0 + dphase, np.pi + 4 * dphase], n_rf=2)
 # TODO: Shift with pi/2 only main harm. in fourth harmonic add delta-phi * 4
 
-
 # SINGLE BUNCH FIRST
 # Beam
 bunch_intensities = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_intensities_red.npy')
@@ -287,7 +286,7 @@ if GENERATE:
     np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy', beam.dt)
 else:
     beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
-    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy')
+    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy') - dphase / rfstation.omega_rf[0,0]
 
 
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,

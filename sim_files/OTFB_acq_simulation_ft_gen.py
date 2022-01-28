@@ -34,10 +34,10 @@ parser.add_argument("--n_ptrack", "-npt", type=int,
                     help="Option to change the number of turns between tracking of parameters, default is 10")
 parser.add_argument("--central_freq", '-cf', type=int,
                     help="Option to choose the central frequnecy of the 4-section, (1) 200.1, (2) 200.222, or (3) 199.995")
-parser.add_argument("--corr_sign", "-cs", type=int,
-                    help="Sign of the corrections in phase from the OTFB, default is +1 (+1).")
 parser.add_argument("--rot_iq", "-ri", type=int,
                     help="Option to rotate the IQ-signals by 180 degrees (-1), default is 1")
+parser.add_argument("--dphase", "-dp", type=float,
+                    help="Option to offset the total phase of the RF system in the simulation, default is 0.")
 
 
 
@@ -151,11 +151,6 @@ if args.n_ptrack is not None:
 if args.central_freq is not None:
     OMEGA_SCENARIO = int(args.central_freq)
 
-if args.corr_sign is not None:
-    phase_sign = args.corr_sign
-else:
-    phase_sign = +1
-
 if SINGLE_BATCH:
     N_bunches = 72                              # Number of bunches
 else:
@@ -163,6 +158,11 @@ else:
 
 if args.rot_iq is not None:
     ROT_IQ = args.rot_iq
+
+if args.dphase is not None:
+    dphase = args.dphase
+else:
+    dphase = 0
 
 print('Fit type:', fit_type)
 print('Number of Bunches:', N_bunches)
@@ -196,7 +196,8 @@ print('Initializing Objects...\n')
 SPS_ring = Ring(C, alpha, p_s, Proton(), N_t)
 
 # RFStation
-rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
+rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0 + dphase, np.pi + 4 * dphase], n_rf=2)
+# TODO: Shift with pi/2 only main harm. in fourth harmonic add delta-phi * 4
 
 
 # SINGLE BUNCH FIRST
@@ -223,7 +224,7 @@ V_part = 0.5442095845867135
 
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=ROT_IQ, phase_corr_sign=phase_sign)
+                                            rot_IQ=ROT_IQ)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=tx_g, a_comb=a_comb,
                          G_llrf=llrf_g, df=domega)   # TODO: change back to only 20

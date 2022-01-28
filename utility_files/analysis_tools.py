@@ -154,13 +154,15 @@ def find_offset_fit(pos1, pos2):
     x = np.linspace(0, len(pos1), len(pos1))
 
     sl, inter, pval, rval, err = linregress(x, pos1)
+    fit_line1 = sl * x + inter
 
-    fit_line = sl * x + inter
+    sl, inter, pval, rval, err = linregress(x, pos2)
+    fit_line2 = sl * x + inter
 
     print(sl)
 
-    offset_fit1 = pos1 - fit_line
-    offset_fit2 = pos2 - fit_line
+    offset_fit1 = pos1 - fit_line1
+    offset_fit2 = pos2 - fit_line2
     return offset_fit1, offset_fit2
 
 
@@ -329,3 +331,20 @@ def plot_profiles(p_profile, p_bin, m_profile, m_bin):
     plt.plot(p_bin, p_profile, color='r', label='1')
     plt.plot(m_bin, m_profile, color='b', label='-1')
     plt.legend()
+
+
+def import_and_normalize_profile(dir_str, norm=1):
+    r'''
+    Imports a profile and its t-axis from a .npy-file where the first column is the profile
+    and the second column is the bins. It will also normalize the profile and you have the option to
+    scale the resulting normalized profile.
+
+    :param dir_str: string - The name of the directory and file
+    :param norm: float - The scaling factor for the normalized profile
+    :return: The resulting profile and its corresponding t-axis
+    '''
+    profile_data = np.load(dir_str)
+    profile = profile_data[:, 0]
+    bin = profile_data[:, 1]
+    profile = norm * profile / np.sum(profile)
+    return profile, bin

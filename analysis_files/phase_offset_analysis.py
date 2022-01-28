@@ -12,16 +12,25 @@ import scipy as sp
 t_rf = 4.99015937e-09
 
 # Importing the profiles - Sim files are from with_impedance/Jan-02-2022/central_freq1/30000turns_fwhm_288/
+
+# Simulations with no phase-shift
 sim_p = np.load('../data_files/profiles/generated_profile_fwhm_288_end_10000.npy')
 sim_b = np.load('../data_files/profiles/generated_profile_bins_fwhm_288_end_10000.npy')
 sim_p = sim_p / np.sum(sim_p)
 
+# Simulations with 180 degree phase-shift
+sim_pm = np.load('../data_files/profiles/generated_profile_fwhm_288_end_30000.npy')
+sim_bm = np.load('../data_files/profiles/generated_profile_bins_fwhm_288_end_30000.npy')
+sim_pm = sim_pm / np.sum(sim_pm)
+
+# From measurements
 mea_p = at.import_measured_profile('../data_files/profiles/MD_104.npy', 0)
 mea_b = np.linspace(0, len(mea_p)*(1/10e9), len(mea_p))
 mea_p = mea_p / np.sum(np.abs(mea_p)) * 0.7
 
 # Finding positions of the bunches
 sim_pos = at.positions_simulated(sim_p, sim_b) * 1e-9
+sim_posm = at.positions_simulated(sim_pm, sim_bm) * 1e-9
 mea_pos = at.positions_measured(mea_p, mea_b) * 1e-9
 
 # Moving to approximately same place in time
@@ -34,16 +43,19 @@ mea_pos = at.positions_measured(mea_p, mea_b) * 1e-9
 
 # Finding bunch-by-bunch offsets
 mea_bbb, sim_bbb = at.find_offset_fit(mea_pos[:72], sim_pos[:72])
+mea_bbbm, sim_bbbm = at.find_offset_fit(mea_pos[:72], sim_posm[:72])
 mea_bbb_trf, sim_bbb_trf = at.find_offset_trf(mea_pos[:72], sim_pos[:72], t_rf)
 
 plt.figure()
 plt.plot(sim_bbb, color='r', label='Sim')
-plt.plot(mea_bbb, color='b', label='Meas')
+plt.plot(sim_bbbm, color='b', label='Rev')
+plt.plot(mea_bbb, color='black', label='Meas')
 plt.legend()
 
 plt.figure()
 plt.plot(sim_b, sim_p, color='r', label='Sim')
-plt.plot(mea_b, mea_p, color='b', label='Meas')
+plt.plot(sim_bm, sim_pm, color='b', label='Rev')
+plt.plot(mea_b, mea_p, color='black', label='Meas')
 plt.legend()
 
 #plt.figure()

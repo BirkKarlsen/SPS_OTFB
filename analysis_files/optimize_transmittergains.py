@@ -32,6 +32,7 @@ N_t = 1                                         # Number of turns to track
 sigma_dt = 1.2e-9
 
 G_tx = [0.251402590786449, 0.511242728131293]
+df = [0.18433333e6, 0.2275e6]
 
 '''
 For the PostLS2 scenario with both cavities at 200.222 MHz the optimized transmitter gains are
@@ -61,7 +62,7 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False)
 
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=63/64,
-                         G_llrf=20, df=[0.18433333e6, 0.2275e6])
+                         G_llrf=20, df=df)
 
 # Comparison
 

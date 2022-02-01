@@ -182,7 +182,8 @@ elif OMEGA_SCENARIO == 2:
 else:
     domega = [0, 0]
 
-
+domega = [0.18433333e6, 0.2275e6]
+G_tx = [0.251402590786449, 0.511242728131293]
 # Objects -------------------------------------------------------------------------------------------------------------
 print('Initializing Objects...\n')
 
@@ -216,11 +217,10 @@ V_part = 0.5442095845867135
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
 
-
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=-1, phase_corr_sign=+1)
+                                            rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
-                         Commissioning=Commissioning, G_tx=tx_g, a_comb=a_comb,
+                         Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
                          G_llrf=0, df=domega)   # TODO: change back to only 20
 
 
@@ -288,6 +288,18 @@ SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp
                                   CavityFeedback=OTFB, Profile=profile)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
+
+
+
+SPS_rf_tracker_with_OTFB = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=None,
+                                  CavityFeedback=OTFB, Profile=profile)
+
+SPS_rf_tracker_with_imp = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
+                                  CavityFeedback=None, Profile=profile)
+
+
+
+
 profile.track()
 total_imp.induced_voltage_sum()
 
@@ -309,37 +321,57 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 1
+    nn = 0
     for i in range(nn):
         OTFB.track()
         SPS_tracker.track()
         profile.track()
         total_imp.induced_voltage_sum()
 
+    OTFB.track()
 
-    voltages = np.ascontiguousarray(SPS_rf_tracker.voltage[:, SPS_rf_tracker.counter[0]])
-    omega_rf = np.ascontiguousarray(SPS_rf_tracker.omega_rf[:, SPS_rf_tracker.counter[0]])
-    phi_rf = np.ascontiguousarray(SPS_rf_tracker.phi_rf[:, SPS_rf_tracker.counter[0]])
+    SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
+    SPS_rf_tracker_with_imp.rf_voltage_calculation()
 
-    un_comp_rf_voltage = bm.rf_volt_comp(voltages, omega_rf, phi_rf,
-                                              SPS_rf_tracker.profile.bin_centers)
-
-    plt.figure()
-    plt.plot(SPS_rf_tracker.rf_voltage, label='OTFB induced')
-    plt.plot(SPS_rf_tracker.total_voltage, label='total voltage')
-    plt.plot(un_comp_rf_voltage, label='uncomp rf volt')
-    plt.xlim((140500, 142000))
-    plt.legend()
+    OTFB_tot = SPS_rf_tracker_with_OTFB.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
+    IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
 
     plt.figure()
-    plt.plot(profile.bin_centers, SPS_rf_tracker.totalInducedVoltage.induced_voltage, label='from impedance model')
-    plt.plot(profile.bin_centers, (SPS_rf_tracker.rf_voltage - un_comp_rf_voltage), label='from OTFB')
+    plt.plot(profile.bin_centers, OTFB_tot, label='OTFB')
+    plt.plot(profile.bin_centers, IMP_tot, label='IMP')
     plt.plot(profile.bin_centers,
              288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
              label='profile')
     plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
     plt.legend()
+
+    plt.show()
+
+
+    #voltages = np.ascontiguousarray(SPS_rf_tracker.voltage[:, SPS_rf_tracker.counter[0]])
+    #omega_rf = np.ascontiguousarray(SPS_rf_tracker.omega_rf[:, SPS_rf_tracker.counter[0]])
+    #phi_rf = np.ascontiguousarray(SPS_rf_tracker.phi_rf[:, SPS_rf_tracker.counter[0]])
+
+    #un_comp_rf_voltage = bm.rf_volt_comp(voltages, omega_rf, phi_rf,
+    #                                          SPS_rf_tracker.profile.bin_centers)
+
+    #plt.figure()
+    #plt.plot(SPS_rf_tracker.rf_voltage, label='OTFB induced')
+    #plt.plot(SPS_rf_tracker.total_voltage, label='total voltage')
+    #plt.plot(un_comp_rf_voltage, label='uncomp rf volt')
+    #plt.xlim((140500, 142000))
+    #plt.legend()
+
+
+    #plt.figure()
+    #plt.plot(profile.bin_centers, SPS_rf_tracker.totalInducedVoltage.induced_voltage, label='from impedance model')
+    #plt.plot(profile.bin_centers, (SPS_rf_tracker.rf_voltage - un_comp_rf_voltage), label='from OTFB')
+    #plt.plot(profile.bin_centers,
+    #         288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+    #         label='profile')
+    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+    #plt.legend()
 
     #plt.figure()
     #plt.plot(SPS_rf_tracker.cavityFB.V_corr, label='Tracker')
@@ -358,7 +390,7 @@ if not GENERATE:
     plt.show()
 
     n = 0
-    for i in range(N_t):
+    for i in range(0):
         SPS_tracker.track()
         profile.track()
         total_imp.induced_voltage_sum()

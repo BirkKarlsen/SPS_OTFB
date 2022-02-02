@@ -62,13 +62,14 @@ from blond.trackers.tracker import FullRingAndRF, RingAndRFTracker
 from blond.impedances.impedance import InducedVoltageFreq, TotalInducedVoltage
 from blond.impedances.impedance_sources import InputTable
 from blond.utils import bmath as bm
+from blond.llrf.signal_processing import cartesian_to_polar
 
 # SPS Impedance
 from SPS.impedance_scenario import scenario, impedance2blond
 
 # TODO: change back - DONE
 fit_type = 'fwhm'
-SINGLE_BATCH = False
+SINGLE_BATCH = True
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = True
 LXPLUS = False                              # TODO: change back before copy to lxplus
@@ -183,7 +184,8 @@ else:
     domega = [0, 0]
 
 domega = [0.18433333e6, 0.2275e6]
-G_tx = [0.251402590786449, 0.511242728131293]
+#G_tx = [0.251402590786449, 0.511242728131293]
+G_tx = [0.25154340605790062590, 0.510893981556323]
 # Objects -------------------------------------------------------------------------------------------------------------
 print('Initializing Objects...\n')
 
@@ -192,7 +194,12 @@ print('Initializing Objects...\n')
 SPS_ring = Ring(C, alpha, p_s, Proton(), N_t)
 
 # RFStation
-rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
+SINGLE_RF = True
+if SINGLE_RF:
+    rfstation = RFStation(SPS_ring, [h], [V], [0], n_rf=1)
+else:
+    rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
+
 
 
 # SINGLE BUNCH FIRST
@@ -206,8 +213,10 @@ n_macro = N_m * N_bunches * bunch_intensities / np.sum(bunch_intensities)
 beam = Beam(SPS_ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 
 # Profile
-profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
-    cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
+profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5),
+    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125), n_slices=2**7 * (72 * 5 + 125)))
+#profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
+#    cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
 
 # One Turn Feedback
 V_part = 0.5442095845867135
@@ -221,14 +230,15 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=0, df=domega)   # TODO: change back to only 20
+                         G_llrf=20, df=domega)   # TODO: change back to only 20
 
 
 # Impedance of the SPS
 if SPS_IMP:
     freqRes = 43.3e3          # Hz
 
-    modelStr = "200TWC_only.txt" # TODO: change back to futurePostLS2_SPS_noMain200TWC.txt
+    modelStr = "futurePostLS2_SPS_noMain200TWC.txt" # TODO: change back to futurePostLS2_SPS_noMain200TWC.txt
+    # "200TWC_only.txt"
     impScenario = scenario(modelStr)
     impModel = impedance2blond(impScenario.table_impedance)
 
@@ -321,30 +331,81 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 0
+    nn = 50
+    dt_p = 10
     for i in range(nn):
         OTFB.track()
         SPS_tracker.track()
         profile.track()
         total_imp.induced_voltage_sum()
+        if 0 == (i + 1) % dt_p:
+            print(i + 1)
+        if i == 0:
+            # Compare generator induced and beam induced contributions
+            gen_ind = OTFB.V_sum - OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:] \
+                      - OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:]
 
-    OTFB.track()
+            beam_ind = OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:] + OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:]
+
+            gV, gp = cartesian_to_polar(gen_ind)
+            bV, bp = cartesian_to_polar(beam_ind)
+            gp = gp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
+            bp = bp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
+
+            gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers - gp)
+            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers - bp)
+
+
 
     SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
     SPS_rf_tracker_with_imp.rf_voltage_calculation()
 
-    OTFB_tot = SPS_rf_tracker_with_OTFB.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
+    OTFB_tot = SPS_rf_tracker.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
 
+    # Compare wake-fields from impedance and OTFB
     plt.figure()
+    plt.plot(profile.bin_centers, bE, label='Turn 0')
     plt.plot(profile.bin_centers, OTFB_tot, label='OTFB')
+    #plt.plot(profile.bin_centers, IMP_tot, label='IMP')
+    #plt.plot(profile.bin_centers,
+    #         288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+    #         label='profile')
+    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+    plt.legend()
+
+
+    plt.figure()
+    plt.title('Beam induced voltage only')
+    plt.plot(profile.bin_centers, bE, label='OTFB')
     plt.plot(profile.bin_centers, IMP_tot, label='IMP')
     plt.plot(profile.bin_centers,
              288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
              label='profile')
-    plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
     plt.legend()
+
+
+    plt.figure()
+    plt.title('Generator voltage only')
+    plt.plot(profile.bin_centers, gE, label='OTFB')
+    plt.plot(profile.bin_centers, SPS_rf_tracker_with_imp.rf_voltage, label='IMP')
+    plt.plot(profile.bin_centers,
+             288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+             label='profile')
+    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+    plt.legend()
+
+
+    at.plot_IQ(OTFB.OTFB_1.V_ANT[-h:],
+               OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
+               OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
+               end=1000 + 5 * 72, wind=4e6)
+
+    #plt.figure()
+    #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
+    #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
 
     plt.show()
 

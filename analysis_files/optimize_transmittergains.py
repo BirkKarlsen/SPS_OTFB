@@ -31,9 +31,12 @@ N_p = 1.15e11                                   # Number of particles
 N_t = 1                                         # Number of turns to track
 sigma_dt = 1.2e-9
 
-G_tx = [0.251402590786449, 0.511242728131293]
+#G_tx = [0.251402590786449, 0.511242728131293] For the old signs from before 02/02/2022 both at 200.222 MHz
 df = [0.18433333e6, 0.2275e6]
+G_tx = [0.25154340605790062590, 0.510893981556323] # For the inverted real axis with 200.222 MHz
 
+df = [0, 0.2275e6]
+G_tx = [0.2607509145194842, 0.510893981556323]
 '''
 For the PostLS2 scenario with both cavities at 200.222 MHz the optimized transmitter gains are
 [0.251402590786449, 0.511242728131293]

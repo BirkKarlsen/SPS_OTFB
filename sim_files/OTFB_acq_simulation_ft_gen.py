@@ -220,7 +220,8 @@ V_part = 0.5442095845867135
 #G_tx_ls = [0.2712028956, 0.58279606]
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
-
+G_tx = [0.2607509145194842, 0.510893981556323]
+tx_g = G_tx
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=ROT_IQ)

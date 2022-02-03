@@ -51,6 +51,7 @@ import utility_files.data_utilities as dut
 import os.path
 from datetime import date
 import utility_files.analysis_tools as at
+from scipy.constants import c
 
 from blond.llrf.cavity_feedback import SPSCavityFeedback, CavityFeedbackCommissioning
 from blond.input_parameters.rf_parameters import RFStation
@@ -59,8 +60,8 @@ from blond.beam.beam import Beam, Proton
 from blond.beam.profile import Profile, CutOptions
 from blond.beam.distributions_multibunch import matched_from_distribution_density_multibunch
 from blond.trackers.tracker import FullRingAndRF, RingAndRFTracker
-from blond.impedances.impedance import InducedVoltageFreq, TotalInducedVoltage
-from blond.impedances.impedance_sources import InputTable
+from blond.impedances.impedance import InducedVoltageFreq, TotalInducedVoltage, InducedVoltageTime
+from blond.impedances.impedance_sources import InputTable, TravelingWaveCavity
 from blond.utils import bmath as bm
 from blond.llrf.signal_processing import cartesian_to_polar
 
@@ -73,7 +74,7 @@ SINGLE_BATCH = True
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = True
 LXPLUS = False                              # TODO: change back before copy to lxplus
-SPS_IMP = True
+SPS_IMP = False
 STDY_OSC = False
 TRACK_IMP = True
 OMEGA_SCENARIO = 3
@@ -200,7 +201,7 @@ if SINGLE_RF:
 else:
     rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
 
-
+print('RF frequency',rfstation.omega_rf[0,0] / 2 / np.pi)
 
 # SINGLE BUNCH FIRST
 # Beam
@@ -230,7 +231,7 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=20, df=domega)   # TODO: change back to only 20
+                         G_llrf=0, df=domega)   # TODO: change back to only 20
 
 
 # Impedance of the SPS
@@ -252,7 +253,26 @@ if SPS_IMP:
     total_imp = TotalInducedVoltage(beam, profile, [impedance_freq])
 
 else:
-    total_imp = None
+    # Cavities
+    l_cav = 32 * 0.374
+    v_g = 0.0946
+    tau = l_cav / (v_g * c) * (1 + v_g)
+    f_cav = 200.222e6
+    n_cav = 4  # factor 2 because of two four/five-sections cavities
+    short_cavity = TravelingWaveCavity(l_cav ** 2 * n_cav * 27.1e3 / 8,
+                                       f_cav, 2 * np.pi * tau)
+    shortInducedVoltage = InducedVoltageTime(beam, profile,
+                                             [short_cavity])
+    l_cav = 43 * 0.374
+    tau = l_cav / (v_g * c) * (1 + v_g)
+    n_cav = 2
+    long_cavity = TravelingWaveCavity(l_cav ** 2 * n_cav * 27.1e3 / 8,
+                                      f_cav, 2 * np.pi * tau)
+    longInducedVoltage = InducedVoltageTime(beam, profile,
+                                            [long_cavity])
+    total_imp = TotalInducedVoltage(
+        beam, profile, [shortInducedVoltage, longInducedVoltage])
+    total_imp.induced_voltage_sum()
 
 # Tracker object for full ring
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
@@ -331,7 +351,7 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 50
+    nn = 1
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -353,7 +373,7 @@ if not GENERATE:
             bp = bp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
 
             gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers - gp)
-            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers - bp)
+            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + bp)
 
 
 
@@ -366,13 +386,13 @@ if not GENERATE:
 
     # Compare wake-fields from impedance and OTFB
     plt.figure()
-    plt.plot(profile.bin_centers, bE, label='Turn 0')
+    #plt.plot(profile.bin_centers, bE, label='Turn 0')
     plt.plot(profile.bin_centers, OTFB_tot, label='OTFB')
-    #plt.plot(profile.bin_centers, IMP_tot, label='IMP')
-    #plt.plot(profile.bin_centers,
-    #         288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
-    #         label='profile')
-    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+    plt.plot(profile.bin_centers, IMP_tot, label='IMP')
+    plt.plot(profile.bin_centers,
+             288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+             label='profile')
+    plt.xlim((4.985e-6, 5.04e-6))
     plt.legend()
 
 
@@ -394,7 +414,7 @@ if not GENERATE:
     plt.plot(profile.bin_centers,
              288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
              label='profile')
-    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+    plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
     plt.legend()
 
 
@@ -402,6 +422,12 @@ if not GENERATE:
                OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
                OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
                end=1000 + 5 * 72, wind=4e6)
+
+    rf_current = OTFB.OTFB_1.I_COARSE_BEAM[-h:]
+    rf_current = np.mean(rf_current[1000:1000 + 5 * 72])
+    #plt.figure()
+    #plt.plot([0, rf_current.real], [0, rf_current.imag], label='Ib')
+    #plt.grid()
 
     #plt.figure()
     #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)

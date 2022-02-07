@@ -7,7 +7,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from blond_common.fitting.profile import binomial_amplitudeN_fit, FitOptions
 from blond_common.interfaces.beam.analytic_distribution import binomialAmplitudeN
-from scipy.signal import find_peaks
+from blond.llrf.signal_processing import polar_to_cartesian
+from scipy.signal import find_peaks, fftconvolve
 from scipy.stats import linregress
 from scipy.interpolate import interp1d
 
@@ -348,3 +349,43 @@ def import_and_normalize_profile(dir_str, norm=1):
     bin = profile_data[:, 1]
     profile = norm * profile / np.sum(profile)
     return profile, bin
+
+
+def IQ_induced_voltage_from_impedance(totalInducedVoltage):
+
+    induced_voltage = totalInducedVoltage.induced_voltage
+
+    return
+
+def plot_induced_voltage(tracker):
+    ind_volt = tracker.totalInducedVoltage.induced_voltage
+
+    plt.figure()
+    plt.title('Total induced voltage')
+    plt.plot(tracker.profile.bin_centers, ind_volt)
+
+
+def delta_function(x):
+    out = np.zeros(x.shape)
+    ind = np.argmin(np.abs(x))
+    out[ind] = 1
+    return out
+
+def gaussian(x, mu, sigma):
+    return (1/sigma) * np.exp(-0.5 * (x - mu)**2 / sigma**2)
+
+
+def rf_current_calculation(profile, t, omega_c, charge):
+    charges = profile * charge
+
+    I_f = 2. * charges * np.cos(omega_c * t)
+    Q_f = 2. * charges * np.sin(omega_c * t)
+
+    return I_f + 1j * Q_f
+
+
+def matr_conv(I, h):
+    """Convolution of beam current with impulse response; uses a complete
+    matrix with off-diagonal elements."""
+
+    return fftconvolve(I, h, mode='full')[:I.shape[0]]

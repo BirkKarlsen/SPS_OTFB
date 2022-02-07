@@ -322,10 +322,11 @@ SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
 
 SPS_rf_tracker_with_OTFB = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=None,
-                                  CavityFeedback=OTFB, Profile=profile)
+                                  CavityFeedback=OTFB, Profile=profile, interpolation=True)
 
 SPS_rf_tracker_with_imp = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
-                                  CavityFeedback=None, Profile=profile)
+                                  CavityFeedback=None, Profile=profile, interpolation=True)
+SPS_tracker_w_imp = FullRingAndRF([SPS_rf_tracker_with_imp])
 
 
 
@@ -355,7 +356,9 @@ if not GENERATE:
     dt_p = 10
     for i in range(nn):
         OTFB.track()
-        SPS_tracker.track()
+        #SPS_tracker.track()
+        SPS_rf_tracker_with_OTFB.track()
+        SPS_tracker_w_imp.track()
         profile.track()
         total_imp.induced_voltage_sum()
         if 0 == (i + 1) % dt_p:
@@ -376,62 +379,85 @@ if not GENERATE:
             bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + bp)
 
 
-
-    SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
-    SPS_rf_tracker_with_imp.rf_voltage_calculation()
+    SPS_rf_tracker.rf_voltage_calculation()
+    #SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
+    #SPS_rf_tracker_with_imp.rf_voltage_calculation()
 
     OTFB_tot = SPS_rf_tracker.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
+    NEW_PLOTS = True
+    if NEW_PLOTS:
+        plt.figure()
+        plt.title('Total Voltage')
+        plt.plot(profile.bin_centers, SPS_rf_tracker_with_OTFB.total_voltage, label='OTFB')
+        plt.plot(profile.bin_centers, SPS_rf_tracker_with_imp.total_voltage, label='IMP')
+        plt.plot(profile.bin_centers,
+                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+                 label='profile')
+        plt.xlim((4.985e-6, 5.04e-6))
+        plt.legend()
 
-    # Compare wake-fields from impedance and OTFB
-    plt.figure()
-    #plt.plot(profile.bin_centers, bE, label='Turn 0')
-    plt.plot(profile.bin_centers, OTFB_tot, label='OTFB')
-    plt.plot(profile.bin_centers, IMP_tot, label='IMP')
-    plt.plot(profile.bin_centers,
-             288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
-             label='profile')
-    plt.xlim((4.985e-6, 5.04e-6))
-    plt.legend()
+        plt.figure()
+        plt.title('Beam Induced Voltage')
+        plt.plot(profile.bin_centers,
+                 SPS_rf_tracker_with_OTFB.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage,
+                 label='OTFB')
+        plt.plot(profile.bin_centers, SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage, label='IMP')
+        plt.plot(profile.bin_centers,
+                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+                 label='profile')
+        plt.xlim((4.985e-6, 5.04e-6))
+        plt.legend()
+    else:
+        # Compare wake-fields from impedance and OTFB
+        plt.figure()
+        #plt.plot(profile.bin_centers, bE, label='Turn 0')
+        plt.plot(profile.bin_centers, OTFB_tot, label='OTFB')
+        plt.plot(profile.bin_centers, IMP_tot, label='IMP')
+        plt.plot(profile.bin_centers,
+                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+                 label='profile')
+        plt.xlim((4.985e-6, 5.04e-6))
+        plt.legend()
 
 
-    plt.figure()
-    plt.title('Beam induced voltage only')
-    plt.plot(profile.bin_centers, bE, label='OTFB')
-    plt.plot(profile.bin_centers, IMP_tot, label='IMP')
-    plt.plot(profile.bin_centers,
-             288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
-             label='profile')
-    #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
-    plt.legend()
+        plt.figure()
+        plt.title('Beam induced voltage only')
+        plt.plot(profile.bin_centers, bE, label='OTFB')
+        plt.plot(profile.bin_centers, IMP_tot, label='IMP')
+        plt.plot(profile.bin_centers,
+                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+                 label='profile')
+        #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+        plt.legend()
 
 
-    plt.figure()
-    plt.title('Generator voltage only')
-    plt.plot(profile.bin_centers, gE, label='OTFB')
-    plt.plot(profile.bin_centers, SPS_rf_tracker_with_imp.rf_voltage, label='IMP')
-    plt.plot(profile.bin_centers,
-             288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
-             label='profile')
-    plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
-    plt.legend()
+        plt.figure()
+        plt.title('Generator voltage only')
+        plt.plot(profile.bin_centers, gE, label='OTFB')
+        plt.plot(profile.bin_centers, SPS_rf_tracker_with_imp.rf_voltage, label='IMP')
+        plt.plot(profile.bin_centers,
+                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+                 label='profile')
+        plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+        plt.legend()
 
 
-    at.plot_IQ(OTFB.OTFB_1.V_ANT[-h:],
-               OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
-               OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
-               end=1000 + 5 * 72, wind=4e6)
+        at.plot_IQ(OTFB.OTFB_1.V_ANT[-h:],
+                   OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
+                   OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
+                   end=1000 + 5 * 72, wind=4e6)
 
-    rf_current = OTFB.OTFB_1.I_COARSE_BEAM[-h:]
-    rf_current = np.mean(rf_current[1000:1000 + 5 * 72])
-    #plt.figure()
-    #plt.plot([0, rf_current.real], [0, rf_current.imag], label='Ib')
-    #plt.grid()
+        rf_current = OTFB.OTFB_1.I_COARSE_BEAM[-h:]
+        rf_current = np.mean(rf_current[1000:1000 + 5 * 72])
+        #plt.figure()
+        #plt.plot([0, rf_current.real], [0, rf_current.imag], label='Ib')
+        #plt.grid()
 
-    #plt.figure()
-    #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
-    #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
+        #plt.figure()
+        #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
+        #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
 
     plt.show()
 

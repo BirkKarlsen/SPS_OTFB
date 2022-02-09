@@ -214,11 +214,13 @@ n_macro = N_m * N_bunches * bunch_intensities / np.sum(bunch_intensities)
 beam = Beam(SPS_ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 
 # Profile
-profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5),
-    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125), n_slices=2**7 * (72 * 5 + 125)))
+delta_slice = 0.2
+profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5 + delta_slice),
+    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125),
+    n_slices=int(round(2**7 * (72 * 5 + 125)))))
 #profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
 #    cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
-
+print(profile.bin_centers[0] / rfstation.t_rf[0,0], profile.bin_size / rfstation.t_rf[0,0])
 # One Turn Feedback
 V_part = 0.5442095845867135
 # TODO: Run with Gtx of 1
@@ -312,10 +314,10 @@ if GENERATE:
     np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy', beam.dt)
 else:
     beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
-    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy')
+    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy') + 0.1 * rfstation.t_rf[0,0]
 
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
-                                  CavityFeedback=OTFB, Profile=profile)
+                                  CavityFeedback=OTFB, Profile=profile, interpolation=True)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
 
@@ -409,6 +411,18 @@ if not GENERATE:
                  label='profile')
         plt.xlim((4.985e-6, 5.04e-6))
         plt.legend()
+
+        at.plot_IQ(OTFB.OTFB_1.V_ANT[-h:],
+                   OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
+                   OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
+                   end=1000 + 5 * 72, wind=4e6)
+
+        t_coarse = np.linspace(0, rfstation.t_rev[0], h)
+        plt.figure()
+        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r')
+        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b')
+        plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].real, color='r')
+        plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].imag, color='b')
     else:
         # Compare wake-fields from impedance and OTFB
         plt.figure()

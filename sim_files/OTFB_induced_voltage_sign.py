@@ -314,7 +314,7 @@ if GENERATE:
     np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy', beam.dt)
 else:
     beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
-    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy') + 0.1 * rfstation.t_rf[0,0]
+    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy') + 0.0 * rfstation.t_rf[0,0]
 
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
                                   CavityFeedback=OTFB, Profile=profile, interpolation=True)
@@ -388,7 +388,8 @@ if not GENERATE:
     OTFB_tot = SPS_rf_tracker.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
-    NEW_PLOTS = True
+    NEW_PLOTS = False
+    PLOT_MATRIX_ELEMENTS = True
     if NEW_PLOTS:
         plt.figure()
         plt.title('Total Voltage')
@@ -412,17 +413,21 @@ if not GENERATE:
         plt.xlim((4.985e-6, 5.04e-6))
         plt.legend()
 
-        at.plot_IQ(OTFB.OTFB_1.V_ANT[-h:],
-                   OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
-                   OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
-                   end=1000 + 5 * 72, wind=4e6)
+        #at.plot_IQ(OTFB.OTFB_1.V_ANT[-h:],
+        #           OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
+        #           OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
+        #           end=1000 + 5 * 72, wind=4e6)
 
         t_coarse = np.linspace(0, rfstation.t_rev[0], h)
-        plt.figure()
+        #plt.figure()
         #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r')
         #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b')
-        plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].real, color='r')
-        plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].imag, color='b')
+        #plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].real, color='r')
+        #plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].imag, color='b')
+
+        plt.figure()
+        plt.plot(profile.bin_centers, OTFB.phi_corr)
+
     else:
         # Compare wake-fields from impedance and OTFB
         plt.figure()
@@ -472,6 +477,19 @@ if not GENERATE:
         #plt.figure()
         #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
         #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
+
+
+    if PLOT_MATRIX_ELEMENTS:
+        # Generator:
+        plt.figure()
+        plt.title('Generatir Matrix')
+        plt.plot(OTFB.OTFB_1.TWC.h_gen.real, label=r'$h_{gs}$')
+        plt.plot(OTFB.OTFB_1.TWC.h_gen.imag, label=r'$-h_{gc}$')
+
+        plt.figure('Beam Matrix')
+        plt.plot(OTFB.OTFB_1.TWC.h_beam.real, label=r'$h_{bs}$')
+        plt.plot(OTFB.OTFB_1.TWC.h_beam.imag, label=r'$-h_{bc}$')
+
 
     plt.show()
 

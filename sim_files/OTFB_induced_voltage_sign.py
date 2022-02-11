@@ -100,7 +100,7 @@ phi = 0                                         # 200 MHz phase [-]
 
 # Parameters for the Simulation
 N_m = int(5e5)                                  # Number of macro-particles for tracking
-N_t = 100                                      # Number of turns to track
+N_t = 1000                                      # Number of turns to track
 
 dt_plot = 2 # TODO: 1000
 dt_track = 10 # TODO: 1000
@@ -358,7 +358,7 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 50
+    nn = 500
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -383,11 +383,13 @@ if not GENERATE:
 
             gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + gp)
             bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + bp)
+            print('Calc')
 
 
     SPS_rf_tracker.rf_voltage_calculation()
     SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
     SPS_rf_tracker_with_imp.rf_voltage_calculation()
+    #SPS_tracker_w_imp.track()
 
     OTFB_tot = SPS_rf_tracker.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
@@ -424,8 +426,8 @@ if not GENERATE:
 
         t_coarse = np.linspace(0, rfstation.t_rev[0], h)
         plt.figure()
-        plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r')
-        plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b')
+        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r')
+        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b')
         plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].real, color='r')
         plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].imag, color='b')
 
@@ -486,6 +488,10 @@ if not GENERATE:
         plt.figure()
         plt.title('Beam Current')
         plt.plot([0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.real)], [0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.imag)])
+
+        plt.figure()
+        plt.plot(gp)
+        plt.plot(bp)
 
 
 

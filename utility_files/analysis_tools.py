@@ -421,7 +421,7 @@ def generator_matrix(t, domega, tau):
     '''
 
     hgs = (1/tau) * rect(t / tau - 0.5) * np.cos(domega * t)
-    hgc = (1/tau) * rect(t / tau - 0.5) * np.sin(domega * t)
+    hgc = -(1/tau) * rect(t / tau - 0.5) * np.sin(domega * t)
     return hgs, hgc
 
 def beam_matrix(t, domega , tau):
@@ -435,7 +435,7 @@ def beam_matrix(t, domega , tau):
     '''
 
     hbs = -(1/tau) * tri(t/tau) * np.cos(domega * t) - (1/tau) * tri(t/tau) * np.sign(t/tau) * np.cos(domega * t)
-    hbc = -(1/tau) * tri(t/tau) * np.sin(domega * t) - (1/tau) * tri(t/tau) * np.sign(t/tau) * np.sin(domega * t)
+    hbc = (1/tau) * tri(t/tau) * np.sin(domega * t) + (1/tau) * tri(t/tau) * np.sign(t/tau) * np.sin(domega * t)
     return hbs, hbc
 
 

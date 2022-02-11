@@ -129,6 +129,7 @@ if args.alpha_comb is not None:
     a_comb = args.alpha_comb
 else:
     a_comb = 63/64
+    #a_comb = 31/32
 
 if args.llrf_gain is not None:
     llrf_g = args.llrf_gain
@@ -187,8 +188,9 @@ else:
 domega = [0.18433333e6, 0.2275e6]
 #G_tx = [0.251402590786449, 0.511242728131293]
 #G_tx = [0.25154340605790062590, 0.510893981556323]
-G_tx = [0.258891055431033,
-        0.53919226162905]
+G_tx = [0.22909261332041,
+        0.429420301179296]
+
 # Objects -------------------------------------------------------------------------------------------------------------
 print('Initializing Objects...\n')
 
@@ -216,7 +218,7 @@ n_macro = N_m * N_bunches * bunch_intensities / np.sum(bunch_intensities)
 beam = Beam(SPS_ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 
 # Profile
-delta_slice = 0.0
+delta_slice = 0.3
 profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5 + delta_slice),
     cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125),
     n_slices=int(round(2**7 * (72 * 5 + 125)))))
@@ -235,7 +237,7 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=50, df=domega)   # TODO: change back to only 20
+                         G_llrf=20, df=domega)   # TODO: change back to only 20
 
 
 # Impedance of the SPS
@@ -356,18 +358,18 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 1
+    nn = 50
     dt_p = 10
     for i in range(nn):
         OTFB.track()
         #SPS_tracker.track()
         SPS_rf_tracker_with_OTFB.track()
-        SPS_tracker_w_imp.track()
+        #SPS_tracker_w_imp.track()
         profile.track()
         total_imp.induced_voltage_sum()
         if 0 == (i + 1) % dt_p:
             print(i + 1)
-        if i == 0:
+        if (i + 1) == nn:
             # Compare generator induced and beam induced contributions
             gen_ind = OTFB.V_sum - OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:] \
                       - OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:]
@@ -379,19 +381,19 @@ if not GENERATE:
             gp = gp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
             bp = bp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
 
-            gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers - gp)
-            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers - bp)
+            gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + gp)
+            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + bp)
 
 
     SPS_rf_tracker.rf_voltage_calculation()
-    #SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
-    #SPS_rf_tracker_with_imp.rf_voltage_calculation()
+    SPS_rf_tracker_with_OTFB.rf_voltage_calculation()
+    SPS_rf_tracker_with_imp.rf_voltage_calculation()
 
     OTFB_tot = SPS_rf_tracker.rf_voltage - SPS_rf_tracker_with_imp.rf_voltage
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
     NEW_PLOTS = False
-    PLOT_MATRIX_ELEMENTS = True
+    PLOT_MATRIX_ELEMENTS = False
     if NEW_PLOTS:
         plt.figure()
         plt.title('Total Voltage')
@@ -422,8 +424,8 @@ if not GENERATE:
 
         t_coarse = np.linspace(0, rfstation.t_rev[0], h)
         plt.figure()
-        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r')
-        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b')
+        plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r')
+        plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b')
         plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].real, color='r')
         plt.plot(profile.bin_centers, OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:].imag, color='b')
 
@@ -450,6 +452,7 @@ if not GENERATE:
         plt.plot(profile.bin_centers,
                  288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
                  label='profile')
+        #plt.xlim((4.985e-6, 5.04e-6))
         #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
         plt.legend()
 
@@ -480,6 +483,11 @@ if not GENERATE:
         #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
         #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
 
+        plt.figure()
+        plt.title('Beam Current')
+        plt.plot([0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.real)], [0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.imag)])
+
+
 
     if PLOT_MATRIX_ELEMENTS:
         # Cavities
@@ -500,17 +508,17 @@ if not GENERATE:
         plt.figure('Generatir Matrix')
         plt.title('Generatir Matrix')
         plt.plot(t_coarse / tau, OTFB.OTFB_1.TWC.h_gen.real, label=r'$h_{gs}$')
-        plt.plot(t_coarse / tau, OTFB.OTFB_1.TWC.h_gen.imag, label=r'$-h_{gc}$')
+        plt.plot(t_coarse / tau, -OTFB.OTFB_1.TWC.h_gen.imag, label=r'$-h_{gc}$')
         plt.plot(t_coarse / tau, hgs * 1e4, label=r'$h_{gs}$ p')
-        plt.plot(t_coarse / tau, hgc * 1e4, label=r'$-h_{gc}$ p')
+        plt.plot(t_coarse / tau, -hgc * 1e4, label=r'$-h_{gc}$ p')
         plt.legend()
 
         plt.figure('Beam Matrix')
         plt.title('Beam Matrix')
         plt.plot(t_fine / tau, OTFB.OTFB_1.TWC.h_beam.real, label=r'$h_{bs}$')
-        plt.plot(t_fine / tau, OTFB.OTFB_1.TWC.h_beam.imag, label=r'$-h_{bc}$')
+        plt.plot(t_fine / tau, -OTFB.OTFB_1.TWC.h_beam.imag, label=r'$-h_{bc}$')
         plt.plot(t_fine / tau, hbs * 1e6 / 2, label=r'$h_{bs}$')
-        plt.plot(t_fine / tau, hbc * 1e6 / 2, label=r'$h_{bc}$')
+        plt.plot(t_fine / tau, -hbc * 1e6 / 2, label=r'$-h_{bc}$')
         plt.legend()
 
 

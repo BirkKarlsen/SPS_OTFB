@@ -32,17 +32,37 @@ N_p = 1.15e11                                   # Number of particles
 N_t = 1                                         # Number of turns to track
 sigma_dt = 1.2e-9
 
-#G_tx = [0.251402590786449, 0.511242728131293] For the old signs from before 02/02/2022 both at 200.222 MHz
-df = [0.18433333e6, 0.2275e6]
-#G_tx = [0.25154340605790062590, 0.510893981556323] # For the inverted real axis with 200.222 MHz
-G_tx = [0.258891055431033,
-        0.53919226162905]
+
+# For a_comb of 63/64 and llrf gain of 20
+a_comb = 63/64
+G_llrf = 20
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [0.22909261332041,
+        0.429420301179296]
+
+
 
 #df = [0, 0.2275e6]
 #G_tx = [0.2607509145194842, 0.510893981556323]
+#G_tx = [0.251402590786449, 0.511242728131293] For the old signs from before 02/02/2022 both at 200.222 MHz
+#G_tx = [0.25154340605790062590, 0.510893981556323] # For the inverted real axis with 200.222 MHz
 '''
 For the PostLS2 scenario with both cavities at 200.222 MHz the optimized transmitter gains are
 [0.251402590786449, 0.511242728131293]
+'''
+
+'''
+Configurations and their optimized transmitter gains:
+
+For a PostLS2 configuration with a_comb = 63/64, G_llrf = 20 and both cavity types at 200.222 MHz
+we have
+df = [0.18433333e6, 
+      0.2275e6]
+G_tx = [0.22909261332041,
+        0.429420301179296]
+        
+For a PostLS2 configuration with a_comb = 31/32, G_llrf = 20 and...
 '''
 
 # Objects ---------------------------------------------------------------------
@@ -67,8 +87,8 @@ bigaussian(ring, rfstation, beam, sigma_dt)
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False)
 
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
-                         Commissioning=Commissioning, G_tx=G_tx, a_comb=63/64,
-                         G_llrf=20, df=df)
+                         Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
+                         G_llrf=G_llrf, df=df)
 
 print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
 
@@ -91,5 +111,5 @@ print()
 print(f'3-section difference: {diff3} %')
 print(f'4-section difference: {diff4} %')
 
-at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
-plt.show()
+#at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
+#plt.show()

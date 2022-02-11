@@ -132,14 +132,15 @@ else:
     a_comb = 63/64
 
 if args.llrf_gain is not None:
-    llrf_g = args.llrf_gain
+    G_llrf = args.llrf_gain
 else:
-    llrf_g = 20
+    G_llrf = 20
 
 if args.tx_gain is not None:
-    tx_g = args.tx_gain
+    G_tx = args.tx_gain
 else:
-    tx_g = [0.2564371551236985, 0.53055789217211453]
+    G_tx = [0.22909261332041,
+            0.429420301179296]
 
 if args.study_osc is not None:
     STDY_OSC = bool(args.study_osc)
@@ -181,11 +182,14 @@ else:
     lxdir = "../"
 
 if OMEGA_SCENARIO == 1:
-    domega = [0, 0.1055e6]
+    df = [0, 0.1055e6]
 elif OMEGA_SCENARIO == 2:
-    domega = [0, 0.2275e6]
+    df = [0, 0.2275e6]
+elif OMEGA_SCENARIO == 3:
+    df = [0.18433333e6,
+          0.2275e6]
 else:
-    domega = [0, 0]
+    df = [0, 0]
 
 
 # Objects -------------------------------------------------------------------------------------------------------------
@@ -215,19 +219,18 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
 
 # One Turn Feedback
 V_part = 0.5442095845867135
-# TODO: Run with Gtx of 1
 
 #G_tx_ls = [0.2712028956, 0.58279606]
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
-G_tx = [0.2607509145194842, 0.510893981556323]
-tx_g = G_tx
+G_tx = [0.22909261332041,
+        0.429420301179296]
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=ROT_IQ)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
-                         Commissioning=Commissioning, G_tx=tx_g, a_comb=a_comb,
-                         G_llrf=llrf_g, df=domega)   # TODO: change back to only 20
+                         Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
+                         G_llrf=G_llrf, df=df)   # TODO: change back to only 20
 
 # Impedance of the SPS
 if SPS_IMP:

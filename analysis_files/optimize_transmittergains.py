@@ -7,6 +7,7 @@ author: Birk Emil Karlsen-Bæck
 
 import numpy as np
 import matplotlib.pyplot as plt
+import utility_files.analysis_tools as at
 
 from blond.beam.beam import Beam, Proton
 from blond.beam.profile import Profile, CutOptions
@@ -33,10 +34,12 @@ sigma_dt = 1.2e-9
 
 #G_tx = [0.251402590786449, 0.511242728131293] For the old signs from before 02/02/2022 both at 200.222 MHz
 df = [0.18433333e6, 0.2275e6]
-G_tx = [0.25154340605790062590, 0.510893981556323] # For the inverted real axis with 200.222 MHz
+#G_tx = [0.25154340605790062590, 0.510893981556323] # For the inverted real axis with 200.222 MHz
+G_tx = [0.258891055431033,
+        0.53919226162905]
 
-df = [0, 0.2275e6]
-G_tx = [0.2607509145194842, 0.510893981556323]
+#df = [0, 0.2275e6]
+#G_tx = [0.2607509145194842, 0.510893981556323]
 '''
 For the PostLS2 scenario with both cavities at 200.222 MHz the optimized transmitter gains are
 [0.251402590786449, 0.511242728131293]
@@ -54,7 +57,7 @@ rfstation = RFStation(ring, [h], [V], [phi])
 beam = Beam(ring, N_m, N_p)
 
 # Profile
-profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
+profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0]*(1000 + 0.1),
     cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
 
 bigaussian(ring, rfstation, beam, sigma_dt)
@@ -66,6 +69,8 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=63/64,
                          G_llrf=20, df=df)
+
+print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
 
 # Comparison
 
@@ -85,3 +90,6 @@ diff4 = np.abs(target4 - ant4) * 100 / target4
 print()
 print(f'3-section difference: {diff3} %')
 print(f'4-section difference: {diff4} %')
+
+at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
+plt.show()

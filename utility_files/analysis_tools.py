@@ -389,3 +389,65 @@ def matr_conv(I, h):
     matrix with off-diagonal elements."""
 
     return fftconvolve(I, h, mode='full')[:I.shape[0]]
+
+
+def rect(t):
+    out = np.zeros(t.shape)
+    for i in range(len(out)):
+        if t[i] < 1/2 and t[i] > -1/2:
+            out[i] = 1
+
+    return out
+
+def tri(t):
+    out = np.zeros(t.shape)
+    for i in range(len(out)):
+        if t[i] < 0 and t[i] > -1:
+            out[i] = t[i] + 1
+        elif t[i] > 0 and t[i] < 1:
+            out[i] = -t[i] + 1
+
+    return out
+
+
+def generator_matrix(t, domega, tau):
+    '''
+    Matrix elements of the generator response matrix as they are given in the I/Q Model of the SPS 200 MHz Travelling
+    Wave Cavity and Feedforward Design paper by P. Baudrenghien and T. Mastordis.
+    :param t: Time array
+    :param domega: difference in frequency between carrier and central frequency
+    :param tau: cavity filling time
+    :return: Matrix elements
+    '''
+
+    hgs = (1/tau) * rect(t / tau - 0.5) * np.cos(domega * t)
+    hgc = (1/tau) * rect(t / tau - 0.5) * np.sin(domega * t)
+    return hgs, hgc
+
+def beam_matrix(t, domega , tau):
+    '''
+    Matrix elements of the generator response matrix as they are given in the I/Q Model of the SPS 200 MHz Travelling
+    Wave Cavity and Feedforward Design paper by P. Baudrenghien and T. Mastordis.
+    :param t: Time array
+    :param domega: difference in frequency between carrier and central frequency
+    :param tau: cavity filling time
+    :return: Matrix elements
+    '''
+
+    hbs = -(1/tau) * tri(t/tau) * np.cos(domega * t) - (1/tau) * tri(t/tau) * np.sign(t/tau) * np.cos(domega * t)
+    hbc = -(1/tau) * tri(t/tau) * np.sin(domega * t) - (1/tau) * tri(t/tau) * np.sign(t/tau) * np.sin(domega * t)
+    return hbs, hbc
+
+
+def plot_OTFB_signals(OTFB, h, t_rf):
+    t_c = np.linspace(0, h * t_rf, h)
+
+    plt.figure()
+    plt.title('Antenna')
+    plt.plot(t_c, OTFB.V_ANT[-h:].real, color='r')
+    plt.plot(t_c, OTFB.V_ANT[-h:].imag, color='b')
+
+    plt.figure()
+    plt.title('Generator')
+    plt.plot(t_c, OTFB.V_IND_COARSE_GEN[-h:].real, color='r')
+    plt.plot(t_c, OTFB.V_IND_COARSE_GEN[-h:].imag, color='b')

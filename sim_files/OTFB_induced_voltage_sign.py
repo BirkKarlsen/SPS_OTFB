@@ -72,7 +72,7 @@ from SPS.impedance_scenario import scenario, impedance2blond
 fit_type = 'fwhm'
 SINGLE_BATCH = True
 GENERATE = False                           # TODO: True
-SAVE_RESULTS = True
+SAVE_RESULTS = False
 LXPLUS = False                              # TODO: change back before copy to lxplus
 SPS_IMP = False
 STDY_OSC = False
@@ -218,9 +218,9 @@ n_macro = N_m * N_bunches * bunch_intensities / np.sum(bunch_intensities)
 beam = Beam(SPS_ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 
 # Profile
-delta_slice = 0.3
+delta_slice = 0.0
 profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5 + delta_slice),
-    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125),
+    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125), #* 4 + 250 * 3
     n_slices=int(round(2**7 * (72 * 5 + 125)))))
 #profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
 #    cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
@@ -290,7 +290,7 @@ SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 bunch_lengths_fl = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_full_length_red.npy')
 bunch_lengths_fwhm = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_FWHM.npy')
 exponents = np.load(lxdir + 'data_files/beam_parameters/avg_exponent_red.npy')
-positions = np.load(lxdir + 'data_files/beam_parameters/avg_positions_red.npy')
+positions = np.load(lxdir + 'data_files/beam_parameters/position_fit.npy')
 
 if fit_type == 'fwhm':
     bunch_length_list = bunch_lengths_fwhm * 1e-9
@@ -309,7 +309,7 @@ bunch_positions = (positions - positions[0]) / rfstation.t_rf[0,0]
 if GENERATE:
     # If this fails, then generate without OTFB in the tracker and redefine the tracker after with OTFB.
     matched_from_distribution_density_multibunch(beam, SPS_ring, SPS_tracker, distribution_options_list,
-                                                 N_bunches, np.around(bunch_positions[:N_bunches]),
+                                                 N_bunches, bunch_positions[:N_bunches],
                                                  intensity_list=bunch_intensities[:N_bunches],
                                                  n_iterations=6, TotalInducedVoltage=total_imp)
     beam.dt += 1000 * rfstation.t_rf[0,0]
@@ -358,7 +358,7 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 500
+    nn = 50
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -449,13 +449,15 @@ if not GENERATE:
 
         plt.figure()
         plt.title('Beam induced voltage only')
-        plt.plot(profile.bin_centers, bE, label='OTFB')
-        plt.plot(profile.bin_centers, IMP_tot, label='IMP')
+        plt.plot(profile.bin_centers, bE, label='OTFB', marker='x', color='r')
+        plt.plot(profile.bin_centers, IMP_tot, label='IMP', color='b')
         plt.plot(profile.bin_centers,
                  288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
-                 label='profile')
-        #plt.xlim((4.985e-6, 5.04e-6))
+                 label='profile', color='black')
+        plt.xlim((4.985e-6, 5.04e-6))
         #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
+        plt.ylabel(r'Induced Voltage [V]')
+        plt.xlabel(r'$\Delta t$ [s]')
         plt.legend()
 
 
@@ -474,6 +476,9 @@ if not GENERATE:
                    OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
                    OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
                    end=1000 + 5 * 72, wind=4e6)
+        plt.title('Phasor plot')
+        plt.xlabel('In-Phase [V]')
+        plt.ylabel('Quadrature [V]')
 
         rf_current = OTFB.OTFB_1.I_COARSE_BEAM[-h:]
         rf_current = np.mean(rf_current[1000:1000 + 5 * 72])
@@ -492,6 +497,9 @@ if not GENERATE:
         plt.figure()
         plt.plot(gp)
         plt.plot(bp)
+
+        plt.figure()
+        plt.plot(profile.bin_centers, OTFB.phi_corr)
 
 
 

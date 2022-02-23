@@ -14,7 +14,7 @@ t_rf = 4.99015937e-09
 # Importing the profiles - Sim files are from with_impedance/Jan-02-2022/central_freq1/30000turns_fwhm_288/
 
 # Simulations with no phase-shift
-profile_ns, bin_ns = at.import_and_normalize_profile('../data_files/profiles_corrected/profile_4000.npy')
+profile_ns, bin_ns = at.import_and_normalize_profile('../data_files/swapped_real_axis/profile_9000.npy')
 
 # Simulations with 180 degree phase-shift
 #profile_rs, bin_rs = at.import_and_normalize_profile('../data_files/profile_comparison/profile_4000_reversed_sign.npy')

@@ -11,6 +11,7 @@ from blond.llrf.signal_processing import polar_to_cartesian
 from scipy.signal import find_peaks, fftconvolve
 from scipy.stats import linregress
 from scipy.interpolate import interp1d
+import json
 
 
 def fwhm(x, y, level=0.5):
@@ -179,6 +180,21 @@ def find_offset_trf(pos1, pos2, t_rf):
 
     return offset1, offset2
 
+
+def find_offset(pos):
+    r'''
+    Takes in an array of bunch positions and does a linear regression of them.
+    The bunch-by-bunch offset is then calculated by taking the difference between the two.
+    :param pos: numpy-array - Ordered list of bunch positions in time
+    :return: numpy-array of the bunch-by-bunch offset
+    '''
+    x = np.linspace(0, len(pos), len(pos))
+
+    sl, inter, pval, rval, err = linregress(x, pos)
+    fit_line = sl * x + inter
+
+    offset_fit = pos - fit_line
+    return offset_fit
 
 
 def import_OTFB_signals(data_dir, cfg_dir, turn):
@@ -451,3 +467,46 @@ def plot_OTFB_signals(OTFB, h, t_rf):
     plt.title('Generator')
     plt.plot(t_c, OTFB.V_IND_COARSE_GEN[-h:].real, color='r')
     plt.plot(t_c, OTFB.V_IND_COARSE_GEN[-h:].imag, color='b')
+
+
+def import_measurement_signals(cavity_number, file_date, timestamp, signal_name, SHOW_SIG = False):
+    r'''
+    Function to import measured signals from the real SPS OTFB.
+
+    :param cavity_number: int - Cavity number
+    :param file_date: int - Date of the measurement
+    :param timestamp: int - Timestamp of when the measurement was made
+    :param signal_name: string - name of the signal
+
+    :return: the signal arrays and the relevant time array
+    '''
+    file_dir = f'../data_files/OTFB_november_measurements/' \
+               f'sps_otfb_data__all_buffers__cavity{cavity_number}__flattop__{file_date}_{timestamp}.json'
+
+    f = open(file_dir)
+    data = json.load(f)
+    if SHOW_SIG:
+        print(data.keys())
+
+    sampling_rate = data['SA.TWC200_expertVcavAmp.C1-ACQ']['samplingRate'] * 1e6
+    dt = 1 / sampling_rate
+    N_samples = len(data['SA.TWC200_expertVcavAmp.C1-ACQ']['data'])
+
+    t_array = np.linspace(0, dt * N_samples, N_samples)
+    voltage_data = np.array(data[f'SA.TWC200_expert{signal_name}Amp.C{cavity_number}-ACQ']['data'])
+    phase_data = np.array(data[f'SA.TWC200_expert{signal_name}Phase.C{cavity_number}-ACQ']['data']) * np.pi / 180
+    return voltage_data, phase_data, t_array
+
+
+def find_closes_value(array, value):
+    r'''
+    Finding the index to the closes value in an array.
+
+    :param array: array
+    :param value: float
+    :return: index of the closes value
+    '''
+    array = np.asarray(array)
+    idx = (np.abs(array - value)).argmin()
+    return idx
+

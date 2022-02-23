@@ -5,6 +5,7 @@ from blond_common.interfaces.beam.analytic_distribution import binomialAmplitude
 from scipy.signal import find_peaks
 from scipy.stats import linregress
 from scipy.interpolate import interp1d
+import utility_files.analysis_tools as at
 
 
 def oscillation_study(sig):
@@ -678,3 +679,15 @@ def plot_ramp(intensity, i, n, sdir):
 
 def plot_induced_voltage(tracker, total_ind):
     pass
+
+
+def plot_bbb_offset(pos_fit, sdir, i):
+    bbb_offset = at.find_offset(pos_fit)
+    x = np.linspace(0, len(pos_fit), len(pos_fit))
+
+    plt.figure()
+    plt.title(f'bunch-by-bunch offset, turn {i}')
+    plt.plot(x, bbb_offset * 1e9)
+    plt.xlabel('Bunch Number')
+    plt.ylabel('Offset [ns]')
+    plt.savefig(sdir + f"fig/bbb_offset_{i}")

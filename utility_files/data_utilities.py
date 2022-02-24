@@ -690,4 +690,4 @@ def plot_bbb_offset(pos_fit, sdir, i):
     plt.plot(x, bbb_offset * 1e9)
     plt.xlabel('Bunch Number')
     plt.ylabel('Offset [ns]')
-    plt.savefig(sdir + f"fig/bbb_offset_{i}")
+    plt.savefig(sdir + f"bbb_offset_{i}")

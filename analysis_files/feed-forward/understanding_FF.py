@@ -7,7 +7,9 @@ Author: Birk Emil Karlsen-Bæck
 PLT_IMPULSE = False
 PLT_BEAM_LOADING = False
 PLT_DESIRED_VEC = False
-PLT_OPT_FIR = True
+PLT_OPT_FIR = False
+PLT_REC_SIG = False
+PLT_OPT_FIR_WO = True
 
 # Imports ---------------------------------------------------------------------
 import numpy as np
@@ -296,13 +298,60 @@ if PLT_OPT_FIR:
 
 
 # Reconstructed signal. Step response of FIR + rectangular window (cavity) ----
-
 def Yeven(Nt, L, P):
     output = np.matmul(Smatrix(P + L - 1, Nt), Hopteven(Nt, L, P))
     return np.matmul(Rmatrix(P, L), output)
 
+def Yodd(Nt, L, P):
+    output = np.matmul(Smatrix(P + L - 1, Nt), Hoptodd(Nt, L, P))
+    return np.matmul(Rmatrix(P, L), output)
+
+def Ytotal(Nt, L, P):
+    return Yeven(Nt, L, P) + Yodd(Nt, L, P)
+
+# TODO: Max error and std as a function of number of taps
+
+if PLT_REC_SIG:
+    plt.figure('Yeven')
+    plt.title('Yeven')
+    plt.plot(Yeven(Ntap, Lfilling, Pfit), '.')
+
+    plt.figure('Yodd')
+    plt.title('Yodd')
+    plt.plot(Yodd(Ntap, Lfilling, Pfit), '.')
+
+    plt.figure('Ytotal')
+    plt.title('Ytotal')
+    plt.plot(Ytotal(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Dvector, '.')
+
+    plt.figure('Y Error')
+    plt.title('Y Error')
+    Yerror = Ytotal(Ntap, Lfilling, Pfit) - Dvector
+    plt.plot(Yerror, '.')
+    print('---- Y Error ----')
+    print('Max error:', np.max(np.abs(Yerror)))
+    print('Sigma error:', np.std(Yerror))
 
 
+# Optimal FIR without splitting even and odd ----------------------------------
+def w(n, Nt):
+    return 1 - 1 / 2 * np.hanning((n - (Nt - 1)/2)/Nt)
+
+tt = np.linspace(0, Ntap - 1, Ntap)
+
+ww = np.zeros(tt.shape)
+for i in range(len(tt)):
+    print(w(tt[i], Ntap))
+
+tt = (tt - (Ntap - 1)/2)/Ntap
+print(np.max(tt))
+print(np.hanning(tt))
+
+if PLT_OPT_FIR_WO:
+    plt.figure('Weighting matrix')
+    plt.title('Weighting matrix')
+    plt.plot(ww)
 
 
 

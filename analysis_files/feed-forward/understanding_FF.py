@@ -6,11 +6,12 @@ Author: Birk Emil Karlsen-Bæck
 
 PLT_IMPULSE = False
 PLT_BEAM_LOADING = False
-PLT_DESIRED_VEC = True
+PLT_DESIRED_VEC = False
 
 
 # Imports ---------------------------------------------------------------------
 import numpy as np
+import numpy.linalg as npla
 import matplotlib.pyplot as plt
 import utility_files.analysis_tools as at
 
@@ -185,7 +186,7 @@ def uniform_weighting(n, Nt):
     return 1
 
 def Weigthing(Nt):
-    output = np.zeros((Nt - 1, Nt - 1))
+    output = np.zeros((Nt, Nt))
     for i in range(output.shape[0]):
         for j in range(output.shape[1]):
             if i == j:
@@ -198,29 +199,39 @@ def EvenMatrix(Nt):
     output = np.zeros((Nt, (Nt + 1)//2))
     for i in range(output.shape[0]):
         for j in range(output.shape[1]):
-            if i + j == (Nt + 3)/2:
+            if i + j == (Nt + 0)//2:
                 output[i,j] = 1
-            elif i - j == (Nt - 1)/2:
+            elif i - j == (Nt - 1)//2:
                 output[i,j] = 1
     return output
+
 
 def Hoptreal(Nt, L, P):
     output = np.matmul(np.transpose(Rmatrix(P, L)), Dvectoreven)
     output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
     output = np.matmul(np.transpose(EvenMatrix(Nt)), output)
-    output = np.matmul(EvenMatrix(Nt), output)
-    output = np.matmul(Smatrix(P + L - 1, Nt), output)
-    output = np.matmul(Rmatrix(P, L), output)
-    output = np.matmul(Weigthing(P), output)
-    output = np.matmul(np.transpose(Rmatrix(P, L)), output)
-    output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
-    output = np.matmul(np.invert(np.transpose(EvenMatrix(Nt))), output)
-    return output
 
-hopt = Hoptreal(Ntap, Lfilling, Pfit)
+    matrix1 = EvenMatrix(Nt)
+    matrix1 = np.matmul(Smatrix(P + L - 1, Nt), matrix1)
+    matrix1 = np.matmul(Rmatrix(P, L), matrix1)
+    matrix1 = np.matmul(Weigthing(P), matrix1)
+    matrix1 = np.matmul(np.transpose(Rmatrix(P, L)), matrix1)
+    matrix1 = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), matrix1)
+    matrix1 = np.matmul(np.transpose(EvenMatrix(Nt)), matrix1)
+    matrix1 = npla.inv(matrix1)
+
+    return np.matmul(matrix1, output)
+
+def Hopteven(Nt, L, P):
+    return np.concatenate(np.flip(Hoptreal(Nt, L, P)), Hoptreal(Nt, L, P))
+
+
+hopt = Hopteven(Ntap, Lfilling, Pfit)
+print(len(hopt))
+print(hopt)
 
 plt.figure()
-plt.plot(hopt)
+plt.plot(hopt, '.')
 
 
 

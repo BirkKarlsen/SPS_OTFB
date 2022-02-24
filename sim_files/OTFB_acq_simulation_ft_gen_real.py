@@ -201,7 +201,7 @@ if not GEN:
     int_arr = np.zeros(N_t//dt_ptrack)
 
     n = 0
-    for i in range(0):
+    for i in range(N_t):
         SPS_tracker.track()
         profile.track()
         total_imp.induced_voltage_sum()

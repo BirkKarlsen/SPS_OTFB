@@ -4,12 +4,13 @@ This is a test file to understand and make simple calculations in preparation fo
 Author: Birk Emil Karlsen-Bæck
 '''
 
-PLT_IMPULSE = False
-PLT_BEAM_LOADING = False
-PLT_DESIRED_VEC = False
-PLT_OPT_FIR = False
-PLT_REC_SIG = False
-PLT_OPT_FIR_WO = True
+PLT_IMPULSE = False                 # Plot impulse response matrix elements
+PLT_BEAM_LOADING = False            # Plot beam loading due to real and imaginary part of impedance
+PLT_DESIRED_VEC = False             # Plot the desired vectors
+PLT_OPT_FIR = False                 # Plot the optimal FIR filters when splitting real and imaginary parts
+PLT_REC_SIG = False                 # Plot reconstructed signal using the FIR filters with splitting
+PLT_OPT_FIR_WO = False              # Plot the optimal FIR filter without splitting the real and imaginary parts
+PLT_REC_SIG_WO = True               # plot the reconstructed signals without splitting the real and imaginary parts
 
 # Imports ---------------------------------------------------------------------
 import numpy as np
@@ -208,7 +209,7 @@ if PLT_DESIRED_VEC:
 def uniform_weighting(n, Nt):
     return 1
 
-def Weigthing(Nt):
+def WeigthingUni(Nt):
     output = np.zeros((Nt, Nt))
     for i in range(output.shape[0]):
         for j in range(output.shape[1]):
@@ -236,7 +237,7 @@ def Hoptreal(Nt, L, P):
     matrix1 = EvenMatrix(Nt)
     matrix1 = np.matmul(Smatrix(P + L - 1, Nt), matrix1)
     matrix1 = np.matmul(Rmatrix(P, L), matrix1)
-    matrix1 = np.matmul(Weigthing(P), matrix1)
+    matrix1 = np.matmul(WeigthingUni(P), matrix1)
     matrix1 = np.matmul(np.transpose(Rmatrix(P, L)), matrix1)
     matrix1 = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), matrix1)
     matrix1 = np.matmul(np.transpose(EvenMatrix(Nt)), matrix1)
@@ -262,7 +263,7 @@ def OddMatrix(Nt):
     return output
 
 def Hoptimag(Nt, L, P):
-    output = np.matmul(Weigthing(P), Dvectorodd)
+    output = np.matmul(WeigthingUni(P), Dvectorodd)
     output = np.matmul(np.transpose(Rmatrix(P, L)), output)
     output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
     output = np.matmul(np.transpose(OddMatrix(Nt)), output)
@@ -270,7 +271,7 @@ def Hoptimag(Nt, L, P):
     matrix1 = OddMatrix(Nt)
     matrix1 = np.matmul(Smatrix(P + L - 1, Nt), matrix1)
     matrix1 = np.matmul(Rmatrix(P, L), matrix1)
-    matrix1 = np.matmul(Weigthing(P), matrix1)
+    matrix1 = np.matmul(WeigthingUni(P), matrix1)
     matrix1 = np.matmul(np.transpose(Rmatrix(P, L)), matrix1)
     matrix1 = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), matrix1)
     matrix1 = np.matmul(np.transpose(OddMatrix(Nt)), matrix1)
@@ -329,41 +330,80 @@ if PLT_REC_SIG:
     plt.title('Y Error')
     Yerror = Ytotal(Ntap, Lfilling, Pfit) - Dvector
     plt.plot(Yerror, '.')
-    print('---- Y Error ----')
+    print('---- Y Error with splitting ----')
     print('Max error:', np.max(np.abs(Yerror)))
     print('Sigma error:', np.std(Yerror))
 
 
 # Optimal FIR without splitting even and odd ----------------------------------
 def w(n, Nt):
-    return 1 - 1 / 2 * np.hanning((n - (Nt - 1)/2)/Nt)
+    return 1 - 1 / 2 * np.hanning(Nt)[n]
 
-tt = np.linspace(0, Ntap - 1, Ntap)
+def WeigthingHann(Nt):
+    output = np.zeros((Nt, Nt))
+    for i in range(output.shape[0]):
+        for j in range(output.shape[1]):
+            if i == j:
+                output[i,j] = w(i, Nt)
+    return output
 
-ww = np.zeros(tt.shape)
-for i in range(len(tt)):
-    print(w(tt[i], Ntap))
+# Optimal FIR without splitting in even and odd
+def Hopt(Nt, L, P):
+    output = np.matmul(WeigthingHann(P), Dvector)
+    output = np.matmul(np.transpose(Rmatrix(P, L)), output)
+    output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
 
-tt = (tt - (Ntap - 1)/2)/Ntap
-print(np.max(tt))
-print(np.hanning(tt))
+    matrix1 = np.matmul(Rmatrix(P, L), Smatrix(P + L - 1, Nt))
+    matrix1 = np.matmul(WeigthingHann(P), matrix1)
+    matrix1 = np.matmul(np.transpose(Rmatrix(P, L)), matrix1)
+    matrix1 = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), matrix1)
+    matrix1 = npla.inv(matrix1)
+    return np.matmul(matrix1, output)
 
 if PLT_OPT_FIR_WO:
-    plt.figure('Weighting matrix')
-    plt.title('Weighting matrix')
-    plt.plot(ww)
+    plt.matshow(WeigthingHann(Ntap))
+
+    plt.figure('Hann')
+    plt.title('Hann')
+    s = np.linspace(0, Ntap-1, Ntap-1, dtype=int)
+    plt.plot(w(s, Ntap), '.')
+
+    plt.figure('Hopt')
+    plt.title('Hopt')
+    plt.plot(Hopt(Ntap, Lfilling, Pfit), '.')
+
+    plt.figure('Hopt + reversed Hopt')
+    plt.title('Hopt + reversed Hopt')
+    plt.plot(0.5 * (Hopt(Ntap, Lfilling, Pfit) + Hopt(Ntap, Lfilling, Pfit)[::-1]), '.')
+
+    plt.figure('Compare Hopt with splitting')
+    plt.title('Compare Hopt with splitting')
+    plt.plot(Hopt(Ntap, Lfilling, Pfit) - Hopteven(Ntap, Lfilling, Pfit), - Hoptodd(Ntap, Lfilling, Pfit), '.')
 
 
+# Reconstructed signal from Hopt ----------------------------------------------
+def YT(Nt, L, P):
+    output = np.matmul(Smatrix(P + L - 1, Nt), Hopt(Nt, L, P))
+    return np.matmul(Rmatrix(P, L), output)
 
 
+if PLT_REC_SIG_WO:
+    plt.figure('Reconstructed signal without splitting')
+    plt.title('Reconstructed signal without splitting')
+    plt.plot(YT(Ntap, Lfilling, Pfit), '.')
 
+    plt.figure('Reconstructed signal with and without splitting')
+    plt.title('Reconstructed signal with and without splitting')
+    plt.plot(YT(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Ytotal(Ntap, Lfilling, Pfit), '.')
 
+    plt.figure('Error from signal without splitting')
+    plt.title('Error from signal without splitting')
+    plt.plot(YT(Ntap, Lfilling, Pfit) - Dvector, '.')
 
-
-
-
-
-
-
+    Yerror = YT(Ntap, Lfilling, Pfit) - Dvector
+    print('---- Y Error without splitting ----')
+    print('Max error:', np.max(np.abs(Yerror)))
+    print('Sigma error:', np.std(Yerror))
 
 plt.show()

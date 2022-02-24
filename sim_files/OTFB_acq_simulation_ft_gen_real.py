@@ -245,7 +245,7 @@ if not GEN:
     OTFB.OTFB_1.calc_power()
     OTFB.OTFB_2.calc_power()
     dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_t)
-    dut.plot_bbb_offset(pos_fit_arr[:N_bunches, n - 1], lxdir + sim_dir + f'fig/', N_t)
+    dut.plot_bbb_offset(pos_fit_arr[:72, n - 1], lxdir + sim_dir + f'fig/', N_t)
 
     # Save the results to their respective directories
     if SAVE_RESULTS:

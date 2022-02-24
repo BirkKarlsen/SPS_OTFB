@@ -239,7 +239,7 @@ if not GEN:
                 dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', i)
                 dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
                 dut.save_profile(profile, lxdir + sim_dir + f'sim_data/', i)
-                dut.plot_bbb_offset(pos_fit_arr[:N_bunches, n-1], lxdir + sim_dir + f'fig/', i)
+                dut.plot_bbb_offset(pos_fit_arr[:72, n-1], lxdir + sim_dir + f'fig/', i)
 
 
     OTFB.OTFB_1.calc_power()

@@ -80,7 +80,7 @@ if args.n_turns is not None:
 
 
 # LXPLUS Simulation Configurations --------------------------------------------
-lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/BLonD_OTFB_development/"
+lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/"
 N_bunches = 288
 
 

@@ -376,6 +376,9 @@ def getBeamPattern_3(timeScale, frames, heightFactor=0.015, distance=500, N_bunc
     Bunch_peaksFit = Bunch_peaksFit[:, 0:N_bunches_max]
     Bunch_Exponent = Bunch_Exponent[:, 0:N_bunches_max]
     Goodness_of_fit = Goodness_of_fit[:, 0:N_bunches_max]
+    if not save_72_fits:
+        x_71 = 0
+        y_71 = 0
 
     return N_bunches, Bunch_positions, Bunch_peaks, Bunch_lengths, Bunch_intensities, Bunch_positionsFit, \
            Bunch_peaksFit, Bunch_Exponent, Goodness_of_fit, x_71, y_71
@@ -577,7 +580,7 @@ def bunch_params(profile, get_72 = True):
     N_bunches, Bunch_positions, Bunch_peaks, Bunch_lengths, Bunch_intensities, Bunch_positionsFit, \
     Bunch_peaksFit, Bunch_Exponent, Goodness_of_fit, x_71, y_71 \
         = getBeamPattern_3(profile.bin_centers, gen_prof.T,
-                           distance=2**7 * 4, fit_option='fwhm', heightFactor=50,
+                           distance=2**7 * 3, fit_option='fwhm', heightFactor=50,
                            wind_len=5, save_72_fits=get_72)
     return Bunch_lengths[0,:], Bunch_positions[0,:], Bunch_positionsFit[0,:] * 1e-9, x_71 * 1e-9, y_71
 

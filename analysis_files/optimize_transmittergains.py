@@ -34,12 +34,14 @@ sigma_dt = 1.2e-9
 
 
 # For a_comb of 63/64 and llrf gain of 20
-a_comb = 63/64
+a_comb = 31/32
 G_llrf = 20
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [0.22909261332041,
-        0.429420301179296]
+#df = [0.18433333e6,
+#      0.2275e6]
+df = [0,
+      0]
+G_tx = [0.1611031942822209,
+        0.115855991237277]
 
 
 
@@ -62,7 +64,12 @@ df = [0.18433333e6,
 G_tx = [0.22909261332041,
         0.429420301179296]
         
-For a PostLS2 configuration with a_comb = 31/32, G_llrf = 20 and...
+For a PostLS2 configuration with a_comb = 31/32, G_llrf = 20 and both cavity types have the measured central frequency
+we have
+df = [0,
+      0]
+G_tx = [0.1611031942822209,
+        0.115855991237277]
 '''
 
 # Objects ---------------------------------------------------------------------

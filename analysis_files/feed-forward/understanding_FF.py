@@ -7,7 +7,7 @@ Author: Birk Emil Karlsen-Bæck
 PLT_IMPULSE = False
 PLT_BEAM_LOADING = False
 PLT_DESIRED_VEC = False
-
+PLT_OPT_FIR = True
 
 # Imports ---------------------------------------------------------------------
 import numpy as np
@@ -21,6 +21,27 @@ plt.rcParams.update({
         'font.family': 'serif',
         'font.size': 16
     })
+
+
+# Philips FIR filter coefficients ---------------------------------------------
+phopteven = np.array([8.67639e-14, -8.32667e-15, -1.59983e-13, 1.15907e-13,
+                      -2.81997e-14, -3.70814e-14, 0.000432526, 0.00302768,
+                      0.00346021, 0.00346021, 0.00346021, 0.00346021,
+                      0.00346021, 0.00346021, 0.00346021, 0.00346021,
+                      0.00346021, 0.00346021, 0.00346021, 0.00346021,
+                      0.00346021, 0.00346021, 0.00346021, 0.00302768,
+                      0.000432526, -3.70814e-14, -2.81997e-14, 1.15907e-13,
+                      -1.59983e-13, -8.32667e-15, 8.67639e-14])
+
+phoptodd = np.array([-0.0140479, 0.0221217, 0.00230681, 0.00230681,
+                     0.00230681, 0.00230681, -0.0177336, -0.0203287,
+                     -0.0011534, -0.0011534, -0.0011534, -0.0011534,
+                     -0.0110608, 0.00702393, -3.95549e-15, 0,
+                     3.95549e-15, -0.00702393, 0.0110608, 0.0011534,
+                     0.0011534, 0.0011534, 0.0011534, 0.0203287,
+                     0.0177336, -0.00230681, -0.00230681, -0.00230681,
+                     -0.00230681, -0.0221217, 0.0140479])
+
 
 
 # Parameters for the FF -------------------------------------------------------
@@ -205,7 +226,6 @@ def EvenMatrix(Nt):
                 output[i,j] = 1
     return output
 
-
 def Hoptreal(Nt, L, P):
     output = np.matmul(np.transpose(Rmatrix(P, L)), Dvectoreven)
     output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
@@ -223,15 +243,67 @@ def Hoptreal(Nt, L, P):
     return np.matmul(matrix1, output)
 
 def Hopteven(Nt, L, P):
-    return np.concatenate(np.flip(Hoptreal(Nt, L, P)), Hoptreal(Nt, L, P))
+    return np.concatenate([Hoptreal(Nt, L, P)[1:][::-1], Hoptreal(Nt, L, P)])
+
+hopteven = Hopteven(Ntap, Lfilling, Pfit)
 
 
-hopt = Hopteven(Ntap, Lfilling, Pfit)
-print(len(hopt))
-print(hopt)
+# Optimal FIR for imaginary valued impedance (Odd symmetric beam loading)
+def OddMatrix(Nt):
+    output = np.zeros((Nt, (Nt - 1) // 2))
+    for i in range(output.shape[0]):
+        for j in range(output.shape[1]):
+            if i + j == (Nt - 2) // 2:
+                output[i, j] = -1
+            elif i - j == (Nt + 1) // 2:
+                output[i, j] = 1
+    return output
 
-plt.figure()
-plt.plot(hopt, '.')
+def Hoptimag(Nt, L, P):
+    output = np.matmul(Weigthing(P), Dvectorodd)
+    output = np.matmul(np.transpose(Rmatrix(P, L)), output)
+    output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
+    output = np.matmul(np.transpose(OddMatrix(Nt)), output)
+
+    matrix1 = OddMatrix(Nt)
+    matrix1 = np.matmul(Smatrix(P + L - 1, Nt), matrix1)
+    matrix1 = np.matmul(Rmatrix(P, L), matrix1)
+    matrix1 = np.matmul(Weigthing(P), matrix1)
+    matrix1 = np.matmul(np.transpose(Rmatrix(P, L)), matrix1)
+    matrix1 = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), matrix1)
+    matrix1 = np.matmul(np.transpose(OddMatrix(Nt)), matrix1)
+    matrix1 = npla.inv(matrix1)
+
+    return np.matmul(matrix1, output)
+
+def Hoptodd(Nt, L, P):
+    output = np.concatenate([-Hoptimag(Nt, L, P)[::-1], np.array([0])])
+    return np.concatenate([output, Hoptimag(Nt, L, P)])
+
+hoptodd = Hoptodd(Ntap, Lfilling, Pfit)
+
+if PLT_OPT_FIR:
+    plt.figure('Optimal FIR for real valued impedance')
+    plt.title('Optimal FIR for real valued impedance')
+    plt.plot(hopteven, '.')
+
+    plt.figure('Optimal FIR for imaginary valued impedance')
+    plt.title('Optimal FIR for imaginary valued impedance')
+    plt.plot(hoptodd, '.')
+
+    print('Error in real FIR:', np.mean(np.abs((hopteven - phopteven))))
+    print('Error in imaginary FIR:', np.mean(np.abs((hoptodd - phoptodd))))
+
+
+# Reconstructed signal. Step response of FIR + rectangular window (cavity) ----
+
+def Yeven(Nt, L, P):
+    output = np.matmul(Smatrix(P + L - 1, Nt), Hopteven(Nt, L, P))
+    return np.matmul(Rmatrix(P, L), output)
+
+
+
+
 
 
 

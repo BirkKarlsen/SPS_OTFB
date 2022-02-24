@@ -20,6 +20,7 @@ args = parser.parse_args()
 GEN = False
 SAVE_RESULTS = True
 SINGLE_BATCH = False
+LXPLUS = False
 fit_type = 'fwhm'
 mstdir = ''
 dt_track = 1000
@@ -30,8 +31,9 @@ dt_save = 1000
 
 # Imports ---------------------------------------------------------------------
 import matplotlib as mpl
-mpl.use('Agg')
+#mpl.use('Agg')
 import numpy as np
+import matplotlib.pyplot as plt
 import os.path
 from datetime import date
 import utility_files.analysis_tools as at
@@ -61,8 +63,8 @@ phi = 0                                         # 200 MHz phase [-]
 
 # Parameters for the SPS Cavity Feedback
 V_part = 0.5442095845867135                     # Voltage partitioning [-]
-G_tx = [0.22909261332041,
-        0.429420301179296]
+G_tx = [0.1611031942822209,
+        0.115855991237277]
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -80,7 +82,10 @@ if args.n_turns is not None:
 
 
 # LXPLUS Simulation Configurations --------------------------------------------
-lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/"
+if LXPLUS:
+    lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/"
+else:
+    lxdir = '../'
 N_bunches = 288
 
 
@@ -104,7 +109,7 @@ beam = Beam(ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 # Profile
 profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5),
     cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 * 4 + 250 * 3 + 125),
-    n_slices=int(round(2**7 * (72 * 5 * 4 + 250 * 3 + 125)))))
+    n_slices=int(round(2**7 * (2.5 + 72 * 5 * 4 + 250 * 3 + 125)))))
 
 
 # SPS Cavity Feedback
@@ -199,7 +204,6 @@ if not GEN:
     max_pow_arr = np.zeros((2, N_t//dt_ptrack))
     max_V_arr = np.zeros((2, N_t//dt_ptrack))
     int_arr = np.zeros(N_t//dt_ptrack)
-
     n = 0
     for i in range(N_t):
         SPS_tracker.track()

@@ -1,5 +1,5 @@
 '''
-This is a simulation file simulating the exact cofiguration that was used for the HIRADMT 2 cycle during the start of
+This is a simulation file simulating the exact configuration that was used for the HIRADMT 2 cycle during the start of
 november 2021.
 
 Author: Birk Emil Karlsen-Bæck
@@ -12,6 +12,10 @@ parser = argparse.ArgumentParser(description="This file simulates the SPS OTFB w
 
 parser.add_argument("--n_turns", '-nt', type=int,
                     help="The number of turns to simulates, default is 1000")
+parser.add_argument("--otfb_config", "-oc", type=int,
+                    help="Different configurations of the OTFB parameters.")
+parser.add_argument("--save_dir", "-sd", type=str,
+                    help="Name of directory to save the results to.")
 
 args = parser.parse_args()
 
@@ -21,6 +25,7 @@ GEN = False
 SAVE_RESULTS = True
 SINGLE_BATCH = False
 LXPLUS = True
+OTFB_CONFIG = 1
 fit_type = 'fwhm'
 mstdir = ''
 dt_track = 1000
@@ -65,6 +70,7 @@ phi = 0                                         # 200 MHz phase [-]
 V_part = 0.5442095845867135                     # Voltage partitioning [-]
 G_tx = [0.1611031942822209,
         0.115855991237277]
+G_llrf = 20
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -80,6 +86,18 @@ total_intensity = 3385.8196 * 10**10
 if args.n_turns is not None:
     N_t = args.n_turns
 
+if args.otfb_config is not None:
+    OTFB_CONFIG = args.otfb_config
+
+
+if OTFB_CONFIG == 1:
+    pass
+elif OTFB_CONFIG == 2:
+    rr = 0.9
+    G_tx = [0.1611031942822209 * rr,
+            0.115855991237277 * rr]
+elif OTFB_CONFIG == 3:
+    G_llrf = 16
 
 # LXPLUS Simulation Configurations --------------------------------------------
 if LXPLUS:
@@ -116,7 +134,7 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False, rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
-                         G_llrf=20)
+                         G_llrf=G_llrf)
 
 
 # SPS Impedance Model

@@ -36,12 +36,13 @@ sigma_dt = 1.2e-9
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
 G_llrf = 20
+rr = 1
 #df = [0.18433333e6,
 #      0.2275e6]
 df = [0,
       0]
-G_tx = [0.1611031942822209,
-        0.115855991237277]
+G_tx = [0.1611031942822209 * rr,
+        0.115855991237277 * rr]
 
 
 
@@ -70,6 +71,14 @@ df = [0,
       0]
 G_tx = [0.1611031942822209,
         0.115855991237277]
+        
+For a PostLS2 configuration with a_comb = 31/32, G_llrf = 16 and both cavity types have the measured central frequency
+we have 
+df = [0,
+      0]
+G_tx = [0.163212561182363,
+        0.127838041632473]
+
 '''
 
 # Objects ---------------------------------------------------------------------
@@ -95,9 +104,11 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False)
 
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=G_llrf, df=df)
+                         G_llrf=G_llrf, df=df, turns=10000, V_part=0)
 
 print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
+
+print(OTFB.OTFB_1.V_part, OTFB.OTFB_2.V_part)
 
 # Comparison
 
@@ -118,5 +129,6 @@ print()
 print(f'3-section difference: {diff3} %')
 print(f'4-section difference: {diff4} %')
 
-#at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
-#plt.show()
+at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
+at.plot_OTFB_signals(OTFB.OTFB_2, h, rfstation.t_rf[0,0])
+plt.show()

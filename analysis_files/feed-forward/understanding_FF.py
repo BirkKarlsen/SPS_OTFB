@@ -18,6 +18,8 @@ import numpy.linalg as npla
 import matplotlib.pyplot as plt
 import utility_files.analysis_tools as at
 
+from blond.llrf.signal_processing import feedforward_filter_TWC3, feedforward_filter_TWC4
+
 plt.rcParams.update({
         'text.usetex': True,
         'text.latex.preamble': r'\usepackage{fourier}',

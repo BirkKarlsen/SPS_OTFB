@@ -24,7 +24,8 @@ gamma_t = 18.0                                  # Transition Gamma [-]
 alpha = 1 / (gamma_t**2)                        # Momentum compaction factor [-]
 p_s = 440e9                                     # Synchronous momentum [eV]
 h = 4620                                        # 200 MHz harmonic number [-]
-V = 10e6                                        # 200 MHz RF voltage [V]
+#V = (0.911535 * 4 + 1.526871 * 2) * 1e6         # 200 MHz RF voltage [V]
+V = 6660589.53641675
 phi = 0                                         # 200 MHz phase [-]
 
 N_m = int(5e5)                                  # Number of macro-particles for tracking
@@ -35,14 +36,16 @@ sigma_dt = 1.2e-9
 
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
-G_llrf = 20
+G_llrf = 16
 rr = 1
+#V_part = 0.5442095845867135
+V_part = 0.5517843967841601
 #df = [0.18433333e6,
 #      0.2275e6]
 df = [0,
       0]
-G_tx = [0.1611031942822209 * rr,
-        0.115855991237277 * rr]
+G_tx = [0.163212561182363,
+        0.127838041632473]
 
 
 
@@ -104,7 +107,7 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False)
 
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=G_llrf, df=df, turns=10000, V_part=0)
+                         G_llrf=G_llrf, df=df, turns=1000, V_part=V_part)
 
 print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
 
@@ -131,4 +134,17 @@ print(f'4-section difference: {diff4} %')
 
 at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
 at.plot_OTFB_signals(OTFB.OTFB_2, h, rfstation.t_rf[0,0])
+
+OTFB.OTFB_1.calc_power()
+OTFB.OTFB_2.calc_power()
+
+plt.figure()
+plt.plot(OTFB.OTFB_1.P_GEN[-h:])
+plt.plot(OTFB.OTFB_2.P_GEN[-h:])
+
+print()
+print('3-section power:', np.mean(OTFB.OTFB_1.P_GEN[-h:]))
+print('4-section power:', np.mean(OTFB.OTFB_2.P_GEN[-h:]))
+
+
 plt.show()

@@ -14,6 +14,8 @@ parser.add_argument("--n_turns", '-nt', type=int,
                     help="The number of turns to simulates, default is 1000")
 parser.add_argument("--otfb_config", "-oc", type=int,
                     help="Different configurations of the OTFB parameters.")
+parser.add_argument("--volt_config", "-vc", type=int,
+                    help="Different values for the RF voltage.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 
@@ -26,6 +28,7 @@ SAVE_RESULTS = True
 SINGLE_BATCH = False
 LXPLUS = True
 OTFB_CONFIG = 1
+VOLT_CONFIG = 1
 fit_type = 'fwhm'
 mstdir = ''
 dt_track = 1000
@@ -89,6 +92,13 @@ if args.n_turns is not None:
 if args.otfb_config is not None:
     OTFB_CONFIG = args.otfb_config
 
+if args.volt_config is not None:
+    VOLT_CONFIG = args.volt_config
+
+if args.save_dir is not None:
+    mstdir = args.save_dir
+
+
 
 if OTFB_CONFIG == 1:
     pass
@@ -98,6 +108,14 @@ elif OTFB_CONFIG == 2:
             0.115855991237277 * rr]
 elif OTFB_CONFIG == 3:
     G_llrf = 16
+    G_tx = [0.163212561182363,
+            0.127838041632473]
+
+if VOLT_CONFIG == 1:
+    pass
+elif VOLT_CONFIG == 2:
+    V = 6660589.53641675
+    V_part = 0.5517843967841601
 
 # LXPLUS Simulation Configurations --------------------------------------------
 if LXPLUS:

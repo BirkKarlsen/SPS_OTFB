@@ -311,6 +311,10 @@ if not GEN:
                 dut.save_profile(profile, lxdir + sim_dir + f'sim_data/', i)
                 dut.plot_bbb_offset(pos_fit_arr[:72, n-1], lxdir + sim_dir + f'fig/', i)
 
+        if i < N_ir:
+            beam.intensity = ramp[i]
+            beam.ratio = beam.intensity / beam.n_macroparticles
+
 
     OTFB.OTFB_1.calc_power()
     OTFB.OTFB_2.calc_power()

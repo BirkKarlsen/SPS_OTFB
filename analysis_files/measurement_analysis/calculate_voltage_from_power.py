@@ -9,8 +9,11 @@ Author: Birk Emil Karlsen-Bæck
 import numpy as np
 from blond.llrf.impulse_response import SPS3Section200MHzTWC, SPS4Section200MHzTWC
 
-TWC3 = SPS3Section200MHzTWC()
-TWC4 = SPS4Section200MHzTWC()
+df = [0.18433333e6,
+      0.2275e6]
+
+TWC3 = SPS3Section200MHzTWC(df=df[0])
+TWC4 = SPS4Section200MHzTWC(df=df[1])
 
 # Parameters
 omega_c = 2 * np.pi * 200394401.46888617        # [rad/s]

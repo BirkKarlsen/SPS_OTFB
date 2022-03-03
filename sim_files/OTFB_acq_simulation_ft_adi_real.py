@@ -1,6 +1,6 @@
 '''
 This is a simulation file simulating the exact configuration that was used for the HIRADMT 2 cycle during the start of
-november 2021.
+november 2021. This simulation is using an intensity ramp to ensure a stable beam.
 
 Author: Birk Emil Karlsen-Bæck
 '''
@@ -12,10 +12,14 @@ parser = argparse.ArgumentParser(description="This file simulates the SPS OTFB w
 
 parser.add_argument("--n_turns", '-nt', type=int,
                     help="The number of turns to simulates, default is 1000")
+parser.add_argument("--n_ramp", "-nr", type=int,
+                    help="The number of turns to track the intensity ramp, default is 5000")
 parser.add_argument("--otfb_config", "-oc", type=int,
                     help="Different configurations of the OTFB parameters.")
 parser.add_argument("--volt_config", "-vc", type=int,
                     help="Different values for the RF voltage.")
+parser.add_argument("--freq_config", "-fc", type=int,
+                    help="Different configurations of the TWC central frequencies.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 
@@ -29,6 +33,7 @@ SINGLE_BATCH = False
 LXPLUS = True
 OTFB_CONFIG = 1
 VOLT_CONFIG = 1
+FREQ_CONFIG = 1
 fit_type = 'fwhm'
 mstdir = ''
 dt_track = 1000
@@ -82,12 +87,14 @@ modelStr = "futurePostLS2_SPS_noMain200TWC.txt" # Name of Impedance Model
 # Parameters for the Simulation
 N_m = int(5e5)                                  # Number of macro-particles for tracking
 N_t = 1000                                      # Number of turns to track
-total_intensity = 3385.8196 * 10**10
-
+N_ir = 5000                                     # NUmber of turns for the intensity ramp
 
 # Change Simulation based on parsed arguments ---------------------------------
 if args.n_turns is not None:
     N_t = args.n_turns
+
+if args.n_ramp is not None:
+    N_ir = args.n_ramp
 
 if args.otfb_config is not None:
     OTFB_CONFIG = args.otfb_config
@@ -117,6 +124,13 @@ elif VOLT_CONFIG == 2:
     V = 6660589.53641675
     V_part = 0.5517843967841601
 
+N_tot = N_t + N_ir
+total_intensity = 3385.8196 * 10**10
+total_start_intensity = 1e11
+ramp = np.linspace(total_start_intensity,
+                   total_intensity, N_ir)
+
+
 # LXPLUS Simulation Configurations --------------------------------------------
 if LXPLUS:
     lxdir = "/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/"
@@ -128,7 +142,7 @@ N_bunches = 288
 # Objects ---------------------------------------------------------------------
 
 # SPS Ring
-ring = Ring(C, alpha, p_s, Proton(), n_turns=N_t)
+ring = Ring(C, alpha, p_s, Proton(), n_turns=N_tot)
 
 
 # RF Station
@@ -137,7 +151,7 @@ rfstation = RFStation(ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
 
 # Beam
 bunch_intensities = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_intensities_red.npy')
-bunch_intensities = total_intensity * bunch_intensities / np.sum(bunch_intensities)  # normalize to 3385.8196 * 10**10
+bunch_intensities = ramp[0] * bunch_intensities / np.sum(bunch_intensities)  # normalize to 3385.8196 * 10**10
 n_macro = N_m * N_bunches * bunch_intensities / np.sum(bunch_intensities)
 beam = Beam(ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 
@@ -242,14 +256,14 @@ print('\tG_llrf =', OTFB.OTFB_1.G_llrf, OTFB.OTFB_2.G_llrf)
 
 # Particle tracking -----------------------------------------------------------
 if not GEN:
-    fwhm_arr = np.zeros((N_bunches, N_t//dt_ptrack))
-    pos_arr = np.zeros((N_bunches, N_t//dt_ptrack))
-    pos_fit_arr = np.zeros((N_bunches, N_t//dt_ptrack))
-    max_pow_arr = np.zeros((2, N_t//dt_ptrack))
-    max_V_arr = np.zeros((2, N_t//dt_ptrack))
-    int_arr = np.zeros(N_t//dt_ptrack)
+    fwhm_arr = np.zeros((N_bunches, N_tot//dt_ptrack))
+    pos_arr = np.zeros((N_bunches, N_tot//dt_ptrack))
+    pos_fit_arr = np.zeros((N_bunches, N_tot//dt_ptrack))
+    max_pow_arr = np.zeros((2, N_tot//dt_ptrack))
+    max_V_arr = np.zeros((2, N_tot//dt_ptrack))
+    int_arr = np.zeros(N_tot//dt_ptrack)
     n = 0
-    for i in range(N_t):
+    for i in range(N_tot):
         SPS_tracker.track()
         profile.track()
         total_imp.induced_voltage_sum()
@@ -262,7 +276,7 @@ if not GEN:
 
             fwhm_arr[:, n], pos_arr[:, n], pos_fit_arr[:, n], x_72, y_72 = dut.bunch_params(profile,
                                                                                             get_72=False)
-
+            int_arr[n] = beam.intensity
             n += 1
 
         if i % dt_save == 0:
@@ -273,6 +287,8 @@ if not GEN:
 
             dut.save_params(fwhm_arr, pos_arr, pos_fit_arr,
                             max_pow_arr, max_V_arr, lxdir + sim_dir)
+
+            dut.plot_ramp(int_arr, i, n - 1, lxdir + sim_dir)
 
 
         if i % dt_plot == 0:
@@ -288,8 +304,8 @@ if not GEN:
 
     OTFB.OTFB_1.calc_power()
     OTFB.OTFB_2.calc_power()
-    dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_t)
-    dut.plot_bbb_offset(pos_fit_arr[:72, n - 1], lxdir + sim_dir + f'fig/', N_t)
+    dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_tot)
+    dut.plot_bbb_offset(pos_fit_arr[:72, n - 1], lxdir + sim_dir + f'fig/', N_tot)
 
     # Save the results to their respective directories
     if SAVE_RESULTS:

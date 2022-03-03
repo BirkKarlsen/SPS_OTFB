@@ -10,7 +10,8 @@ PLT_DESIRED_VEC = False             # Plot the desired vectors
 PLT_OPT_FIR = False                 # Plot the optimal FIR filters when splitting real and imaginary parts
 PLT_REC_SIG = False                 # Plot reconstructed signal using the FIR filters with splitting
 PLT_OPT_FIR_WO = False              # Plot the optimal FIR filter without splitting the real and imaginary parts
-PLT_REC_SIG_WO = True               # plot the reconstructed signals without splitting the real and imaginary parts
+PLT_REC_SIG_WO = False              # plot the reconstructed signals without splitting the real and imaginary parts
+SECTION = 4
 
 # Imports ---------------------------------------------------------------------
 import numpy as np
@@ -19,6 +20,7 @@ import matplotlib.pyplot as plt
 import utility_files.analysis_tools as at
 
 from blond.llrf.signal_processing import feedforward_filter_TWC3, feedforward_filter_TWC4
+from blond.llrf.impulse_response import SPS3Section200MHzTWC, SPS4Section200MHzTWC
 
 plt.rcParams.update({
         'text.usetex': True,
@@ -27,6 +29,14 @@ plt.rcParams.update({
         'font.size': 16
     })
 
+if SECTION == 3:
+    TWC = SPS3Section200MHzTWC()
+    print(TWC.tau)
+    print(len(feedforward_filter_TWC3))
+else:
+    TWC = SPS4Section200MHzTWC()
+    print(TWC.tau)
+    print(len(feedforward_filter_TWC4))
 
 # Philips FIR filter coefficients ---------------------------------------------
 phopteven = np.array([8.67639e-14, -8.32667e-15, -1.59983e-13, 1.15907e-13,
@@ -54,9 +64,14 @@ fs = 40.0444e6                          # Sampling frequency, was 124/4 MS/s
 Ts = 1 / fs
 Trev = 924 / fs                         # Revolution period, was 256/fs
 Nrev = Trev * fs
-T = 420e-9                              # Filling time [s]
-Lfilling = round(T * fs)                # Cavity response length
-Ntap = 31                               # Filter response length. MUST BE ODD
+if SECTION == 3:
+    T = 461.91831e-9                              # Filling time [s]
+    Lfilling = round(T * fs)                # Cavity response length
+    Ntap = 31                               # Filter response length. MUST BE ODD
+else:
+    T = 620.70273e-9  # Filling time [s]
+    Lfilling = round(T * fs)  # Cavity response length
+    Ntap = 37  # Filter response length. MUST BE ODD
 
 
 # FIR filter ------------------------------------------------------------------
@@ -312,6 +327,11 @@ def Yodd(Nt, L, P):
 def Ytotal(Nt, L, P):
     return Yeven(Nt, L, P) + Yodd(Nt, L, P)
 
+def Ytotal2(Nt, L, P):
+    output = Hopteven(Nt, L, P) + Hoptodd(Nt, L, P)
+    output = np.matmul(Smatrix(P + L - 1, Nt), output)
+    return np.matmul(Rmatrix(P, L), output)
+
 # TODO: Max error and std as a function of number of taps
 
 if PLT_REC_SIG:
@@ -336,6 +356,16 @@ if PLT_REC_SIG:
     print('Max error:', np.max(np.abs(Yerror)))
     print('Sigma error:', np.std(Yerror))
 
+# Compare with FF coefficients from BLonD
+bl_3sec = feedforward_filter_TWC3
+bl_4sec = feedforward_filter_TWC4
+
+my_3sec = Hopteven(Ntap, Lfilling, Pfit) + Hoptodd(Ntap, Lfilling, Pfit)
+
+print(my_3sec)
+plt.figure()
+plt.plot(bl_4sec, '.')
+plt.plot(my_3sec, '.')
 
 # Optimal FIR without splitting even and odd ----------------------------------
 def w(n, Nt):
@@ -381,7 +411,6 @@ if PLT_OPT_FIR_WO:
     plt.figure('Compare Hopt with splitting')
     plt.title('Compare Hopt with splitting')
     plt.plot(Hopt(Ntap, Lfilling, Pfit) - Hopteven(Ntap, Lfilling, Pfit), - Hoptodd(Ntap, Lfilling, Pfit), '.')
-
 
 # Reconstructed signal from Hopt ----------------------------------------------
 def YT(Nt, L, P):

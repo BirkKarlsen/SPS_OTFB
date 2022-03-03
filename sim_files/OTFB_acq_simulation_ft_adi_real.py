@@ -79,6 +79,8 @@ V_part = 0.5442095845867135                     # Voltage partitioning [-]
 G_tx = [0.1611031942822209,
         0.115855991237277]
 G_llrf = 20
+df = [0,
+      0]
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -124,6 +126,14 @@ elif VOLT_CONFIG == 2:
     V = 6660589.53641675
     V_part = 0.5517843967841601
 
+if FREQ_CONFIG == 1:
+    pass
+elif FREQ_CONFIG == 2:
+    df = [0.18433333e6,
+          0.2275e6]
+    G_tx = [0.229377820916177,
+            0.430534529571209]
+
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10
 total_start_intensity = 1e11
@@ -166,7 +176,7 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False, rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
-                         G_llrf=G_llrf)
+                         G_llrf=G_llrf, df=df)
 
 
 # SPS Impedance Model

@@ -40,13 +40,13 @@ G_llrf = 16
 rr = 1
 #V_part = 0.5442095845867135
 V_part = 0.5517843967841601
-#df = [0.18433333e6,
-#      0.2275e6]
-df = [0,
-      0]
-G_tx = [0.163212561182363,
-        0.127838041632473]
-
+df = [0.18433333e6,
+      0.2275e6]
+#df = [0,
+#      0]
+G_tx = [0.229377820916177,
+        0.430534529571209]
+SHOW_PLT = False
 
 
 #df = [0, 0.2275e6]
@@ -81,6 +81,12 @@ df = [0,
       0]
 G_tx = [0.163212561182363,
         0.127838041632473]
+For a PostLS2 configuration with a_comb = 31/32, G_llrf = 16 and both cavity types have the measured central frequency
+we have
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [0.229377820916177,
+        0.430534529571209]
 
 '''
 
@@ -115,16 +121,18 @@ print(OTFB.OTFB_1.V_part, OTFB.OTFB_2.V_part)
 
 # Comparison
 
-target3 = 10 * 4 * 3 / (4 * 3 + 2 * 4)
-target4 = 10 * 2 * 4 / (4 * 3 + 2 * 4)
+target3 = V * 1e-6 * V_part
+target4 = V * 1e-6 * (1 - V_part)
 
 ant3 = np.mean(np.abs(OTFB.OTFB_1.V_ANT[-h:])) / 1e6
 ant4 = np.mean(np.abs(OTFB.OTFB_2.V_ANT[-h:])) / 1e6
 print(f'Desired 3-section: {target3} MV')
-print(f'Model 3-section: {ant3} MV')
+print(f'Model 3-section:   {ant3} MV')
+print(f'Is under {target3 > ant3}')
 print()
 print(f'Desired 4-section: {target4} MV')
-print(f'Model 4-section: {ant4} MV')
+print(f'Model 4-section:   {ant4} MV')
+print(f'Is under {target4 > ant4}')
 
 diff3 = np.abs(target3 - ant3) * 100 / target3
 diff4 = np.abs(target4 - ant4) * 100 / target4
@@ -146,5 +154,5 @@ print()
 print('3-section power:', np.mean(OTFB.OTFB_1.P_GEN[-h:]))
 print('4-section power:', np.mean(OTFB.OTFB_2.P_GEN[-h:]))
 
-
-plt.show()
+if SHOW_PLT:
+    plt.show()

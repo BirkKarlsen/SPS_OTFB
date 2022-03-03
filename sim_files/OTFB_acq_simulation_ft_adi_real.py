@@ -104,6 +104,9 @@ if args.otfb_config is not None:
 if args.volt_config is not None:
     VOLT_CONFIG = args.volt_config
 
+if args.freq_config is not None:
+    FREQ_CONFIG = args.freq_config
+
 if args.save_dir is not None:
     mstdir = args.save_dir
 
@@ -273,6 +276,10 @@ if not GEN:
     max_V_arr = np.zeros((2, N_tot//dt_ptrack))
     int_arr = np.zeros(N_tot//dt_ptrack)
     n = 0
+
+    beam.intensity = ramp[0]
+    beam.ratio = beam.intensity / beam.n_macroparticles
+
     for i in range(N_tot):
         SPS_tracker.track()
         profile.track()

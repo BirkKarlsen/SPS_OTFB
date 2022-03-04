@@ -122,6 +122,11 @@ elif OTFB_CONFIG == 3:
     G_llrf = 16
     G_tx = [0.163212561182363,
             0.127838041632473]
+elif OTFB_CONFIG == 4:
+    rr = 0.95
+    G_llrf = 16
+    G_tx = [0.163212561182363 * rr,
+            0.127838041632473 * rr]
 
 if VOLT_CONFIG == 1:
     pass

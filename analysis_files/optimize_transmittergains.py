@@ -35,19 +35,19 @@ sigma_dt = 1.2e-9
 
 
 # For a_comb of 63/64 and llrf gain of 20
-a_comb = 63/64
-G_llrf = 20
+a_comb = 31/32
+G_llrf = 16
 rr = 1
 #V_part = 0.5442095845867135
 V_part = 0.5517843967841601
-df = [0.18433333e6,
-      0.2275e6]
-#df = [0,
-#      0]
-G_tx = [0.22909261332041,
-        0.429420301179296]
-SHOW_PLT = False
-
+#df = [0.18433333e6,
+#      0.2275e6]
+df = [62333.333,
+      105500]
+G_tx = [0.1910842957076554,
+        0.289228143612504]
+SHOW_PLT = True
+n_pretrack = 1000
 
 #df = [0, 0.2275e6]
 #G_tx = [0.2607509145194842, 0.510893981556323]
@@ -87,6 +87,18 @@ df = [0.18433333e6,
       0.2275e6]
 G_tx = [0.229377820916177,
         0.430534529571209]
+For a PostLS2 configuration with a_comb = 63/64, Gllrf = 20 and both cavity types at measured frequencies
+we have
+df = [0,
+      0]
+G_tx = [0.1615069965527125,
+        0.11584062194618076]
+For a PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and both cavity types at 200.1 MHz
+we have
+df = [62333.333,
+      105500]
+G_tx = [0.1910842957076554,
+        0.289228143612504]
 
 '''
 
@@ -113,7 +125,7 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False)
 
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=G_llrf, df=df, turns=1000, V_part=V_part)
+                         G_llrf=G_llrf, df=df, turns=n_pretrack, V_part=V_part)
 
 print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
 
@@ -128,11 +140,17 @@ ant3 = np.mean(np.abs(OTFB.OTFB_1.V_ANT[-h:])) / 1e6
 ant4 = np.mean(np.abs(OTFB.OTFB_2.V_ANT[-h:])) / 1e6
 print(f'Desired 3-section: {target3} MV')
 print(f'Model 3-section:   {ant3} MV')
-print(f'Is under {target3 > ant3}')
+if target3 > ant3:
+    print(f'Increase')
+else:
+    print(f'Decrease')
 print()
 print(f'Desired 4-section: {target4} MV')
 print(f'Model 4-section:   {ant4} MV')
-print(f'Is under {target4 > ant4}')
+if target4 > ant4:
+    print(f'Increase')
+else:
+    print(f'Decrease')
 
 diff3 = np.abs(target3 - ant3) * 100 / target3
 diff4 = np.abs(target4 - ant4) * 100 / target4

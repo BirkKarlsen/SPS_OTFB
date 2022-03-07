@@ -9,8 +9,10 @@ Author: Birk Emil Karlsen-Bæck
 import numpy as np
 from blond.llrf.impulse_response import SPS3Section200MHzTWC, SPS4Section200MHzTWC
 
-df = [0.18433333e6,
-      0.2275e6]
+#df = [0.18433333e6,
+#      0.2275e6]
+df = [62333.333,
+      105500]
 
 TWC3 = SPS3Section200MHzTWC(df=df[0])
 TWC4 = SPS4Section200MHzTWC(df=df[1])

@@ -133,6 +133,9 @@ if VOLT_CONFIG == 1:
 elif VOLT_CONFIG == 2:
     V = 6660589.53641675
     V_part = 0.5517843967841601
+elif VOLT_CONFIG == 3:
+    V = 6860740.881203784
+    V_part = 0.5434907802323814
 
 if FREQ_CONFIG == 1:
     pass
@@ -141,6 +144,11 @@ elif FREQ_CONFIG == 2:
           0.2275e6]
     G_tx = [0.229377820916177,
             0.430534529571209]
+elif FREQ_CONFIG == 3:
+    df = [62333.333,
+          105500]
+    G_tx = [0.1910842957076554,
+            0.289228143612504]
 
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10

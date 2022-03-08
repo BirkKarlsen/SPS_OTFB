@@ -3,8 +3,27 @@ Python-script to optimize the transmitter-gains in the SPS
 
 author: Birk Emil Karlsen-Bæck
 '''
-# Imports ---------------------------------------------------------------------
+import argparse
 
+parser = argparse.ArgumentParser(description="This file simulates the SPS OTFB with impedances.")
+
+parser.add_argument("--bisect", '-bs', type=int,
+                    help="Option to use the bisection script on this file, default is False (0)")
+parser.add_argument("--g_tx_1", '-g1', type=float,
+                    help="Option to input the transmitter gain for the 3-section")
+parser.add_argument("--g_tx_2", '-g2', type=float,
+                    help="Option to input the transmitter gain for the 4-section")
+
+
+args = parser.parse_args()
+
+# Options for script ----------------------------------------------------------
+BISECT = False
+SHOW_PLT = False
+n_pretrack = 1000
+
+
+# Imports ---------------------------------------------------------------------
 import numpy as np
 import matplotlib.pyplot as plt
 import utility_files.analysis_tools as at
@@ -15,7 +34,6 @@ from blond.beam.distributions import bigaussian
 from blond.input_parameters.ring import Ring
 from blond.input_parameters.rf_parameters import RFStation
 from blond.llrf.cavity_feedback import SPSCavityFeedback, CavityFeedbackCommissioning
-from blond.trackers.tracker import RingAndRFTracker
 
 
 # Parameters ------------------------------------------------------------------
@@ -36,18 +54,26 @@ sigma_dt = 1.2e-9
 
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
-G_llrf = 16
+G_llrf = 0
 rr = 1
 #V_part = 0.5442095845867135
 V_part = 0.5517843967841601
-#df = [0.18433333e6,
-#      0.2275e6]
-df = [62333.333,
-      105500]
-G_tx = [0.1910842957076554,
-        0.289228143612504]
-SHOW_PLT = True
-n_pretrack = 1000
+df = [0.18433333e6,
+      0.2275e6]
+#df = [62333.333,
+#      105500]
+#df = [0,
+#      0]
+G_tx = [0.25147316248903445,
+        0.5110686163372516]
+
+if args.bisect is not None:
+    BISECT = bool(args.bisect)
+if args.g_tx_1 is not None:
+    G_tx[0] = args.g_tx_1
+if args.g_tx_2 is not None:
+    G_tx[1] = args.g_tx_2
+
 
 #df = [0, 0.2275e6]
 #G_tx = [0.2607509145194842, 0.510893981556323]
@@ -99,6 +125,18 @@ df = [62333.333,
       105500]
 G_tx = [0.1910842957076554,
         0.289228143612504]
+For a PostLS2 configuration with a_comb = 31/32, Gllrf = 0 and both cavity types at measured
+we have
+df = [0,
+      0]
+G_tx = [0.26041876200342555,
+        0.5558826390544476]
+For a PostLS2 configuration with a_comb = 31/32, Gllrf = 0 and both cavities at 200.222 MHz
+we have
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [0.25147316248903445,
+        0.5110686163372516]
 
 '''
 
@@ -127,9 +165,10 @@ OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
                          G_llrf=G_llrf, df=df, turns=n_pretrack, V_part=V_part)
 
-print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
+if not BISECT:
+    print(np.mean(np.angle(OTFB.OTFB_1.V_ANT)) * 180/np.pi)
 
-print(OTFB.OTFB_1.V_part, OTFB.OTFB_2.V_part)
+    print(OTFB.OTFB_1.V_part, OTFB.OTFB_2.V_part)
 
 # Comparison
 
@@ -138,25 +177,29 @@ target4 = V * 1e-6 * (1 - V_part)
 
 ant3 = np.mean(np.abs(OTFB.OTFB_1.V_ANT[-h:])) / 1e6
 ant4 = np.mean(np.abs(OTFB.OTFB_2.V_ANT[-h:])) / 1e6
-print(f'Desired 3-section: {target3} MV')
-print(f'Model 3-section:   {ant3} MV')
-if target3 > ant3:
-    print(f'Increase')
-else:
-    print(f'Decrease')
-print()
-print(f'Desired 4-section: {target4} MV')
-print(f'Model 4-section:   {ant4} MV')
-if target4 > ant4:
-    print(f'Increase')
-else:
-    print(f'Decrease')
+
+if not BISECT:
+    print(f'Desired 3-section: {target3} MV')
+    print(f'Model 3-section:   {ant3} MV')
+    if target3 > ant3:
+        print(f'Increase')
+    else:
+        print(f'Decrease')
+    print()
+    print(f'Desired 4-section: {target4} MV')
+    print(f'Model 4-section:   {ant4} MV')
+    if target4 > ant4:
+        print(f'Increase')
+    else:
+        print(f'Decrease')
 
 diff3 = np.abs(target3 - ant3) * 100 / target3
 diff4 = np.abs(target4 - ant4) * 100 / target4
-print()
-print(f'3-section difference: {diff3} %')
-print(f'4-section difference: {diff4} %')
+
+if not BISECT:
+    print()
+    print(f'3-section difference: {diff3} %')
+    print(f'4-section difference: {diff4} %')
 
 at.plot_OTFB_signals(OTFB.OTFB_1, h, rfstation.t_rf[0,0])
 at.plot_OTFB_signals(OTFB.OTFB_2, h, rfstation.t_rf[0,0])
@@ -168,9 +211,10 @@ plt.figure()
 plt.plot(OTFB.OTFB_1.P_GEN[-h:])
 plt.plot(OTFB.OTFB_2.P_GEN[-h:])
 
-print()
-print('3-section power:', np.mean(OTFB.OTFB_1.P_GEN[-h:]))
-print('4-section power:', np.mean(OTFB.OTFB_2.P_GEN[-h:]))
+if not BISECT:
+    print()
+    print('3-section power:', np.mean(OTFB.OTFB_1.P_GEN[-h:]))
+    print('4-section power:', np.mean(OTFB.OTFB_2.P_GEN[-h:]))
 
-if SHOW_PLT:
+if SHOW_PLT and not BISECT:
     plt.show()

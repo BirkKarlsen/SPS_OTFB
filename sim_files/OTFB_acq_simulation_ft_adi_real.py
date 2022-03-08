@@ -132,6 +132,9 @@ elif OTFB_CONFIG == 5:
     G_llrf = 16
     G_tx = [0.163212561182363 * rr,
             0.127838041632473 * rr]
+elif OTFB_CONFIG == 6:
+    G_llrf = 0
+
 
 
 if VOLT_CONFIG == 1:
@@ -155,6 +158,18 @@ elif FREQ_CONFIG == 3:
           105500]
     G_tx = [0.1910842957076554,
             0.289228143612504]
+elif FREQ_CONFIG == 4:
+    df = [0,
+          0]
+    # Optimized for both cavities at their measured resonant frequencies and Gllrf = 0
+    G_tx = [0.26041876200342555,
+            0.5558826390544476]
+elif FREQ_CONFIG == 5:
+    df = [0.18433333e6,
+          0.2275e6]
+    # Optimized for both cavities at 200.222 MHz and Gllrf = 0
+    G_tx = [0.25147316248903445,
+            0.5110686163372516]
 
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10

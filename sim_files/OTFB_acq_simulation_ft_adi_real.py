@@ -22,6 +22,8 @@ parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
+parser.add_argument("--feedforward", "--ff", type=int,
+                    help="Option to enable the SPS feed-forward, default is False (0).")
 
 args = parser.parse_args()
 
@@ -34,6 +36,7 @@ LXPLUS = True
 OTFB_CONFIG = 1
 VOLT_CONFIG = 1
 FREQ_CONFIG = 1
+FEEDFORWARD = False
 fit_type = 'fwhm'
 mstdir = ''
 dt_track = 1000
@@ -109,6 +112,9 @@ if args.freq_config is not None:
 
 if args.save_dir is not None:
     mstdir = args.save_dir
+
+if args.feedforward is not None:
+    FEEDFORWARD = bool(args.feedforward)
 
 
 
@@ -210,7 +216,7 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 
 
 # SPS Cavity Feedback
-Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False, rot_IQ=1)
+Commissioning = CavityFeedbackCommissioning(open_FF=not FEEDFORWARD, debug=False, rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
                          G_llrf=G_llrf, df=df)

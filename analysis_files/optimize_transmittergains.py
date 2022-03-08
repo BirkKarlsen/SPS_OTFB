@@ -54,18 +54,20 @@ sigma_dt = 1.2e-9
 
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
-G_llrf = 0
+G_llrf = 16
 rr = 1
 #V_part = 0.5442095845867135
 V_part = 0.5517843967841601
-df = [0.18433333e6,
-      0.2275e6]
-#df = [62333.333,
+#df = [0.18433333e6,        # Both at 200.222
+#      0.2275e6]
+#df = [62333.333,           # Both at 200.1
 #      105500]
-#df = [0,
+#df = [0,                   # Measured
 #      0]
-G_tx = [0.25147316248903445,
-        0.5110686163372516]
+df = [0.71266666e6,         # Other side of omega_rf
+      0.799e6]
+G_tx = [0.163607060338826,
+        0.1288941276502113]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -137,6 +139,19 @@ df = [0.18433333e6,
       0.2275e6]
 G_tx = [0.25147316248903445,
         0.5110686163372516]
+For a PostLS2 configuration with a_comb = 31/32, Gllrf = 0 and resonant frequencies at other side of omega_rf
+we have
+df = [0.71266666e6, 
+      0.799e6]
+G_tx = [0.2603649863930353,
+        0.55564846411416855]
+For a PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and resonant frequencies at other side of omega_rf
+we have
+df = [0.71266666e6, 
+      0.799e6]
+G_tx = [0.163607060338826,
+        0.1288941276502113]
+
 
 '''
 

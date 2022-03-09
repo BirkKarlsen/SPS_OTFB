@@ -22,7 +22,7 @@ parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
-parser.add_argument("--feedforward", "--ff", type=int,
+parser.add_argument("--feedforward", "-ff", type=int,
                     help="Option to enable the SPS feed-forward, default is False (0).")
 
 args = parser.parse_args()

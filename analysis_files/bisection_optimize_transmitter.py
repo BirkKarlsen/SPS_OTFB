@@ -59,13 +59,23 @@ def bisection_method(target, a, b, G3SEC, gs, max_it, tol):
     return c, yc
 
 # Lauch optimization ----------------------------------------------------------
-V_part = 0.5517843967841601
-V = 6660589.53641675e-6
+V_part = 0.60
+V = 10
 # 3-section
 target = V * V_part
 a = 0.2
 b = 0.3
 
-c, yc = bisection_method(target, a, b, True, 0.4, 100, 1e-14)
+c3, yc3 = bisection_method(target, a, b, True, 0.4, 100, 1e-14)
 
-print(c, yc)
+# 4-section
+target = V * (1 - V_part)
+a = 0.4
+b = 0.6
+
+c4, yc4 = bisection_method(target, a, b, False, 0.4, 100, 1e-14)
+
+print('----- 3-section -----')
+print(c3, yc3)
+print('----- 4-section -----')
+print(c4, yc4)

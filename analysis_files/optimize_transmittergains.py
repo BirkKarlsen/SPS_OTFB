@@ -40,10 +40,11 @@ from blond.llrf.cavity_feedback import SPSCavityFeedback, CavityFeedbackCommissi
 C = 2 * np.pi * 1100.009                        # Ring circumference [m]
 gamma_t = 18.0                                  # Transition Gamma [-]
 alpha = 1 / (gamma_t**2)                        # Momentum compaction factor [-]
-p_s = 440e9                                     # Synchronous momentum [eV]
+p_s = 450e9                                     # Synchronous momentum [eV]
 h = 4620                                        # 200 MHz harmonic number [-]
 #V = (0.911535 * 4 + 1.526871 * 2) * 1e6         # 200 MHz RF voltage [V]
-V = 6660589.53641675
+#V = 6660589.53641675
+V = 10e6
 phi = 0                                         # 200 MHz phase [-]
 
 N_m = int(5e5)                                  # Number of macro-particles for tracking
@@ -53,11 +54,12 @@ sigma_dt = 1.2e-9
 
 
 # For a_comb of 63/64 and llrf gain of 20
-a_comb = 31/32
-G_llrf = 16
+a_comb = 63/64
+G_llrf = 20
 rr = 1
 #V_part = 0.5442095845867135
-V_part = 0.5517843967841601
+#V_part = 0.5517843967841601
+V_part = 0.6
 df = [0.18433333e6,        # Both at 200.222
       0.2275e6]
 #df = [62333.333,           # Both at 200.1

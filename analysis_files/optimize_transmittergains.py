@@ -58,14 +58,14 @@ G_llrf = 16
 rr = 1
 #V_part = 0.5442095845867135
 V_part = 0.5517843967841601
-#df = [0.18433333e6,        # Both at 200.222
-#      0.2275e6]
+df = [0.18433333e6,        # Both at 200.222
+      0.2275e6]
 #df = [62333.333,           # Both at 200.1
 #      105500]
 #df = [0,                   # Measured
 #      0]
-df = [0.71266666e6,         # Other side of omega_rf
-      0.799e6]
+#df = [0.71266666e6,         # Other side of omega_rf
+#      0.799e6]
 G_tx = [0.163607060338826,
         0.1288941276502113]
 
@@ -225,6 +225,9 @@ OTFB.OTFB_2.calc_power()
 plt.figure()
 plt.plot(OTFB.OTFB_1.P_GEN[-h:])
 plt.plot(OTFB.OTFB_2.P_GEN[-h:])
+
+if BISECT:
+    print(ant3, ant4)
 
 if not BISECT:
     print()

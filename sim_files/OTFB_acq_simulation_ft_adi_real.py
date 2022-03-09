@@ -176,6 +176,18 @@ elif FREQ_CONFIG == 5:
     # Optimized for both cavities at 200.222 MHz and Gllrf = 0
     G_tx = [0.25147316248903445,
             0.5110686163372516]
+elif FREQ_CONFIG == 6:
+    df = [0.71266666e6,
+          0.799e6]
+    # Optimized for both cavities at other side of omega_rf and Gllrf = 0
+    G_tx = [0.2603649863930353,
+            0.55564846411416855]
+elif FREQ_CONFIG == 7:
+    df = [0.71266666e6,
+          0.799e6]
+    # Optimized for both cavities at other side of omega_rf and Gllrf = 16
+    G_tx = [0.163607060338826,
+            0.1288941276502113]
 
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10

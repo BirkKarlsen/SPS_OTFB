@@ -32,8 +32,8 @@ N_t = 1000                                      # Number of turns to track
 # SPS Cavity Controler Parameters
 df = [0.18433333e6,
       0.2275e6]
-G_tx = [0.229377820916177,
-        0.430534529571209]
+G_tx = [0.22908800255477224,
+        0.4294032663036014]
 G_llrf = 20
 a_comb = 63/64
 
@@ -74,7 +74,7 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=0, cut_right=rfstation.
 # SPS Cavity Feedback
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False, rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, Commissioning=Commissioning,
-                         G_tx=G_tx, a_comb=31/32, G_llrf=G_llrf, df=df)
+                         G_tx=G_tx, a_comb=a_comb, G_llrf=G_llrf, df=df)
 
 
 # Tracker Object without SPS OTFB

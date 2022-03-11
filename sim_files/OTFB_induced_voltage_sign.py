@@ -70,7 +70,7 @@ from SPS.impedance_scenario import scenario, impedance2blond
 
 # TODO: change back - DONE
 fit_type = 'fwhm'
-SINGLE_BATCH = True
+SINGLE_BATCH = False
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = False
 LXPLUS = False                              # TODO: change back before copy to lxplus
@@ -128,13 +128,13 @@ else:
 if args.alpha_comb is not None:
     a_comb = args.alpha_comb
 else:
-    a_comb = 63/64
-    #a_comb = 31/32
+    #a_comb = 63/64
+    a_comb = 31/32
 
 if args.llrf_gain is not None:
     llrf_g = args.llrf_gain
 else:
-    llrf_g = 20 # TODO: 10
+    llrf_g = 16 # TODO: 10
 
 if args.tx_gain is not None:
     tx_g = args.tx_gain
@@ -185,11 +185,17 @@ elif OMEGA_SCENARIO == 2:
 else:
     domega = [0, 0]
 
-domega = [0.18433333e6, 0.2275e6]
+#domega = [0.18433333e6, 0.2275e6]
+domega = [0, 0]
 #G_tx = [0.251402590786449, 0.511242728131293]
 #G_tx = [0.25154340605790062590, 0.510893981556323]
-G_tx = [0.22909261332041,
-        0.429420301179296]
+#G_tx = [0.22909261332041,
+#        0.429420301179296]
+#G_tx = [0.163212561182363 * 0.8,
+#        0.127838041632473 * 0.8]
+G_tx = [0.25,
+        0.5]
+
 
 # Objects -------------------------------------------------------------------------------------------------------------
 print('Initializing Objects...\n')
@@ -220,8 +226,8 @@ beam = Beam(SPS_ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 # Profile
 delta_slice = 0.0
 profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5 + delta_slice),
-    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 + 125), #* 4 + 250 * 3
-    n_slices=int(round(2**7 * (72 * 5 + 125)))))
+    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 * 4 + 250 * 3 + 125), #* 4 + 250 * 3
+    n_slices=int(round(2**7 * (72 * 5 * 4 + 250 * 3 + 125)))))
 #profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
 #    cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
 print(profile.bin_centers[0] / rfstation.t_rf[0,0], profile.bin_size / rfstation.t_rf[0,0])
@@ -237,7 +243,7 @@ Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=20, df=domega)   # TODO: change back to only 20
+                         G_llrf=16, df=domega)   # TODO: change back to only 20
 
 
 # Impedance of the SPS
@@ -290,7 +296,7 @@ SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 bunch_lengths_fl = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_full_length_red.npy')
 bunch_lengths_fwhm = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_FWHM.npy')
 exponents = np.load(lxdir + 'data_files/beam_parameters/avg_exponent_red.npy')
-positions = np.load(lxdir + 'data_files/beam_parameters/position_fit.npy')
+positions = np.load(lxdir + 'data_files/beam_parameters/avg_positions_red.npy')
 
 if fit_type == 'fwhm':
     bunch_length_list = bunch_lengths_fwhm * 1e-9
@@ -476,7 +482,15 @@ if not GENERATE:
                    OTFB.OTFB_1.V_IND_COARSE_GEN[-h:],
                    OTFB.OTFB_1.V_IND_COARSE_BEAM[-h:],
                    end=1000 + 5 * 72, wind=4e6)
-        plt.title('Phasor plot')
+        plt.title('Phasor plot 3-section')
+        plt.xlabel('In-Phase [V]')
+        plt.ylabel('Quadrature [V]')
+
+        at.plot_IQ(OTFB.OTFB_2.V_ANT[-h:],
+                   OTFB.OTFB_2.V_IND_COARSE_GEN[-h:],
+                   OTFB.OTFB_2.V_IND_COARSE_BEAM[-h:],
+                   end=1000 + 5 * 72, wind=4e6)
+        plt.title('Phasor plot 4-section')
         plt.xlabel('In-Phase [V]')
         plt.ylabel('Quadrature [V]')
 
@@ -490,9 +504,28 @@ if not GENERATE:
         #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
         #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
 
+        #plt.figure()
+        #plt.title('Beam Current')
+        #plt.plot([0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.real)], [0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.imag)])
+
         plt.figure()
-        plt.title('Beam Current')
-        plt.plot([0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.real)], [0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.imag)])
+        plt.title('Antenna 3-section')
+        plt.plot(np.abs(OTFB.OTFB_1.V_ANT[-h:]))
+
+        plt.figure()
+        plt.title('Power 3-section')
+        OTFB.OTFB_1.calc_power()
+        plt.plot(OTFB.OTFB_1.P_GEN[-h:])
+
+        plt.figure()
+        plt.title('Antenna 4-section')
+        plt.plot(np.abs(OTFB.OTFB_2.V_ANT[-h:]))
+
+        plt.figure()
+        plt.title('Power 4-section')
+        OTFB.OTFB_2.calc_power()
+        plt.plot(OTFB.OTFB_2.P_GEN[-h:])
+
 
         plt.figure()
         plt.plot(gp)
@@ -519,8 +552,8 @@ if not GENERATE:
         hbs, hbc = at.beam_matrix(t_fine, domega, tau)
 
         # Generator:
-        plt.figure('Generatir Matrix')
-        plt.title('Generatir Matrix')
+        plt.figure('Generator Matrix')
+        plt.title('Generator Matrix')
         plt.plot(t_coarse / tau, OTFB.OTFB_1.TWC.h_gen.real, label=r'$h_{gs}$')
         plt.plot(t_coarse / tau, -OTFB.OTFB_1.TWC.h_gen.imag, label=r'$-h_{gc}$')
         plt.plot(t_coarse / tau, hgs * 1e4, label=r'$h_{gs}$ p')

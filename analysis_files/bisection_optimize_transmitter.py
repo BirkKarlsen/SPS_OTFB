@@ -1,5 +1,10 @@
 '''
-This file was made to us the bisection method to optimize the transmitter gain by calling the other file
+This file was made to us the bisection method to optimize the transmitter gain by calling the other file.
+
+Note: optimization of the transmitter gain usually takes about 45-50 iterations. The transmitter gain for the
+3-section should be between 0.2 and 0.3 and the 4-section should be between 0.4 and 0.7. Unless the central
+frequency is such that the feedback is at the edge of stability, in which case the transmitter gain is
+usually between 0.1 and 0.2 for both cavities.
 
 Author: Birk Emil Karlsen-Bæck
 '''
@@ -68,10 +73,13 @@ b = 0.3
 
 c3, yc3 = bisection_method(target, a, b, True, 0.4, 100, 1e-14)
 
+print('----- 3-section -----')
+print(c3, yc3)
+
 # 4-section
 target = V * (1 - V_part)
 a = 0.4
-b = 0.6
+b = 0.7
 
 c4, yc4 = bisection_method(target, a, b, False, 0.4, 100, 1e-14)
 

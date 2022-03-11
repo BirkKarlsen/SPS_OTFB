@@ -84,6 +84,7 @@ G_tx = [0.1611031942822209,
 G_llrf = 20
 df = [0,
       0]
+G_ff = 0.10
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -188,6 +189,13 @@ elif FREQ_CONFIG == 7:
     # Optimized for both cavities at other side of omega_rf and Gllrf = 16
     G_tx = [0.163607060338826,
             0.1288941276502113]
+elif FREQ_CONFIG == 8:
+    # This option is used to test the inverted rotation for the cavity filter. with G_llrf = 16
+    G_llrf = 16
+    df = [0,
+          0]
+    G_tx = [0.25,
+            0.5]
 
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10
@@ -231,7 +239,7 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 Commissioning = CavityFeedbackCommissioning(open_FF=not FEEDFORWARD, debug=False, rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
-                         G_llrf=G_llrf, df=df)
+                         G_llrf=G_llrf, df=df, G_ff=G_ff)
 
 
 # SPS Impedance Model
@@ -258,7 +266,7 @@ if GEN:
     bunch_lengths_fl = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_full_length_red.npy')
     bunch_lengths_fwhm = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_length_FWHM.npy')
     exponents = np.load(lxdir + 'data_files/beam_parameters/avg_exponent_red.npy')
-    positions = np.load(lxdir + 'data_files/beam_parameters/position_fit.npy')
+    positions = np.load(lxdir + 'data_files/beam_parameters/avg_positions_red.npy')
 
     bunch_length_list = bunch_lengths_fwhm * 1e-9
 

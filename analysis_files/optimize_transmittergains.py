@@ -64,12 +64,12 @@ V_part = 0.6
 #      0.2275e6]
 #df = [62333.333,           # Both at 200.1
 #      105500]
-df = [0,                   # Measured
-      0]
-#df = [0.71266666e6,         # Other side of omega_rf
-#      0.799e6]
-G_tx = [0.29571511616294244,
-        0.5]
+#df = [0,                   # Measured
+#      0]
+df = [0.71266666e6,         # Other side of omega_rf
+      0.799e6]
+G_tx = [0.2954658658441758,
+        0.6834594499082112]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -180,6 +180,25 @@ df = [0,
       0]
 G_tx = [0.29571511616294244,
         0.6811879164944046]
+
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [0.2588039161833038,
+        0.5388545255141338]
+
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [0.2795158374036263,
+        0.6219653308191606]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at opposite side of the RF frequency
+df = [0.71266666e6, 
+      0.799e6]
+G_tx = [0.2954658658441758,
+        0.6834594499082112]
+
 
 
 '''

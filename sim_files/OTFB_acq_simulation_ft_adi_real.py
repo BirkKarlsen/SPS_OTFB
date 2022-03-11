@@ -190,12 +190,32 @@ elif FREQ_CONFIG == 7:
     G_tx = [0.163607060338826,
             0.1288941276502113]
 elif FREQ_CONFIG == 8:
-    # This option is used to test the inverted rotation for the cavity filter. with G_llrf = 16
+    # This option is used to test the inverted rotation for the cavity filter. with measured TWC
     G_llrf = 16
     df = [0,
           0]
     G_tx = [0.25,
             0.5]
+elif FREQ_CONFIG == 9:
+    # This option is used to test the inverted rotation for the cavity filter, with 200.222 TWC
+    G_llrf = 16
+    df = [0.18433333e6,
+          0.2275e6]
+    G_tx = [0.2588039161833038,
+            0.5388545255141338]
+elif FREQ_CONFIG == 10:
+    # This option is used to test the inverted rotation for the cavity filter, with 200.1 TWC
+    G_llrf = 16
+    df = [62333.333,
+          105500]
+    G_tx = [0.2795158374036263,
+            0.6219653308191606]
+elif FREQ_CONFIG == 11:
+    # This option is used to test the inverted rotation for the cavity filter, with opposite side TWCs
+    G_llrf = 16
+    df = [0.71266666e6,
+          0.799e6]
+
 
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10

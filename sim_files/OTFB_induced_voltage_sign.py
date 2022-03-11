@@ -70,7 +70,7 @@ from SPS.impedance_scenario import scenario, impedance2blond
 
 # TODO: change back - DONE
 fit_type = 'fwhm'
-SINGLE_BATCH = False
+SINGLE_BATCH = True
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = False
 LXPLUS = False                              # TODO: change back before copy to lxplus

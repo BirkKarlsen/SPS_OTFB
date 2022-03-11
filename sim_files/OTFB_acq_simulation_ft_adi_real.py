@@ -215,7 +215,8 @@ elif FREQ_CONFIG == 11:
     G_llrf = 16
     df = [0.71266666e6,
           0.799e6]
-
+    G_tx = [0.2954658658441758,
+            0.50]
 
 N_tot = N_t + N_ir
 total_intensity = 3385.8196 * 10**10

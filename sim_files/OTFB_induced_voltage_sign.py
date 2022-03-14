@@ -70,7 +70,7 @@ from SPS.impedance_scenario import scenario, impedance2blond
 
 # TODO: change back - DONE
 fit_type = 'fwhm'
-SINGLE_BATCH = True
+SINGLE_BATCH = False
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = False
 LXPLUS = False                              # TODO: change back before copy to lxplus
@@ -193,8 +193,8 @@ domega = [0, 0]
 #        0.429420301179296]
 #G_tx = [0.163212561182363 * 0.8,
 #        0.127838041632473 * 0.8]
-G_tx = [0.25,
-        0.5]
+G_tx = [1,
+        0.8]
 
 
 # Objects -------------------------------------------------------------------------------------------------------------
@@ -496,17 +496,6 @@ if not GENERATE:
 
         rf_current = OTFB.OTFB_1.I_COARSE_BEAM[-h:]
         rf_current = np.mean(rf_current[1000:1000 + 5 * 72])
-        #plt.figure()
-        #plt.plot([0, rf_current.real], [0, rf_current.imag], label='Ib')
-        #plt.grid()
-
-        #plt.figure()
-        #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].real)
-        #plt.plot(OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag)
-
-        #plt.figure()
-        #plt.title('Beam Current')
-        #plt.plot([0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.real)], [0, np.mean(OTFB.OTFB_1.I_COARSE_BEAM.imag)])
 
         plt.figure()
         plt.title('Antenna 3-section')

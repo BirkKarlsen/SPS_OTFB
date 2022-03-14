@@ -95,6 +95,9 @@ profile.track()
 
 print('Simulating...\n')
 
+t_FF = np.linspace(0, rfstation.t_rev[0], h//5)
+t_coarse = np.linspace(0, rfstation.t_rev[0], h)
+
 for i in range(N_t):
     SPS_tracker.track()
     profile.track()
@@ -103,11 +106,13 @@ for i in range(N_t):
     if (i + 1) % dtrack == 0:
         print(i + 1)
 
-    if i%dplot == 0:
+    if i % dplot == 0:
         plt.figure()
         plt.title('I_BEAM_COARSE_FF')
-        plt.plot(OTFB.OTFB_1.I_BEAM_COARSE_FF.real, color='r')
-        plt.plot(OTFB.OTFB_1.I_BEAM_COARSE_FF.imag, color='b')
+        plt.plot(t_FF, OTFB.OTFB_1.I_BEAM_COARSE_FF[-h//5:].real, color='r')
+        #plt.plot(t_FF, OTFB.OTFB_1.I_BEAM_COARSE_FF[-h//5:].imag, color='b')
+        plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r', linestyle='--')
+        #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b', linestyle='--')
 
         plt.figure()
         plt.title('I_FF_CORR')

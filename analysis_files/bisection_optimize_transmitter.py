@@ -68,8 +68,8 @@ V_part = 0.60
 V = 10
 # 3-section
 target = V * V_part
-a = 0.2
-b = 0.3
+a = 0.9
+b = 1.1
 
 c3, yc3 = bisection_method(target, a, b, True, 0.4, 100, 1e-14)
 
@@ -78,8 +78,8 @@ print(c3, yc3)
 
 # 4-section
 target = V * (1 - V_part)
-a = 0.4
-b = 0.7
+a = 0.9
+b = 1.1
 
 c4, yc4 = bisection_method(target, a, b, False, 0.4, 100, 1e-14)
 

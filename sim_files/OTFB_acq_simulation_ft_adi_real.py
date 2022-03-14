@@ -153,6 +153,8 @@ elif VOLT_CONFIG == 3:
     V = 6860740.881203784
     V_part = 0.5434907802323814
 
+
+
 if FREQ_CONFIG == 1:
     pass
 elif FREQ_CONFIG == 2:
@@ -195,7 +197,7 @@ elif FREQ_CONFIG == 8:
     df = [0,
           0]
     G_tx = [0.25,
-            0.5]
+            0.40]
 elif FREQ_CONFIG == 9:
     # This option is used to test the inverted rotation for the cavity filter, with 200.222 TWC
     G_llrf = 16

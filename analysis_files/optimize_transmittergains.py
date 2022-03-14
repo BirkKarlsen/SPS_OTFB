@@ -20,7 +20,7 @@ args = parser.parse_args()
 # Options for script ----------------------------------------------------------
 BISECT = False
 SHOW_PLT = True
-n_pretrack = 10000
+n_pretrack = 1000
 
 
 # Imports ---------------------------------------------------------------------
@@ -54,22 +54,22 @@ sigma_dt = 1.2e-9
 
 
 # For a_comb of 63/64 and llrf gain of 20
-a_comb = 31/32
-G_llrf = 16
+a_comb = 63/64
+G_llrf = 20
 rr = 1
 #V_part = 0.5442095845867135
 #V_part = 0.5517843967841601
 V_part = 0.6
-#df = [0.18433333e6,        # Both at 200.222
-#      0.2275e6]
+df = [0.18433333e6,        # Both at 200.222
+      0.2275e6]
 #df = [62333.333,           # Both at 200.1
 #      105500]
 #df = [0,                   # Measured
 #      0]
-df = [0.71266666e6,         # Other side of omega_rf
-      0.799e6]
-G_tx = [0.2954658658441758,
-        0.50]
+#df = [0.71266666e6,         # Other side of omega_rf
+#      0.799e6]
+G_tx = [0.25,
+        0.35]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -198,6 +198,16 @@ df = [0.71266666e6,
       0.799e6]
 G_tx = [0.2954658658441758,
         0.6834594499082112]
+
+-----------------------------
+----- Newest OTFB model -----
+-----------------------------
+
+For PostLS2 configuration with a_comb = 63/64, Gllrf = 20 and TWCs at 200.222 MHz
+f = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.0355739238973907,
+        1.078403005653143]
 
 
 

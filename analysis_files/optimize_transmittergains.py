@@ -69,7 +69,7 @@ V_part = 0.6
 df = [0.71266666e6,         # Other side of omega_rf
       0.799e6]
 G_tx = [0.2954658658441758,
-        0.6834594499082112]
+        0.50]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -271,8 +271,10 @@ OTFB.OTFB_1.calc_power()
 OTFB.OTFB_2.calc_power()
 
 plt.figure()
-plt.title('Power')
+plt.title('Power 3-section')
 plt.plot(OTFB.OTFB_1.P_GEN[-h:])
+plt.figure()
+plt.title('Power 4-section')
 plt.plot(OTFB.OTFB_2.P_GEN[-h:])
 
 if BISECT:

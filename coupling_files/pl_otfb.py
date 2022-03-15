@@ -7,6 +7,9 @@ Author: Birk Emil Karlsen-Bæck
 # Imports ---------------------------------------------------------------------
 import numpy as np
 import matplotlib.pyplot as plt
+import utility_files.data_utilities as dut
+import utility_files.analysis_tools as at
+
 
 from blond.input_parameters.rf_parameters import RFStation
 from blond.input_parameters.ring import Ring
@@ -31,8 +34,8 @@ V_part = None
 a_comb = 63/64
 G_ff = 0.7
 G_llrf = 20
-G_tx = [1,
-        1]
+G_tx = [1.0355739238973907,
+        1.078403005653143]
 df = [0.18433333e6,
       0.2275e6]
 
@@ -47,7 +50,7 @@ N_t = 4000                                      # Number of turns to track
 total_intensity = 3385.8196e10                  # Total intensity
 
 lxdir = '../'
-N_bunches = 1
+N_bunches = 72
 
 
 # Objects ---------------------------------------------------------------------
@@ -88,7 +91,7 @@ BFB = BeamFeedback(ring, rfstation, profile, configuration=config)
 
 
 # Tracker Object without SPS OTFB
-SPS_rf_tracker = RingAndRFTracker(rfstation, beam, CavityFeedback=None, Profile=profile,
+SPS_rf_tracker = RingAndRFTracker(rfstation, beam, CavityFeedback=OTFB, Profile=profile,
                                   interpolation=True, BeamFeedback=BFB)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
@@ -103,30 +106,95 @@ else:
 
 profile.track()
 
-dt_plot = 10
+dt_plot = 500
 dt_track = 10
+dt_ptrack = 10
 
 phase = np.zeros(N_t)
+n_coarses = np.zeros(N_t)
+
+fwhm_arr = np.zeros((N_bunches, N_t // dt_ptrack))
+pos_arr = np.zeros((N_bunches, N_t // dt_ptrack))
+pos_fit_arr = np.zeros((N_bunches, N_t // dt_ptrack))
+n = 0
+
 
 for i in range(N_t):
-    #OTFB.track()
-    #BFB.track()
+    OTFB.track()
     SPS_tracker.track()
     profile.track()
     phase[i] = SPS_rf_tracker.phi_rf[0, i]
+    n_coarses[i] = int(round(rfstation.t_rev[0]/rfstation.t_rf[0, 0]))
+
+    if i % dt_ptrack == 0:
+        fwhm_arr[:, n], pos_arr[:, n], pos_fit_arr[:, n], x_72, y_72 = dut.bunch_params(profile,
+                                                                                    get_72=False)
+
+        bbb_offset = at.find_offset(pos_fit_arr[:, n])
+        x = np.linspace(0, len(bbb_offset), len(bbb_offset))
+
+        n += 1
+
+
     if i % dt_track == 0:
         print(f'Turn {i}')
 
+    if n_coarses[i] != n_coarses[i - 1]:
+        print('Resampling is needed')
+
     if i % dt_plot == 0:
         plt.figure()
-        plt.plot(profile.bin_centers, profile.n_macroparticles * 1e5)
+        plt.plot(profile.bin_centers, profile.n_macroparticles * 1e4)
         plt.plot(profile.bin_centers, SPS_rf_tracker.total_voltage)
-        plt.xlim((4.99e-6, 4.996e-6))
+        #plt.xlim((4.99e-6, 4.996e-6))
+
         plt.figure()
+        plt.title(f'bunch-by-bunch offset, turn {i}')
+        plt.plot(x, bbb_offset * 1e9)
+        plt.xlabel('Bunch Number')
+        plt.ylabel('Offset [ns]')
+
+        plt.figure()
+        plt.title('Bunch length, FWHM')
+        plt.plot(fwhm_arr[0, :n-1])
+        plt.plot(fwhm_arr[-1, :n-1])
+
+        plt.figure()
+        plt.title('Bunch position')
+        plt.plot(pos_fit_arr[0, :n-1] - pos_fit_arr[0, 0])
+        plt.plot(pos_fit_arr[-1, :n-1] - pos_fit_arr[-1, 0])
+
+        plt.figure()
+        plt.title('RF phase')
         plt.plot(phase[:i])
 
+        beam_ind, gen_ind = dut.find_induced_and_generator(OTFB, rfstation, profile, SPS_rf_tracker)
+        beam_eff_ind = dut.find_effective_induced(OTFB, rfstation, profile, SPS_rf_tracker)
 
+        plt.figure()
+        plt.title('Beam induced')
+        plt.plot(profile.bin_centers, beam_ind)
+        plt.plot(profile.bin_centers, beam_eff_ind)
+        plt.plot(profile.bin_centers, profile.n_macroparticles * 1e3)
+
+        plt.figure()
+        plt.title('Generator induced')
+        plt.plot(profile.bin_centers, gen_ind)
+        plt.plot(profile.bin_centers, profile.n_macroparticles * 1e4)
+
+
+    if i % dt_plot == 0 or i % dt_ptrack == 0:
         plt.show()
+
+plt.figure()
+plt.title('Bunch length, FWHM')
+plt.plot(fwhm_arr[0,:])
+plt.plot(fwhm_arr[-1,:])
+
+plt.figure()
+plt.title('Bunch position')
+plt.plot(pos_fit_arr[0,:] - pos_fit_arr[0,0])
+plt.plot(pos_fit_arr[-1,:] - pos_fit_arr[-1,0])
 
 
 

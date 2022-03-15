@@ -694,3 +694,35 @@ def plot_bbb_offset(pos_fit, sdir, i):
     plt.xlabel('Bunch Number')
     plt.ylabel('Offset [ns]')
     plt.savefig(sdir + f"bbb_offset_{i}")
+
+
+def find_induced_and_generator(OTFB, rfstation, profile, tracker):
+    # Beam-induced voltage
+    ind_amp = np.abs(OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:] +
+                     OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:])
+    ind_phase = np.angle(OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:] +
+                         OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:]) - np.pi/2
+
+    beam_induced = ind_amp * np.sin(rfstation.omega_rf[0, tracker.counter] * profile.bin_centers
+                                    + rfstation.phi_rf[0, tracker.counter] + ind_phase)
+
+    # Generator-induced voltage
+    ind_amp = np.abs(OTFB.V_sum - OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:]
+                     - OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:])
+    ind_phase = np.angle(OTFB.V_sum - OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:]
+                         - OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:]) - np.pi/2
+
+    generator_induced = ind_amp * np.sin(rfstation.omega_rf[0, tracker.counter] * profile.bin_centers
+                                    + rfstation.phi_rf[0, tracker.counter] + ind_phase)
+
+    return beam_induced, generator_induced
+
+def find_effective_induced(OTFB, rfstation, profile, tracker, n_phi = 100):
+    # From tracker
+    rf_voltage = tracker.rf_voltage
+
+    # Voltage without OTFB
+    rf_wo = tracker.voltage[0, tracker.counter] * np.sin(rfstation.omega_rf[0, tracker.counter] * profile.bin_centers
+                                                         + rfstation.phi_rf[0, tracker.counter])
+
+    return rf_voltage - rf_wo

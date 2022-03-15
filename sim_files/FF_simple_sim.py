@@ -43,6 +43,7 @@ G_tx = [0.229377820916177,
         0.430534529571209]
 G_llrf = 16
 a_comb = 31/32
+G_ff = 0.7
 
 N_bunches = 72
 lxdir = '../'
@@ -78,7 +79,7 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 Commissioning = CavityFeedbackCommissioning(open_FF=False, debug=False, rot_IQ=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
-                         G_llrf=G_llrf, df=df)
+                         G_llrf=G_llrf, df=df, G_ff=G_ff)
 
 
 # Tracker Object without SPS OTFB

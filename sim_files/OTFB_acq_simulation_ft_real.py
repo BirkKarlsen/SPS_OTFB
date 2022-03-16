@@ -24,6 +24,8 @@ parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 parser.add_argument("--feedforward", "-ff", type=int,
                     help="Option to enable the SPS feed-forward, default is False (0).")
+parser.add_argument("--tx_ratio", "-tr", type=float,
+                    help="Option to tweak the optimal transmitter gain, default is 1.")
 
 args = parser.parse_args()
 
@@ -43,6 +45,7 @@ dt_track = 1000
 dt_ptrack = 10
 dt_plot = 1000
 dt_save = 1000
+tr = 1
 
 
 # Imports ---------------------------------------------------------------------
@@ -79,12 +82,12 @@ phi = 0                                         # 200 MHz phase [-]
 
 # Parameters for the SPS Cavity Feedback
 V_part = 0.5442095845867135                     # Voltage partitioning [-]
-G_tx = [0.1611031942822209,
-        0.115855991237277]
-G_llrf = 20
+G_tx = [1,
+        1]
+G_llrf = 16
 df = [0,
       0]
-G_ff = 0.10
+G_ff = 0.7
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -116,6 +119,9 @@ if args.save_dir is not None:
 
 if args.feedforward is not None:
     FEEDFORWARD = bool(args.feedforward)
+
+if args.tx_ratio is not None:
+    tr = float(args.tx_ratio)
 
 
 
@@ -153,78 +159,25 @@ elif VOLT_CONFIG == 3:
     V = 6860740.881203784
     V_part = 0.5434907802323814
 
-
-
 if FREQ_CONFIG == 1:
-    pass
+    G_tx = [1 * tr,
+            1 * tr]
 elif FREQ_CONFIG == 2:
-    df = [0.18433333e6,
+    df = [0.18433333e6,  # Both at 200.222
           0.2275e6]
-    G_tx = [0.229377820916177,
-            0.430534529571209]
+    G_tx = [1.0352156647332151 * tr,
+            1.077709051028262 * tr]
 elif FREQ_CONFIG == 3:
-    df = [62333.333,
+    df = [62333.333,  # Both at 200.1
           105500]
-    G_tx = [0.1910842957076554,
-            0.289228143612504]
-elif FREQ_CONFIG == 4:
-    df = [0,
-          0]
-    # Optimized for both cavities at their measured resonant frequencies and Gllrf = 0
-    G_tx = [0.26041876200342555,
-            0.5558826390544476]
-elif FREQ_CONFIG == 5:
-    df = [0.18433333e6,
-          0.2275e6]
-    # Optimized for both cavities at 200.222 MHz and Gllrf = 0
-    G_tx = [0.25147316248903445,
-            0.5110686163372516]
-elif FREQ_CONFIG == 6:
-    df = [0.71266666e6,
-          0.799e6]
-    # Optimized for both cavities at other side of omega_rf and Gllrf = 0
-    G_tx = [0.2603649863930353,
-            0.55564846411416855]
-elif FREQ_CONFIG == 7:
-    df = [0.71266666e6,
-          0.799e6]
-    # Optimized for both cavities at other side of omega_rf and Gllrf = 16
-    G_tx = [0.163607060338826,
-            0.1288941276502113]
-elif FREQ_CONFIG == 8:
-    # This option is used to test the inverted rotation for the cavity filter. with measured TWC
-    G_llrf = 16
-    df = [0,
-          0]
-    G_tx = [0.25,
-            0.40]
-elif FREQ_CONFIG == 9:
-    # This option is used to test the inverted rotation for the cavity filter, with 200.222 TWC
-    G_llrf = 16
-    df = [0.18433333e6,
-          0.2275e6]
-    G_tx = [0.2588039161833038,
-            0.5388545255141338]
-elif FREQ_CONFIG == 10:
-    # This option is used to test the inverted rotation for the cavity filter, with 200.1 TWC
-    G_llrf = 16
-    df = [62333.333,
-          105500]
-    G_tx = [0.2795158374036263,
-            0.6219653308191606]
-elif FREQ_CONFIG == 11:
-    # This option is used to test the inverted rotation for the cavity filter, with opposite side TWCs
-    G_llrf = 16
-    df = [0.71266666e6,
-          0.799e6]
-    G_tx = [0.2954658658441758,
-            0.50]
+    G_tx = [1.1180633496145078 * tr,
+            1.2439306616383181 * tr]
 
 N_tot = N_t + N_ir
 if N_ir == 0:
-    total_intensity = 3385.8196 * 10 ** 10
+    total_intensity = 3385.8196e10
 else:
-    total_intensity = 3385.8196 * 10**10
+    total_intensity = 3385.8196e10
     total_start_intensity = 1e11
     ramp = np.linspace(total_start_intensity,
                        total_intensity, N_ir)

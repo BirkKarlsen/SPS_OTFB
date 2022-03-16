@@ -54,16 +54,16 @@ sigma_dt = 1.2e-9
 
 
 # For a_comb of 63/64 and llrf gain of 20
-a_comb = 63/64
-G_llrf = 20
+a_comb = 31/32
+G_llrf = 16
 rr = 1
 #V_part = 0.5442095845867135
 #V_part = 0.5517843967841601
 V_part = 0.6
-df = [0.18433333e6,        # Both at 200.222
-      0.2275e6]
-#df = [62333.333,           # Both at 200.1
-#      105500]
+#df = [0.18433333e6,        # Both at 200.222
+#      0.2275e6]
+df = [62333.333,           # Both at 200.1
+      105500]
 #df = [0,                   # Measured
 #      0]
 #df = [0.71266666e6,         # Other side of omega_rf

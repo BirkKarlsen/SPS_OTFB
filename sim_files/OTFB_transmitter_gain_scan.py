@@ -40,6 +40,8 @@ bash_file_names = np.zeros(ratio_array.shape, dtype=str)
 sub_file_names = np.zeros(ratio_array.shape, dtype=str)
 file_names = np.zeros(ratio_array.shape, dtype=str)
 
+print('\nMaking shell scripts...')
+
 for i in range(len(ratio_array)):
     bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_tx_{100 * ratio_array[i]:.0f}.sh'
     sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_tx_{100 * ratio_array[i]:.0f}.sub'
@@ -57,7 +59,7 @@ for i in range(len(ratio_array)):
     os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names[i]}')
     os.system(f'chmod a+x {bash_dir}{bash_file_names[i]}')
 
-
+print('\nMaking and submitting simulations...')
 for i in range(len(ratio_array)):
     # Make submission file
     os.system(f'touch {sub_dir}{sub_file_names[i]}')

@@ -415,11 +415,6 @@ if not GEN:
     if SAVE_RESULTS:
         dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
 
-        if not os.path.exists(lxdir + sim_dir + f'generated_beams/'):
-            os.makedirs(lxdir + sim_dir + f'generated_beams/')
-        np.save(lxdir + sim_dir + f'generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_end_{N_t}.npy', beam.dE)
-        np.save(lxdir + sim_dir + f'generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_end_{N_t}.npy', beam.dt)
-
         if not os.path.exists(lxdir + sim_dir + f'profile_data/'):
             os.makedirs(lxdir + sim_dir + f'profile_data/')
         np.save(lxdir + sim_dir + f'profile_data/generated_profile_{fit_type}_{N_bunches}_end_{N_t}',

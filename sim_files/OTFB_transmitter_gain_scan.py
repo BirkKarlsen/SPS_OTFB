@@ -67,10 +67,10 @@ for i in range(len(ratio_array)):
     os.system(f'touch {sub_dir}{sub_file_names[i]}')
 
     sub_content = f'executable = {bash_dir}{bash_file_names[i]}\n' \
-                  f'arguments = $(ClusterId)$(ProcId)\n' \
-                  f'output = {bash_dir}{file_names[i]}.$(ClusterId)$(ProcId).out\n' \
-                  f'error = {bash_dir}{file_names[i]}.$(ClusterId)$(ProcId).err\n' \
-                  f'log = {bash_dir}{file_names[i]}.$(ClusterId)$(ProcId).err\n' \
+                  f'arguments = \$(ClusterId)\$(ProcId)\n' \
+                  f'output = {bash_dir}{file_names[i]}.\$(ClusterId)\$(ProcId).out\n' \
+                  f'error = {bash_dir}{file_names[i]}.\$(ClusterId)\$(ProcId).err\n' \
+                  f'log = {bash_dir}{file_names[i]}.\$(ClusterId)\$(ProcId).err\n' \
                   f'+JobFlavour = "tomorrow"\n' \
                   f'queue'
 

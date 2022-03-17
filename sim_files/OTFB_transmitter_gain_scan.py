@@ -36,9 +36,9 @@ if args.extended is not None:
 
 # Make necessary preparations for Sims ----------------------------------------
 
-bash_file_names = np.zeros(ratio_array.shape, dtype=str)
-sub_file_names = np.zeros(ratio_array.shape, dtype=str)
-file_names = np.zeros(ratio_array.shape, dtype=str)
+bash_file_names = np.zeros(ratio_array.shape).tolist()
+sub_file_names = np.zeros(ratio_array.shape).tolist()
+file_names = np.zeros(ratio_array.shape).tolist()
 
 print('\nMaking shell scripts...')
 
@@ -59,6 +59,8 @@ for i in range(len(ratio_array)):
     os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names[i]}')
     os.system(f'chmod a+x {bash_dir}{bash_file_names[i]}')
 
+    print()
+
 print('\nMaking and submitting simulations...')
 for i in range(len(ratio_array)):
     # Make submission file
@@ -69,7 +71,7 @@ for i in range(len(ratio_array)):
                   f'output = {bash_dir}{file_names[i]}.$(ClusterId)$(ProcId).out\n' \
                   f'error = {bash_dir}{file_names[i]}.$(ClusterId)$(ProcId).err\n' \
                   f'log = {bash_dir}{file_names[i]}.$(ClusterId)$(ProcId).err\n' \
-                  f'+JobFlavour = "tomorrow"' \
+                  f'+JobFlavour = "tomorrow"\n' \
                   f'queue'
 
     os.system(f'echo "{sub_content}" > {sub_dir}{sub_file_names[i]}')

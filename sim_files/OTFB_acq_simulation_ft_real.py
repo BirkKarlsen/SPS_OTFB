@@ -319,8 +319,11 @@ if not GEN:
     int_arr = np.zeros(N_tot//dt_ptrack)
     n = 0
 
-    beam.intensity = ramp[0]
-    beam.ratio = beam.intensity / beam.n_macroparticles
+    if N_ir == 0:
+        pass
+    else:
+        beam.intensity = ramp[0]
+        beam.ratio = beam.intensity / beam.n_macroparticles
 
     for i in range(N_tot):
         SPS_tracker.track()

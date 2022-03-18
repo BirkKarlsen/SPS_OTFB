@@ -47,7 +47,7 @@ dt_save = 1000
 
 # Imports ---------------------------------------------------------------------
 import matplotlib as mpl
-#mpl.use('Agg')
+mpl.use('Agg')
 import numpy as np
 import matplotlib.pyplot as plt
 import os.path
@@ -81,10 +81,10 @@ phi = 0                                         # 200 MHz phase [-]
 V_part = 0.5442095845867135                     # Voltage partitioning [-]
 G_tx = [0.1611031942822209,
         0.115855991237277]
-G_llrf = 20
+G_llrf = 16
 df = [0,
       0]
-G_ff = 0.10
+G_ff = 0.7
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -160,8 +160,8 @@ if FREQ_CONFIG == 1:
 elif FREQ_CONFIG == 2:
     df = [0.18433333e6,
           0.2275e6]
-    G_tx = [0.229377820916177,
-            0.430534529571209]
+    G_tx = [1.0352156647332151,
+            1.077709051028262]
 elif FREQ_CONFIG == 3:
     df = [62333.333,
           105500]

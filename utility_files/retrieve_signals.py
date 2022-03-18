@@ -7,7 +7,6 @@ Author: Birk Emil Karlsen-Bæck
 # Import ----------------------------------------------------------------------
 import numpy as np
 import os
-import subprocess
 import argparse
 
 

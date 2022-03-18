@@ -35,7 +35,7 @@ date_string = 'Mar-17-2022/'
 
 save_dir = mst_dir + 'data_files/'
 data_dir = mst_dir + 'data_files/with_impedance/'
-dir_within_sim = '3000turns_fwhm_288/sim_data/'
+dir_within_sim = '30000turns_fwhm_288/sim_data/'
 
 save_name = f'profiles_scan_fr{FREQ_CONFIG}/'
 ratio_array = np.linspace(0.9, 1.1, 10)

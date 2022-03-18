@@ -63,7 +63,8 @@ data_dir += date_string
 # Retrieve data ----------------------------------------------------------------
 
 # Make the directory that the files will be saved to
-os.mkdir(save_dir + save_name)
+if not os.path.exists(save_dir + save_name):
+    os.mkdir(save_dir + save_name)
 
 # Search for the data within the given directory
 for i in range(len(ratio_array)):

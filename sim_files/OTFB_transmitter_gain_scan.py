@@ -6,8 +6,6 @@ Author: Birk Emil Karlsen-Bæck
 
 # Import ----------------------------------------------------------------------
 import numpy as np
-import matplotlib.pyplot as plt
-import subprocess
 import argparse
 import os
 

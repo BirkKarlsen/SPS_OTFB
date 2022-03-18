@@ -77,7 +77,7 @@ for i in range(len(ratio_array)):
         if file.startswith(signal_name):
             file_list.append(file)
             turns.append(file[len(signal_name):])
-    turns = np.array(turns)
+    turns = np.array(turns, dtype=int)
 
     # Find latest turn that the signals was recorded and saved
     final_index = np.where(turns == np.amax(turns))[0][0]

@@ -83,7 +83,7 @@ for i in range(len(ratio_array)):
     final_index = np.where(turns == np.amax(turns))[0][0]
     file_i = file_list[final_index]
 
-    os.system(f"cp {sim_dir_i}{file_i[:-4]}_tr{100 * ratio_array[i]:.0f}.npy {save_dir + save_name}.")
+    os.system(f"cp {sim_dir_i}{file_i} {save_dir + save_name}{file_i[:-4]}_tr{100 * ratio_array[i]:.0f}.npy")
 
 
 

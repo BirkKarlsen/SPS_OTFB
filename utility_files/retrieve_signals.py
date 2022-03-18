@@ -76,7 +76,7 @@ for i in range(len(ratio_array)):
     for file in os.listdir(sim_dir_i[:-1]):
         if file.startswith(signal_name):
             file_list.append(file)
-            turns.append(file[len(signal_name):])
+            turns.append(file[len(signal_name):-4])
     turns = np.array(turns, dtype=int)
 
     # Find latest turn that the signals was recorded and saved

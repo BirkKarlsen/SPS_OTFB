@@ -3,6 +3,7 @@ File to launch multiple simulations to scan values of the transmitter gain effec
 
 Author: Birk Emil Karlsen-Bæck
 '''
+# TODO: Scan G_llrf gains 5, 10, 14, 16, 20
 
 # Import ----------------------------------------------------------------------
 import numpy as np

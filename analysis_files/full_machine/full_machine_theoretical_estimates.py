@@ -58,5 +58,5 @@ def theoretical_power(f_r, f_c, R_beam, R_gen, tau, I_beam):
         Rg_eff = generator_effective_impedance(f_r[i], f_c, R_gen[i], tau[i])
         RbI_eff, RbQ_eff = beam_effective_impedance(f_r[i], f_c, R_gen[i], tau[i])
 
-        
+
 

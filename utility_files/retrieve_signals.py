@@ -48,7 +48,7 @@ if args.save_dir is not None:
     save_name = str(args.save_dir)
 
 if args.signal_type is not None:
-    signal_name = str(args.signal_type) + '_'
+    signal_name = str(args.signal_type)
 
 if args.date_str is not None:
     date_string = str(args.date_str)

@@ -1,5 +1,5 @@
 '''
-File to launch multiple simulations to scan values of the transmitter gain effect.
+File to launch multiple simulations to scan values of the LLRF gain effect.
 
 Author: Birk Emil Karlsen-Bæck
 '''
@@ -13,37 +13,32 @@ parser = argparse.ArgumentParser(description="This file launches simulations for
 
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
-parser.add_argument("--extended", "-ext", type=int,
-                    help="Option to enable extended search")
 
 args = parser.parse_args()
 
 # Parameter Values ------------------------------------------------------------
-ratio_array = np.linspace(0.90, 1.10, 10)
-ratio_array_extended = np.linspace(0.80, 1.20, 10)
-FREQ_CONFIG = 1
+input_array = np.array([1, 2, 3, 4, 5])
+gllrf_array = np.array([5, 10, 14, 16, 20])
+FREQ_CONFIG = 3
 bash_dir = '/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/bash_files/'
 sub_dir = '/afs/cern.ch/work/b/bkarlsen/Submittion_Files/SPS_OTFB/'
 
 if args.freq_config is not None:
     FREQ_CONFIG = args.freq_config
 
-if args.extended is not None:
-    ratio_array = np.linspace(0.80, 1.20, 10)
-
 
 # Make necessary preparations for Sims ----------------------------------------
 
-bash_file_names = np.zeros(ratio_array.shape).tolist()
-sub_file_names = np.zeros(ratio_array.shape).tolist()
-file_names = np.zeros(ratio_array.shape).tolist()
+bash_file_names = np.zeros(input_array.shape).tolist()
+sub_file_names = np.zeros(input_array.shape).tolist()
+file_names = np.zeros(input_array.shape).tolist()
 
 print('\nMaking shell scripts...')
 
-for i in range(len(ratio_array)):
-    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_tx_{100 * ratio_array[i]:.0f}.sh'
-    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_tx_{100 * ratio_array[i]:.0f}.sub'
-    file_names[i] = f'scan_fr{FREQ_CONFIG}_tx_{100 * ratio_array[i]:.0f}'
+for i in range(len(input_array)):
+    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}.sh'
+    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}.sub'
+    file_names[i] = f'scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}'
 
     # Make bash file
     os.system(f'touch {bash_dir}{bash_file_names[i]}')
@@ -52,14 +47,14 @@ for i in range(len(ratio_array)):
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
                    f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc 1 -fc {FREQ_CONFIG} ' \
-                   f'-tr {ratio_array[i]} -sd scan_fr{FREQ_CONFIG}_tr_{100 * ratio_array[i]:.0f}/'
+                   f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}/'
 
     os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names[i]}')
     os.system(f'chmod a+x {bash_dir}{bash_file_names[i]}')
 
 
 print('\nMaking and submitting simulations...')
-for i in range(len(ratio_array)):
+for i in range(len(input_array)):
     # Make submission file
     os.system(f'touch {sub_dir}{sub_file_names[i]}')
 

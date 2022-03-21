@@ -20,6 +20,8 @@ parser.add_argument("--volt_config", "-vc", type=int,
                     help="Different values for the RF voltage.")
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
+parser.add_argument("--gllrf_config", "-gc", type=int,
+                    help="Different configurations of G_llrf to fo parameter scan.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 parser.add_argument("--feedforward", "-ff", type=int,
@@ -38,6 +40,7 @@ LXPLUS = True
 OTFB_CONFIG = 1
 VOLT_CONFIG = 1
 FREQ_CONFIG = 1
+GLLRF_CONFIG = 1
 FEEDFORWARD = False
 fit_type = 'fwhm'
 mstdir = ''
@@ -114,6 +117,9 @@ if args.volt_config is not None:
 if args.freq_config is not None:
     FREQ_CONFIG = args.freq_config
 
+if args.gllrf_config is not None:
+    GLLRF_CONFIG = args.gllrf_config
+
 if args.save_dir is not None:
     mstdir = args.save_dir
 
@@ -172,6 +178,39 @@ elif FREQ_CONFIG == 3:
           105500]
     G_tx = [1.1180633496145078 * tr,
             1.2439306616383181 * tr]
+
+if args.gllrf_config is not None:
+    if GLLRF_CONFIG == 1:
+        G_llrf = 5
+        df = [62333.333,  # Both at 200.1
+              105500]
+        G_tx = [1.1067988416724432 * tr,
+                1.2198386723730976 * tr]
+    elif GLLRF_CONFIG == 2:
+        G_llrf = 10
+        df = [62333.333,  # Both at 200.1
+              105500]
+        G_tx = [1.1146994926588105 * tr,
+                1.2367097833279674 * tr]
+    elif GLLRF_CONFIG == 3:
+        G_llrf = 14
+        df = [62333.333,  # Both at 200.1
+              105500]
+        G_tx = [1.1172401859286643 * tr,
+                1.2421617290781886 * tr]
+    elif GLLRF_CONFIG == 4:
+        G_llrf = 16
+        df = [62333.333,  # Both at 200.1
+              105500]
+        G_tx = [1.1180633496145078 * tr,
+                1.2439306616383181 * tr]
+    elif GLLRF_CONFIG == 5:
+        G_llrf = 20
+        df = [62333.333,  # Both at 200.1
+              105500]
+        G_tx = [1.1192402524102003 * tr,
+                1.246461850104049 * tr]
+
 
 N_tot = N_t + N_ir
 if N_ir == 0:

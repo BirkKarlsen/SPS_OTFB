@@ -55,7 +55,7 @@ sigma_dt = 1.2e-9
 
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
-G_llrf = 16
+G_llrf = 5
 rr = 1
 #V_part = 0.5442095845867135
 #V_part = 0.5517843967841601
@@ -68,8 +68,8 @@ df = [62333.333,           # Both at 200.1
 #      0]
 #df = [0.71266666e6,         # Other side of omega_rf
 #      0.799e6]
-G_tx = [0.25,
-        0.35]
+G_tx = [1.1067988416724432,
+        1.2198386723730976]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -209,6 +209,35 @@ f = [0.18433333e6,
 G_tx = [1.0355739238973907,
         1.078403005653143]
 
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1192402524102003,
+        1.246461850104049]
+        
+For PostLS2 configuration witha_comb = 31/32, Gllrf = 16 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1180633496145078,
+        1.2439306616383181]
+
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 14 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1172401859286643,
+        1.2421617290781886]
+
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 10 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1146994926588105,
+        1.2367097833279674]
+
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 5 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1067988416724432,
+        1.2198386723730976]
 
 
 '''

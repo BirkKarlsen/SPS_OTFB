@@ -66,7 +66,7 @@ def bisection_method(target, a, b, G3SEC, gs, max_it, tol):
 # Lauch optimization ----------------------------------------------------------
 V_part = 0.60
 V = 10
-BYPASS_3 = True
+BYPASS_3 = False
 # 3-section
 target = V * V_part
 a = 0.9

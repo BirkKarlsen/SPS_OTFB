@@ -181,7 +181,36 @@ elif FREQ_CONFIG == 3:
 
 if args.gllrf_config is not None:
     if FREQ_CONFIG == 1:
-        pass
+        if GLLRF_CONFIG == 1:
+            G_llrf = 5
+            df = [0,  # Measured
+                  0]
+            G_tx = [1.1648584800986386,
+                    1.4564159619446317]
+        elif GLLRF_CONFIG == 2:
+            G_llrf = 10
+            df = [0,  # Measured
+                  0]
+            G_tx = [1.1774737926193093,
+                    1.4983080316713226]
+        elif GLLRF_CONFIG == 3:
+            G_llrf = 14
+            df = [0,  # Measured
+                  0]
+            G_tx = [1.1815415154561475,
+                    1.502249000727316]
+        elif GLLRF_CONFIG == 4:
+            G_llrf = 16
+            df = [0,  # Measured
+                  0]
+            G_tx = [0.80,
+                    0.80]
+        elif GLLRF_CONFIG == 5:
+            G_llrf = 20
+            df = [0,  # Measured
+                  0]
+            G_tx = [0.80,
+                    0.80]
     elif FREQ_CONFIG == 2:
         if GLLRF_CONFIG == 1:
             G_llrf = 5

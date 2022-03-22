@@ -20,7 +20,7 @@ args = parser.parse_args()
 # Options for script ----------------------------------------------------------
 BISECT = False
 SHOW_PLT = True
-n_pretrack = 1000
+n_pretrack = 10000
 
 
 # Imports ---------------------------------------------------------------------
@@ -55,21 +55,22 @@ sigma_dt = 1.2e-9
 
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
-G_llrf = 20
+G_llrf = 16
 rr = 1
 #V_part = 0.5442095845867135
 #V_part = 0.5517843967841601
 V_part = 0.6
-df = [0.18433333e6,        # Both at 200.222
-      0.2275e6]
+#df = [0.18433333e6,        # Both at 200.222
+#      0.2275e6]
 #df = [62333.333,           # Both at 200.1
 #      105500]
-#df = [0,                   # Measured
-#      0]
+df = [0,                   # Measured
+      0]
 #df = [0.71266666e6,         # Other side of omega_rf
 #      0.799e6]
-G_tx = [1.0317735694097596,
-        1.0710520614580732]
+tr = 0.65
+G_tx = [0.80,
+        0.80]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -91,114 +92,6 @@ For the PostLS2 scenario with both cavities at 200.222 MHz the optimized transmi
 '''
 Configurations and their optimized transmitter gains:
 
-For a PostLS2 configuration with a_comb = 63/64, G_llrf = 20 and both cavity types at 200.222 MHz
-we have
-df = [0.18433333e6, 
-      0.2275e6]
-G_tx = [0.22909261332041,
-        0.429420301179296]
-        
-For a PostLS2 configuration with a_comb = 31/32, G_llrf = 20 and both cavity types have the measured central frequency
-we have
-df = [0,
-      0]
-G_tx = [0.1611031942822209,
-        0.115855991237277]
-        
-For a PostLS2 configuration with a_comb = 31/32, G_llrf = 16 and both cavity types have the measured central frequency
-we have 
-df = [0,
-      0]
-G_tx = [0.163212561182363,
-        0.127838041632473]
-        
-For a PostLS2 configuration with a_comb = 31/32, G_llrf = 16 and both cavity types at 200.222 MHz
-we have
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [0.229377820916177,
-        0.430534529571209]
-        
-For a PostLS2 configuration with a_comb = 63/64, Gllrf = 20 and both cavity types at measured frequencies
-we have
-df = [0,
-      0]
-G_tx = [0.1615069965527125,
-        0.11584062194618076]
-        
-For a PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and both cavity types at 200.1 MHz
-we have
-df = [62333.333,
-      105500]
-G_tx = [0.1910842957076554,
-        0.289228143612504]
-        
-For a PostLS2 configuration with a_comb = 31/32, Gllrf = 0 and both cavity types at measured
-we have
-df = [0,
-      0]
-G_tx = [0.26041876200342555,
-        0.5558826390544476]
-        
-For a PostLS2 configuration with a_comb = 31/32, Gllrf = 0 and both cavities at 200.222 MHz
-we have
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [0.25147316248903445,
-        0.5110686163372516]
-        
-For a PostLS2 configuration with a_comb = 31/32, Gllrf = 0 and resonant frequencies at other side of omega_rf
-we have
-df = [0.71266666e6, 
-      0.799e6]
-G_tx = [0.2603649863930353,
-        0.55564846411416855]
-        
-For a PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and resonant frequencies at other side of omega_rf
-we have
-df = [0.71266666e6, 
-      0.799e6]
-G_tx = [0.163607060338826,
-        0.1288941276502113]
-
-For a PostLS2 configuration with a_comb = 63/64, Gllrf = 20 and TWCs at 200.222 MHz
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [0.22908800255477224,
-        0.4294032663036014]
-
-For a PostLS2 configuration with a_comb = 63/64, Gllrf = 14 and TWCs at measured
-df = [0, 
-      0]
-G_tx = [0.16437471786672908,
-        0.13555802364091854]
-
-
-For alternated master:
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at measured
-df = [0, 
-      0]
-G_tx = [0.29571511616294244,
-        0.6811879164944046]
-
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.222 MHz
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [0.2588039161833038,
-        0.5388545255141338]
-
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.1 MHz
-df = [62333.333,
-      105500]
-G_tx = [0.2795158374036263,
-        0.6219653308191606]
-        
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at opposite side of the RF frequency
-df = [0.71266666e6, 
-      0.799e6]
-G_tx = [0.2954658658441758,
-        0.6834594499082112]
-
 -----------------------------
 ----- Newest OTFB model -----
 -----------------------------
@@ -209,23 +102,11 @@ df = [0.18433333e6,
 G_tx = [1.0355739238973907,
         1.078403005653143]
         
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.222 MHz
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 5 and TWCs at 200.222 MHz
 df = [0.18433333e6,
       0.2275e6]
-G_tx = [1.035573923897336,
-        1.0784030056522707]
-        
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.222 MHz
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [1.0352156647332156,
-        1.077709051028262]
-        
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 14 and TWCs at 200.222 MHz
-df = [0.18433333e6,
-      0.2275e6]
-G_tx = [1.0349649477141394,
-        1.0772235174474414]
+G_tx = [1.0317735694097596,
+        1.0710520614580732]
         
 For PostLS2 configuration with a_comb = 31/32, Gllrf = 10 and TWCs at 200.222 MHz
 df = [0.18433333e6,
@@ -233,17 +114,41 @@ df = [0.18433333e6,
 G_tx = [1.0341903556357148,
         1.0757240557694563]
         
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 5 and TWCs at 200.222 MHz
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 14 and TWCs at 200.222 MHz
 df = [0.18433333e6,
       0.2275e6]
-G_tx = [1.0317735694097596,
-        1.0710520614580732]
-
-For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.1 MHz
+G_tx = [1.0349649477141394,
+        1.0772235174474414]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.0352156647332156,
+        1.077709051028262]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.035573923897336,
+        1.0784030056522707]
+        
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 5 and TWCs at 200.1 MHz
 df = [62333.333,
       105500]
-G_tx = [1.1192402524102003,
-        1.246461850104049]
+G_tx = [1.1067988416724432,
+        1.2198386723730976]
+        
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 10 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1146994926588105,
+        1.2367097833279674]
+        
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 14 and TWCs at 200.1 MHz
+df = [62333.333,
+      105500]
+G_tx = [1.1172401859286643,
+        1.2421617290781886]
         
 For PostLS2 configuration witha_comb = 31/32, Gllrf = 16 and TWCs at 200.1 MHz
 df = [62333.333,
@@ -251,24 +156,41 @@ df = [62333.333,
 G_tx = [1.1180633496145078,
         1.2439306616383181]
 
-For PostLS2 configuration with a_comb = 31/32 Gllrf = 14 and TWCs at 200.1 MHz
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.1 MHz
 df = [62333.333,
       105500]
-G_tx = [1.1172401859286643,
-        1.2421617290781886]
+G_tx = [1.1192402524102003,
+        1.246461850104049]
 
-For PostLS2 configuration with a_comb = 31/32 Gllrf = 10 and TWCs at 200.1 MHz
-df = [62333.333,
-      105500]
-G_tx = [1.1146994926588105,
-        1.2367097833279674]
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 5 and TWCs at measured
+df = [0,
+      0]
+G_tx = [1.1648584800986386,
+        1.4564159619446317]
 
-For PostLS2 configuration with a_comb = 31/32 Gllrf = 5 and TWCs at 200.1 MHz
-df = [62333.333,
-      105500]
-G_tx = [1.1067988416724432,
-        1.2198386723730976]
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 10 and TWCs at measured
+df = [0,
+      0]
+G_tx = [1.1774737926193093,
+        1.4983080316713226]
 
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 14 and TWCs at measured (with a tr of 0.65 to be sure)
+df = [0,
+      0]
+G_tx = [1.1815415154561475,
+        1.502249000727316]
+        
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 16 and TWCs at measured
+df = [0,
+      0]
+G_tx = [0.80,
+        0.80]
+        
+For PostLS2 configuration with a_comb = 31/32 Gllrf = 20 and TWCs at measured
+df = [0,
+      0]
+G_tx = [0.80,
+        0.80]
 
 '''
 

@@ -401,7 +401,7 @@ if not GENERATE:
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
     NEW_PLOTS = False
-    PLOT_MATRIX_ELEMENTS = False
+    PLOT_MATRIX_ELEMENTS = True
     if NEW_PLOTS:
         plt.figure()
         plt.title('Total Voltage')

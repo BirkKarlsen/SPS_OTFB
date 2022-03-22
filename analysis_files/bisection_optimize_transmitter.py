@@ -81,7 +81,7 @@ if not BYPASS_3:
 # 4-section
 target = V * (1 - V_part)
 a = 0.9
-b = 1.3
+b = 1.6
 
 c4, yc4 = bisection_method(target, a, b, False, 0.4, 100, 1e-14)
 

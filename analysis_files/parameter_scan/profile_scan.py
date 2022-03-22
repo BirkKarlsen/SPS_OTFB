@@ -25,7 +25,7 @@ FREQ_CONFIG = 3
 EXTENDED = False
 
 # Plots
-PLT_PROFILE = False
+PLT_PROFILE = True
 PLT_BBB = True
 
 # Directories -----------------------------------------------------------------

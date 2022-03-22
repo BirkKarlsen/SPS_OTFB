@@ -55,21 +55,21 @@ sigma_dt = 1.2e-9
 
 # For a_comb of 63/64 and llrf gain of 20
 a_comb = 31/32
-G_llrf = 5
+G_llrf = 20
 rr = 1
 #V_part = 0.5442095845867135
 #V_part = 0.5517843967841601
 V_part = 0.6
-#df = [0.18433333e6,        # Both at 200.222
-#      0.2275e6]
-df = [62333.333,           # Both at 200.1
-      105500]
+df = [0.18433333e6,        # Both at 200.222
+      0.2275e6]
+#df = [62333.333,           # Both at 200.1
+#      105500]
 #df = [0,                   # Measured
 #      0]
 #df = [0.71266666e6,         # Other side of omega_rf
 #      0.799e6]
-G_tx = [1.1067988416724432,
-        1.2198386723730976]
+G_tx = [1.0317735694097596,
+        1.0710520614580732]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -204,10 +204,40 @@ G_tx = [0.2954658658441758,
 -----------------------------
 
 For PostLS2 configuration with a_comb = 63/64, Gllrf = 20 and TWCs at 200.222 MHz
-f = [0.18433333e6,
+df = [0.18433333e6,
       0.2275e6]
 G_tx = [1.0355739238973907,
         1.078403005653143]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.035573923897336,
+        1.0784030056522707]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 16 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.0352156647332156,
+        1.077709051028262]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 14 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.0349649477141394,
+        1.0772235174474414]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 10 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.0341903556357148,
+        1.0757240557694563]
+        
+For PostLS2 configuration with a_comb = 31/32, Gllrf = 5 and TWCs at 200.222 MHz
+df = [0.18433333e6,
+      0.2275e6]
+G_tx = [1.0317735694097596,
+        1.0710520614580732]
 
 For PostLS2 configuration with a_comb = 31/32, Gllrf = 20 and TWCs at 200.1 MHz
 df = [62333.333,

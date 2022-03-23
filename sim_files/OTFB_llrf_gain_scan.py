@@ -63,7 +63,7 @@ for i in range(len(input_array)):
                   f'output = {bash_dir}{file_names[i]}.\$(ClusterId)\$(ProcId).out\n' \
                   f'error = {bash_dir}{file_names[i]}.\$(ClusterId)\$(ProcId).err\n' \
                   f'log = {bash_dir}{file_names[i]}.\$(ClusterId)\$(ProcId).log\n' \
-                  f'+JobFlavour = \\"tomorrow\\"\n' \
+                  f'+JobFlavour = \\"testmatch\\"\n' \
                   f'queue'
 
     os.system(f'echo "{sub_content}" > {sub_dir}{sub_file_names[i]}')

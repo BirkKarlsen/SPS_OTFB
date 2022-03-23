@@ -181,96 +181,72 @@ elif FREQ_CONFIG == 3:
 
 if args.gllrf_config is not None:
     if FREQ_CONFIG == 1:
+        df = [0,  # Measured
+              0]
         if GLLRF_CONFIG == 1:
             G_llrf = 5
-            df = [0,  # Measured
-                  0]
             G_tx = [1.1648584800986386,
                     1.4564159619446317]
         elif GLLRF_CONFIG == 2:
             G_llrf = 10
-            df = [0,  # Measured
-                  0]
             G_tx = [1.1774737926193093,
                     1.4983080316713226]
         elif GLLRF_CONFIG == 3:
             G_llrf = 14
-            df = [0,  # Measured
-                  0]
-            G_tx = [1.1815415154561475,
-                    1.502249000727316]
+            G_tx = [1.1815415154561475 * 0.65,
+                    1.502249000727316 * 0.65]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            df = [0,  # Measured
-                  0]
             G_tx = [0.80,
                     0.80]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            df = [0,  # Measured
-                  0]
             G_tx = [0.80,
                     0.80]
     elif FREQ_CONFIG == 2:
+        df = [0.18433333e6,  # Both at 200.222
+              0.2275e6]
         if GLLRF_CONFIG == 1:
             G_llrf = 5
-            df = [0.18433333e6,  # Both at 200.222
-                  0.2275e6]
             G_tx = [1.0317735694097596 * tr,
                     1.0710520614580732 * tr]
         elif GLLRF_CONFIG == 2:
             G_llrf = 10
-            df = [0.18433333e6,  # Both at 200.222
-                  0.2275e6]
             G_tx = [1.0341903556357148 * tr,
                     1.0757240557694563 * tr]
         elif GLLRF_CONFIG == 3:
             G_llrf = 14
-            df = [0.18433333e6,  # Both at 200.222
-                  0.2275e6]
             G_tx = [1.0349649477141394 * tr,
                     1.0772235174474414 * tr]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            df = [0.18433333e6,  # Both at 200.222
-                  0.2275e6]
             G_tx = [1.0352156647332156 * tr,
                     1.077709051028262 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            df = [0.18433333e6,  # Both at 200.222
-                  0.2275e6]
             G_tx = [1.035573923897336 * tr,
                     1.0784030056522707 * tr]
     elif FREQ_CONFIG == 3:
+        df = [62333.333,  # Both at 200.1
+              105500]
         if GLLRF_CONFIG == 1:
             G_llrf = 5
-            df = [62333.333,  # Both at 200.1
-                  105500]
             G_tx = [1.1067988416724432 * tr,
                     1.2198386723730976 * tr]
         elif GLLRF_CONFIG == 2:
             G_llrf = 10
-            df = [62333.333,  # Both at 200.1
-                  105500]
             G_tx = [1.1146994926588105 * tr,
                     1.2367097833279674 * tr]
         elif GLLRF_CONFIG == 3:
             G_llrf = 14
-            df = [62333.333,  # Both at 200.1
-                  105500]
             G_tx = [1.1172401859286643 * tr,
                     1.2421617290781886 * tr]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            df = [62333.333,  # Both at 200.1
-                  105500]
             G_tx = [1.1180633496145078 * tr,
                     1.2439306616383181 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            df = [62333.333,  # Both at 200.1
-                  105500]
             G_tx = [1.1192402524102003 * tr,
                     1.246461850104049 * tr]
 

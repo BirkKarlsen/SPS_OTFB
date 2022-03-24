@@ -7,7 +7,7 @@ Author: Birk Emil Karlsen-Bæck
 PLT_IMPULSE = False                 # Plot impulse response matrix elements
 PLT_BEAM_LOADING = False            # Plot beam loading due to real and imaginary part of impedance
 PLT_DESIRED_VEC = False             # Plot the desired vectors
-PLT_OPT_FIR = False                 # Plot the optimal FIR filters when splitting real and imaginary parts
+PLT_OPT_FIR = True                 # Plot the optimal FIR filters when splitting real and imaginary parts
 PLT_REC_SIG = False                 # Plot reconstructed signal using the FIR filters with splitting
 PLT_OPT_FIR_WO = False              # Plot the optimal FIR filter without splitting the real and imaginary parts
 PLT_REC_SIG_WO = False              # plot the reconstructed signals without splitting the real and imaginary parts
@@ -311,8 +311,11 @@ if PLT_OPT_FIR:
     plt.title('Optimal FIR for imaginary valued impedance')
     plt.plot(hoptodd, '.')
 
-    print('Error in real FIR:', np.mean(np.abs((hopteven - phopteven))))
-    print('Error in imaginary FIR:', np.mean(np.abs((hoptodd - phoptodd))))
+    print(hopteven + hoptodd * 1j)
+
+    if SECTION == 3:
+        print('Error in real FIR:', np.mean(np.abs((hopteven - phopteven))))
+        print('Error in imaginary FIR:', np.mean(np.abs((hoptodd - phoptodd))))
 
 
 # Reconstructed signal. Step response of FIR + rectangular window (cavity) ----

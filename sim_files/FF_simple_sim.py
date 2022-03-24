@@ -31,8 +31,8 @@ phi = 0                                         # 200 MHz phase [-]
 # Parameters for the Simulation
 N_m = int(5e5)                                  # Number of macro-particles for tracking
 N_t = 1000                                      # Number of turns to track
-dtrack = 50
-dplot = 200
+dtrack = 5
+dplot = 20
 dprof = 200
 
 # OTFB parameters
@@ -43,9 +43,9 @@ G_tx = [0.229377820916177,
         0.430534529571209]
 G_llrf = 16
 a_comb = 31/32
-G_ff = 0.7
+G_ff = 1
 
-N_bunches = 72
+N_bunches = 288
 lxdir = '../'
 total_intensity = 3385.8196 * 10**10 / 4
 fit_type = 'fwhm'
@@ -110,20 +110,37 @@ for i in range(N_t):
     if i % dplot == 0:
         plt.figure()
         plt.title('I_BEAM_COARSE_FF')
+
+        # Calculation:
+        I_beam = OTFB.OTFB_1.I_COARSE_BEAM[-h:].real
+        I_beam = I_beam.reshape((h//5, 5))
+        I_beam = np.sum(I_beam, axis=1)
+
         plt.plot(t_FF, OTFB.OTFB_1.I_BEAM_COARSE_FF[-h//5:].real, color='r')
         #plt.plot(t_FF, OTFB.OTFB_1.I_BEAM_COARSE_FF[-h//5:].imag, color='b')
         plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].real, color='r', linestyle='--')
+        #plt.plot(t_FF, I_beam, color='b')
         #plt.plot(t_coarse, OTFB.OTFB_1.I_COARSE_BEAM[-h:].imag, color='b', linestyle='--')
 
         plt.figure()
         plt.title('I_FF_CORR')
-        plt.plot(OTFB.OTFB_1.I_FF_CORR.real, color='r')
-        plt.plot(OTFB.OTFB_1.I_FF_CORR.imag, color='b')
+        plt.plot(t_FF, OTFB.OTFB_1.I_FF_CORR.real[-h//5:], color='r')
+        plt.plot(t_FF, OTFB.OTFB_1.I_FF_CORR.imag[-h//5:], color='b')
 
         plt.figure()
-        plt.title('V_FF_CORR')
-        plt.plot(OTFB.OTFB_1.V_FF_CORR.real, color='r')
-        plt.plot(OTFB.OTFB_1.V_FF_CORR.imag, color='b')
+        plt.title('DV_FF')
+        plt.plot(t_FF, OTFB.OTFB_1.DV_FF.real[-h//5:], color='r')
+        plt.plot(t_FF, OTFB.OTFB_1.DV_FF.imag[-h//5:], color='b')
+        plt.plot(profile.bin_centers, profile.n_macroparticles * 1e2)
+
+        plt.figure()
+        plt.title('V_FF_fine')
+        plt.plot(profile.bin_centers, profile.n_macroparticles * 1e1)
+        plt.plot(profile.bin_centers, OTFB.OTFB_1.V_FF_CORR_FINE.real, color='r')
+        plt.plot(profile.bin_centers, OTFB.OTFB_1.V_FF_CORR_FINE.imag, color='b')
+
+        plt.plot(profile.bin_centers, OTFB.OTFB_1.V_IND_FINE_BEAM.real[-profile.n_slices:], color='r', linestyle='--')
+        plt.plot(profile.bin_centers, OTFB.OTFB_1.V_IND_FINE_BEAM.imag[-profile.n_slices:], color='b', linestyle='--')
 
         plt.show()
 

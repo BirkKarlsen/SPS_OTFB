@@ -575,6 +575,58 @@ def save_plots_OTFB(O, dir, i):
     plt.savefig(dir + f'4sec_V_IND_BEAM_turn{i}')
 
 
+def save_plots_FF(O, dir, i):
+    # 3 section
+    plt.figure()
+    plt.suptitle(f'3sec, FF I beam, turn {i}')
+    plt.subplot(211)
+    plt.plot(np.abs(O.OTFB_1.I_BEAM_COARSE_FF[-O.OTFB_1.n_coarse_FF:]), 'g', label='abs')
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(O.OTFB_1.I_BEAM_COARSE_FF[-O.OTFB_1.n_coarse_FF:].real, 'r', label='real')
+    plt.plot(O.OTFB_1.I_BEAM_COARSE_FF[-O.OTFB_1.n_coarse_FF:].imag, 'b', label='imag')
+    plt.legend()
+
+    plt.savefig(dir + f'3sec_I_BEAM_COARSE_FF_turn{i}')
+
+    plt.figure()
+    plt.suptitle(f'3sec, DV_FF, turn {i}')
+    plt.subplot(211)
+    plt.plot(np.abs(O.OTFB_1.DV_FF[-O.OTFB_1.n_coarse_FF:]), 'g', label='abs')
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(O.OTFB_1.DV_FF[-O.OTFB_1.n_coarse_FF:].real, 'r', label='real')
+    plt.plot(O.OTFB_1.DV_FF[-O.OTFB_1.n_coarse_FF:].imag, 'b', label='imag')
+    plt.legend()
+
+    plt.savefig(dir + f'3sec_DV_FF_turn{i}')
+
+    # 4 section
+    plt.figure()
+    plt.suptitle(f'4sec, FF I beam, turn {i}')
+    plt.subplot(211)
+    plt.plot(np.abs(O.OTFB_2.I_BEAM_COARSE_FF[-O.OTFB_2.n_coarse_FF:]), 'g', label='abs')
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(O.OTFB_2.I_BEAM_COARSE_FF[-O.OTFB_2.n_coarse_FF:].real, 'r', label='real')
+    plt.plot(O.OTFB_2.I_BEAM_COARSE_FF[-O.OTFB_2.n_coarse_FF:].imag, 'b', label='imag')
+    plt.legend()
+
+    plt.savefig(dir + f'4sec_I_BEAM_COARSE_FF_turn{i}')
+
+    plt.figure()
+    plt.suptitle(f'4sec, DV_FF, turn {i}')
+    plt.subplot(211)
+    plt.plot(np.abs(O.OTFB_2.DV_FF[-O.OTFB_2.n_coarse_FF:]), 'g', label='abs')
+    plt.legend()
+    plt.subplot(212)
+    plt.plot(O.OTFB_2.DV_FF[-O.OTFB_2.n_coarse_FF:].real, 'r', label='real')
+    plt.plot(O.OTFB_2.DV_FF[-O.OTFB_2.n_coarse_FF:].imag, 'b', label='imag')
+    plt.legend()
+
+    plt.savefig(dir + f'4sec_DV_FF_turn{i}')
+
+
 def bunch_params(profile, get_72 = True):
     gen_prof = np.array([profile.n_macroparticles])
     N_bunches, Bunch_positions, Bunch_peaks, Bunch_lengths, Bunch_intensities, Bunch_positionsFit, \
@@ -684,15 +736,17 @@ def plot_induced_voltage(tracker, total_ind):
     pass
 
 
-def plot_bbb_offset(pos_fit, sdir, i):
-    bbb_offset = at.find_offset(pos_fit)
-    x = np.linspace(0, len(pos_fit), len(pos_fit))
-
+def plot_bbb_offset(pos_fit, N_batches, sdir, i):
     plt.figure()
     plt.title(f'bunch-by-bunch offset, turn {i}')
-    plt.plot(x, bbb_offset * 1e9)
+    for j in range(N_batches):
+        bbb_offset = at.find_offset(pos_fit[72 * j: 72 * (j + 1)])
+        x = np.linspace(0, len(pos_fit), len(pos_fit))
+        plt.plot(x, bbb_offset * 1e9, label=f'ba{j + 1}')
+
     plt.xlabel('Bunch Number')
     plt.ylabel('Offset [ns]')
+    plt.legend()
     plt.savefig(sdir + f"bbb_offset_{i}")
 
 

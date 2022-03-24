@@ -439,7 +439,9 @@ if not GEN:
                 dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', i)
                 dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
                 dut.save_profile(profile, lxdir + sim_dir + f'sim_data/', i)
-                dut.plot_bbb_offset(pos_fit_arr[:72, n-1], lxdir + sim_dir + f'fig/', i)
+                dut.plot_bbb_offset(pos_fit_arr[:72, n-1], 4, lxdir + sim_dir + f'fig/', i)
+                if FEEDFORWARD:
+                    dut.save_plots_FF(OTFB, lxdir + sim_dir + f'fig/', i)
 
         if i < N_ir != 0:
             beam.intensity = ramp[i]

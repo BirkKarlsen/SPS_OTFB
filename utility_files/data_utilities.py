@@ -739,9 +739,11 @@ def plot_induced_voltage(tracker, total_ind):
 def plot_bbb_offset(pos_fit, N_batches, sdir, i):
     plt.figure()
     plt.title(f'bunch-by-bunch offset, turn {i}')
+    pos_fit = pos_fit.reshape((N_batches, 72))
+
     for j in range(N_batches):
-        bbb_offset = at.find_offset(pos_fit[72 * j: 72 * (j + 1)])
-        x = np.linspace(0, len(pos_fit), len(pos_fit))
+        bbb_offset = at.find_offset(pos_fit[i,:])
+        x = np.linspace(0, len(pos_fit[i,:]), len(pos_fit[i,:]))
         plt.plot(x, bbb_offset * 1e9, label=f'ba{j + 1}')
 
     plt.xlabel('Bunch Number')

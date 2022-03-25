@@ -742,8 +742,8 @@ def plot_bbb_offset(pos_fit, N_batches, sdir, i):
     pos_fit = pos_fit.reshape((N_batches, 72))
 
     for j in range(N_batches):
-        bbb_offset = at.find_offset(pos_fit[i,:])
-        x = np.linspace(0, len(pos_fit[i,:]), len(pos_fit[i,:]))
+        bbb_offset = at.find_offset(pos_fit[j,:])
+        x = np.linspace(0, len(pos_fit[j,:]), len(pos_fit[j,:]))
         plt.plot(x, bbb_offset * 1e9, label=f'ba{j + 1}')
 
     plt.xlabel('Bunch Number')

@@ -93,7 +93,7 @@ G_tx = [1,
 G_llrf = 16
 df = [0,
       0]
-G_ff = 0.7
+G_ff = 1
 
 # Parameters for the SPS Impedance Model
 freqRes = 43.3e3                                # Frequency resolution [Hz]
@@ -302,7 +302,8 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 
 
 # SPS Cavity Feedback
-Commissioning = CavityFeedbackCommissioning(open_FF=not FEEDFORWARD, debug=False, rot_IQ=1)
+Commissioning = CavityFeedbackCommissioning(open_FF=not FEEDFORWARD, debug=False, rot_IQ=1,
+                                            FIR_filter=FIR_FILTER)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
                          G_llrf=G_llrf, df=df, G_ff=G_ff)

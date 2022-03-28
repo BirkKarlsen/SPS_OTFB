@@ -30,6 +30,8 @@ parser.add_argument("--fir_filter", "-fir", type=int,
                     help="Option to choose FIR filter for FF, default is only real (1).")
 parser.add_argument("--tx_ratio", "-tr", type=float,
                     help="Option to tweak the optimal transmitter gain, default is 1.")
+parser.add_argument("--v_error", "-ve", type=float,
+                    help="Option to account for voltage error in measurements.")
 
 args = parser.parse_args()
 
@@ -134,6 +136,9 @@ if args.fir_filter is not None:
 
 if args.tx_ratio is not None:
     tr = float(args.tx_ratio)
+
+if args.v_error is not None:
+    V *= float(args.v_error)
 
 
 

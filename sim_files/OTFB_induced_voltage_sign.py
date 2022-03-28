@@ -94,7 +94,8 @@ gamma_t = 18.0                                  # Transition Gamma [-]
 alpha = 1 / (gamma_t**2)                        # Momentum compaction factor [-]
 p_s = 440e9                                     # Synchronous momentum [eV]
 h = 4620                                        # 200 MHz harmonic number [-]
-V = (0.911535 * 4 + 1.526871 * 2) * 1e6         # 200 MHz RF voltage [V]
+#V = (0.911535 * 4 + 1.526871 * 2) * 1e6         # 200 MHz RF voltage [V]
+V = 5.96e6
 phi = 0                                         # 200 MHz phase [-]
 
 
@@ -243,7 +244,7 @@ V_part = 0.5442095845867135
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
 
-Commissioning = CavityFeedbackCommissioning(open_FF=False, debug=False,
+Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=1, FIR_filter=3)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
@@ -368,7 +369,7 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 100
+    nn = 50
     dt_p = 10
     for i in range(nn):
         OTFB.track()

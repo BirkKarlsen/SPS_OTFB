@@ -61,7 +61,7 @@ EXTENDED = False
 CAV_TYPE = 3
 MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
 omit_ind = 5
-shift_P = 25                # [kW]
+shift_P = 0.11                # [%]
 
 # Plots
 PLT_POWER = True
@@ -110,7 +110,7 @@ for i in range(len(ratio_array)):
 if PLT_POWER:
     dt = 8e-9
     t = np.linspace(0, dt * 65536, 65536)
-    ts = np.linspace(0, 4.990159369074305e-09 * 4620, 4620) + (5.37e-6 - 4.412e-6)
+    ts = np.linspace(0, 4.990159369074305e-09 * 4620, 4620) + ((5.981e-6 - 4.983e-6) + (13.643e-6 - 12.829e-6)) / 2
     t_s = 1e6
     P_s = 1e-3
 
@@ -120,16 +120,18 @@ if PLT_POWER:
     if CAV_TYPE == 3:
         pass
         plt.plot(t * t_s, sec3_mean_tot * P_s, color='b', linestyle='--', label='M')
+        plt.plot(t * t_s, sec3_mean_tot * P_s - shift_P * sec3_mean_tot * P_s, color='b', linestyle='--', label='M')
         plt.fill_between(t * t_s, (sec3_mean_tot * 0.80) * P_s, (sec3_mean_tot * 1.20) * P_s, alpha=0.3, color='b')
     else:
         pass
         plt.plot(t * t_s, sec4_mean_tot * P_s, color='b', linestyle='--', label='M')
+        plt.plot(t * t_s, sec4_mean_tot * P_s - shift_P * sec4_mean_tot * P_s, color='b', linestyle='--', label='M')
         plt.fill_between(t * t_s, (sec4_mean_tot * 0.80) * P_s, (sec4_mean_tot * 1.20) * P_s, alpha=0.3, color='b')
     colormap = plt.cm.gist_ncar
     plt.gca().set_prop_cycle(plt.cycler('color', plt.cm.jet(np.linspace(0, 1, Ns))))
 
     for i in range(len(ratio_array) - (len(ratio_array) - omit_ind)):
-        plt.plot(ts * t_s, power[:,i] * P_s + shift_P, label=f'{ratio_array[i]}')
+        plt.plot(ts * t_s, power[:,i] * P_s, label=f'{ratio_array[i]}')
 
     plt.xlim((3.25e-6 * t_s, 1.65e-5 * t_s))
     plt.ylabel(r'Power [kW]')

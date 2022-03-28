@@ -26,6 +26,8 @@ parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 parser.add_argument("--feedforward", "-ff", type=int,
                     help="Option to enable the SPS feed-forward, default is False (0).")
+parser.add_argument("--fir_filter", "-fir", type=int,
+                    help="Option to choose FIR filter for FF, default is only real (1).")
 parser.add_argument("--tx_ratio", "-tr", type=float,
                     help="Option to tweak the optimal transmitter gain, default is 1.")
 
@@ -41,6 +43,7 @@ OTFB_CONFIG = 1
 VOLT_CONFIG = 1
 FREQ_CONFIG = 1
 GLLRF_CONFIG = 1
+FIR_FILTER = 1
 FEEDFORWARD = False
 fit_type = 'fwhm'
 mstdir = ''
@@ -125,6 +128,9 @@ if args.save_dir is not None:
 
 if args.feedforward is not None:
     FEEDFORWARD = bool(args.feedforward)
+
+if args.fir_filter is not None:
+    FIR_FILTER = int(args.fir_filter)
 
 if args.tx_ratio is not None:
     tr = float(args.tx_ratio)

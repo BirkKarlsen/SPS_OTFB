@@ -70,7 +70,7 @@ from SPS.impedance_scenario import scenario, impedance2blond
 
 # TODO: change back - DONE
 fit_type = 'fwhm'
-SINGLE_BATCH = False
+SINGLE_BATCH = True
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = False
 LXPLUS = False                              # TODO: change back before copy to lxplus
@@ -195,7 +195,11 @@ domega = [0, 0]
 #        0.127838041632473 * 0.8]
 G_tx = [1,
         0.8]
-
+G_llrf = 16
+G_tx = [1.0352156647332156,
+        1.077709051028262]
+domega = [0.18433333e6,  # Both at 200.222
+          0.2275e6]
 
 # Objects -------------------------------------------------------------------------------------------------------------
 print('Initializing Objects...\n')
@@ -239,11 +243,11 @@ V_part = 0.5442095845867135
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
 
-Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=1)
+Commissioning = CavityFeedbackCommissioning(open_FF=False, debug=False,
+                                            rot_IQ=1, FIR_filter=3)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=16, df=domega)   # TODO: change back to only 20
+                         G_llrf=16, df=domega, G_ff=1)   # TODO: change back to only 20
 
 
 # Impedance of the SPS
@@ -364,7 +368,7 @@ if SAVE_RESULTS:
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 50
+    nn = 100
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -401,7 +405,7 @@ if not GENERATE:
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
     NEW_PLOTS = False
-    PLOT_MATRIX_ELEMENTS = True
+    PLOT_MATRIX_ELEMENTS = False
     if NEW_PLOTS:
         plt.figure()
         plt.title('Total Voltage')
@@ -516,12 +520,17 @@ if not GENERATE:
         plt.plot(OTFB.OTFB_2.P_GEN[-h:])
 
 
-        plt.figure()
-        plt.plot(gp)
-        plt.plot(bp)
+        beam_ind, gen_ind = dut.find_induced_and_generator(OTFB, rfstation, profile, SPS_rf_tracker)
+        beam_eff_ind = dut.find_effective_induced(OTFB, rfstation, profile, SPS_rf_tracker)
 
         plt.figure()
-        plt.plot(profile.bin_centers, OTFB.phi_corr)
+        plt.title('Induced voltage in 200 MHz TWC')
+        plt.plot((profile.bin_centers - profile.bin_centers[0]) * 1e9, beam_ind * 1e-6, color='b', label='no OTFB')
+        plt.plot((profile.bin_centers - profile.bin_centers[0]) * 1e9, beam_eff_ind* 1e-6, color='r', label='with OTFB')
+        plt.legend()
+        plt.xlim((0, 2500))
+        plt.xlabel('$\Delta t$ [ns]')
+        plt.ylabel('$V_{ind}$ [MV]')
 
 
 

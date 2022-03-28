@@ -56,10 +56,12 @@ def get_power():
 
 
 # Options ---------------------------------------------------------------------
-FREQ_CONFIG = 3
+FREQ_CONFIG = 2
 EXTENDED = False
-CAV_TYPE = 4
-MODE = 2
+CAV_TYPE = 3
+MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
+omit_ind = 5
+shift_P = 25                # [kW]
 
 # Plots
 PLT_POWER = True
@@ -69,7 +71,7 @@ PLT_POWER_PTP = False
 mst_dir = os.getcwd()[:-len('analysis_files/parameter_scan')]
 
 if MODE == 1:
-    data_folder = f'power_scan_fr{FREQ_CONFIG}/'
+    data_folder = f'power_scan_tr_fr{FREQ_CONFIG}/'
 else:
     data_folder = f'power_scan_llrf_fr{FREQ_CONFIG}/'
 data_dir = mst_dir + 'data_files/' + data_folder
@@ -89,9 +91,9 @@ else:
 
 # Get data --------------------------------------------------------------------
 if MODE == 1:
-    sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_29999_tr{ratio_array[0]:.0f}.npy')
+    sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_29000_tr{ratio_array[0]:.0f}.npy')
 else:
-    sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_29999_llrf{ratio_array[0]:.0f}.npy')
+    sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_29000_llrf{ratio_array[0]:.0f}.npy')
 
 power = np.zeros((sample_data.shape[0], len(ratio_array)))
 
@@ -126,8 +128,8 @@ if PLT_POWER:
     colormap = plt.cm.gist_ncar
     plt.gca().set_prop_cycle(plt.cycler('color', plt.cm.jet(np.linspace(0, 1, Ns))))
 
-    for i in range(len(ratio_array) -1):
-        plt.plot(ts * t_s, power[:,i] * P_s, label=f'{ratio_array[i]}')
+    for i in range(len(ratio_array) - (len(ratio_array) - omit_ind)):
+        plt.plot(ts * t_s, power[:,i] * P_s + shift_P, label=f'{ratio_array[i]}')
 
     plt.xlim((3.25e-6 * t_s, 1.65e-5 * t_s))
     plt.ylabel(r'Power [kW]')

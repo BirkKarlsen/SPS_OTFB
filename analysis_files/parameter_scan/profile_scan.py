@@ -40,9 +40,10 @@ def measured_offset():
 
 
 # Options ---------------------------------------------------------------------
-FREQ_CONFIG = 3
+FREQ_CONFIG = 2
 EXTENDED = False
-MODE = 2
+MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
+omit_ind = 10
 
 # Plots
 PLT_PROFILE = True
@@ -52,7 +53,7 @@ PLT_BBB = True
 mst_dir = os.getcwd()[:-len('analysis_files/parameter_scan')]
 
 if MODE == 1:
-    data_folder = f'profile_scan_fr{FREQ_CONFIG}/'
+    data_folder = f'profile_scan_tr_fr{FREQ_CONFIG}/'
 else:
     data_folder = f'profile_scan_llrf_fr{FREQ_CONFIG}/'
 data_dir = mst_dir + 'data_files/' + data_folder
@@ -116,7 +117,7 @@ for i in range(len(ratio_array)):
     bbb_offsets[:, i] = at.find_offset(Bunch_positionsFit[i,:72])
     xs[:, i] = np.linspace(0, len(Bunch_positionsFit[0,:72]), len(Bunch_positionsFit[0,:72]))
 
-omit_ind = 10
+
 bbb_offsets = bbb_offsets[:,:omit_ind]
 xs = xs[:,:omit_ind]
 

@@ -590,16 +590,16 @@ def save_plots_FF(O, dir, i):
     plt.savefig(dir + f'3sec_I_BEAM_COARSE_FF_turn{i}')
 
     plt.figure()
-    plt.suptitle(f'3sec, DV_FF, turn {i}')
+    plt.suptitle(f'3sec, V_FF_CORR, turn {i}')
     plt.subplot(211)
-    plt.plot(np.abs(O.OTFB_1.DV_FF[-O.OTFB_1.n_coarse_FF:]), 'g', label='abs')
+    plt.plot(np.abs(O.OTFB_1.V_FF_CORR[-O.OTFB_1.n_coarse_FF:]), 'g', label='abs')
     plt.legend()
     plt.subplot(212)
-    plt.plot(O.OTFB_1.DV_FF[-O.OTFB_1.n_coarse_FF:].real, 'r', label='real')
-    plt.plot(O.OTFB_1.DV_FF[-O.OTFB_1.n_coarse_FF:].imag, 'b', label='imag')
+    plt.plot(O.OTFB_1.V_FF_CORR[-O.OTFB_1.n_coarse_FF:].real, 'r', label='real')
+    plt.plot(O.OTFB_1.V_FF_CORR[-O.OTFB_1.n_coarse_FF:].imag, 'b', label='imag')
     plt.legend()
 
-    plt.savefig(dir + f'3sec_DV_FF_turn{i}')
+    plt.savefig(dir + f'3sec_V_FF_CORR_turn{i}')
 
     # 4 section
     plt.figure()
@@ -615,16 +615,16 @@ def save_plots_FF(O, dir, i):
     plt.savefig(dir + f'4sec_I_BEAM_COARSE_FF_turn{i}')
 
     plt.figure()
-    plt.suptitle(f'4sec, DV_FF, turn {i}')
+    plt.suptitle(f'4sec, V_FF_CORR, turn {i}')
     plt.subplot(211)
-    plt.plot(np.abs(O.OTFB_2.DV_FF[-O.OTFB_2.n_coarse_FF:]), 'g', label='abs')
+    plt.plot(np.abs(O.OTFB_2.V_FF_CORR[-O.OTFB_2.n_coarse_FF:]), 'g', label='abs')
     plt.legend()
     plt.subplot(212)
-    plt.plot(O.OTFB_2.DV_FF[-O.OTFB_2.n_coarse_FF:].real, 'r', label='real')
-    plt.plot(O.OTFB_2.DV_FF[-O.OTFB_2.n_coarse_FF:].imag, 'b', label='imag')
+    plt.plot(O.OTFB_2.V_FF_CORR[-O.OTFB_2.n_coarse_FF:].real, 'r', label='real')
+    plt.plot(O.OTFB_2.V_FF_CORR[-O.OTFB_2.n_coarse_FF:].imag, 'b', label='imag')
     plt.legend()
 
-    plt.savefig(dir + f'4sec_DV_FF_turn{i}')
+    plt.savefig(dir + f'4sec_V_FF_CORR_turn{i}')
 
 
 def bunch_params(profile, get_72 = True):

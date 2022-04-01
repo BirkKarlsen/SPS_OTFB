@@ -244,8 +244,8 @@ V_part = 0.5442095845867135
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
 
-Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=1, FIR_filter=3)
+Commissioning = CavityFeedbackCommissioning(open_FF=False, debug=False,
+                                            rot_IQ=1, FIR_filter=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
                          G_llrf=16, df=domega, G_ff=1)   # TODO: change back to only 20
@@ -364,13 +364,19 @@ if SAVE_RESULTS:
     if not os.path.exists(sdir):
         os.makedirs(lxdir + sim_dir + f'sim_data/')
 
+print('omega_c', OTFB.OTFB_1.omega_c)
+print('omega_r', OTFB.OTFB_1.omega_r)
+print('t_rf', rfstation.t_rf[0,0])
+print('tau', OTFB.OTFB_1.TWC.tau)
+print('T_s', OTFB.OTFB_1.T_s)
+
 
 
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 50
-    dt_p = 10
+    nn = 2
+    dt_p = 1
     for i in range(nn):
         OTFB.track()
         #SPS_tracker.track()

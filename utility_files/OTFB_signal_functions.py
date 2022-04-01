@@ -6,6 +6,7 @@ author: Birk Emil Karlsen-Bæck
 
 # Imports ---------------------------------------------------------------------
 import numpy as np
+import matplotlib.pyplot as plt
 
 from blond.llrf.signal_processing import comb_filter, cartesian_to_polar, \
     polar_to_cartesian, modulator, moving_average, \
@@ -54,5 +55,39 @@ def mod_to_frf(omega_c, omega_r, t_rf, dphi_mod, dphi_rf, DV_MOV_AVG):
 
 
 
+def feedforward(sig, omega_c, omega_r, t_rf, tau, dphi_mod, dphi_rf, T_s, coeff_FF):
+    n_coarse_FF = len(sig)
+    n_FF = len(coeff_FF)
+    n_FF_delay = int(0.5 * (n_FF - 1) + 0.5 * tau/t_rf/5)
 
+    I_BEAM_COARSE_FF_MOD = np.zeros(2 * len(sig), dtype=complex)
+    I_FF_CORR = np.zeros(2 * len(sig), dtype=complex)
+    I_FF_CORR_MOD = np.zeros(2 * len(sig), dtype=complex)
+    I_FF_CORR_DEL = np.zeros(2 * len(sig), dtype=complex)
 
+    for i in range(2):
+        # Do a down-modulation to the resonant frequency of the TWC
+        I_BEAM_COARSE_FF_MOD[:n_coarse_FF] = I_BEAM_COARSE_FF_MOD[-n_coarse_FF:]
+        I_BEAM_COARSE_FF_MOD[-n_coarse_FF:] = modulator(sig, omega_i=omega_c, omega_f=omega_r,
+                                                        T_sampling=5 * T_s,
+                                                        phi_0=(dphi_mod + dphi_rf))
+
+        I_FF_CORR[:n_coarse_FF] = I_FF_CORR[-n_coarse_FF:]
+        I_FF_CORR[-n_coarse_FF:] = np.zeros(n_coarse_FF)
+        for ind in range(n_coarse_FF, 2 * n_coarse_FF):
+            for k in range(n_FF):
+                I_FF_CORR[ind] += coeff_FF[k] \
+                                       * I_BEAM_COARSE_FF_MOD[ind - k]
+
+        # Do a down-modulation to the resonant frequency of the TWC
+        I_FF_CORR_MOD[:n_coarse_FF] = I_FF_CORR_MOD[-n_coarse_FF:]
+        I_FF_CORR_MOD[-n_coarse_FF:] = modulator(I_FF_CORR[-n_coarse_FF:],
+                                                           omega_i=omega_r, omega_f=omega_c,
+                                                           T_sampling=5 * T_s,
+                                                           phi_0=-(dphi_mod + dphi_rf))
+
+        # Compensate for FIR filter delay
+        I_FF_CORR_DEL[:n_coarse_FF] = I_FF_CORR_DEL[-n_coarse_FF:]
+        I_FF_CORR_DEL[-n_coarse_FF:] = I_FF_CORR_MOD[n_FF_delay:n_FF_delay - n_coarse_FF]
+
+    return I_FF_CORR_DEL

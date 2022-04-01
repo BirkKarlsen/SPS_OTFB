@@ -56,7 +56,7 @@ def get_power():
 
 
 # Options ---------------------------------------------------------------------
-FREQ_CONFIG = 2
+FREQ_CONFIG = 3
 EXTENDED = False
 CAV_TYPE = 3
 MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
@@ -64,7 +64,7 @@ omit_ind = 5
 shift_P = 0.11                # [%]
 
 # Plots
-PLT_POWER = True
+PLT_POWER = False
 PLT_POWER_PTP = False
 
 # Directories -----------------------------------------------------------------
@@ -117,15 +117,18 @@ if PLT_POWER:
     sec3_mean_tot, sec3_std_tot, sec4_mean_tot, sec4_std_tot = get_power()
 
     plt.figure()
+
+    plt.title('3-section Power for $f_c =$ 200.1 MHz')
+
     if CAV_TYPE == 3:
         pass
         plt.plot(t * t_s, sec3_mean_tot * P_s, color='b', linestyle='--', label='M')
-        plt.plot(t * t_s, sec3_mean_tot * P_s - shift_P * sec3_mean_tot * P_s, color='b', linestyle='--', label='M')
+        #plt.plot(t * t_s, sec3_mean_tot * P_s - shift_P * sec3_mean_tot * P_s, color='b', linestyle='--', label='M')
         plt.fill_between(t * t_s, (sec3_mean_tot * 0.80) * P_s, (sec3_mean_tot * 1.20) * P_s, alpha=0.3, color='b')
     else:
         pass
         plt.plot(t * t_s, sec4_mean_tot * P_s, color='b', linestyle='--', label='M')
-        plt.plot(t * t_s, sec4_mean_tot * P_s - shift_P * sec4_mean_tot * P_s, color='b', linestyle='--', label='M')
+        #plt.plot(t * t_s, sec4_mean_tot * P_s - shift_P * sec4_mean_tot * P_s, color='b', linestyle='--', label='M')
         plt.fill_between(t * t_s, (sec4_mean_tot * 0.80) * P_s, (sec4_mean_tot * 1.20) * P_s, alpha=0.3, color='b')
     colormap = plt.cm.gist_ncar
     plt.gca().set_prop_cycle(plt.cycler('color', plt.cm.jet(np.linspace(0, 1, Ns))))

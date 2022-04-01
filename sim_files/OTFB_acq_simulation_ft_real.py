@@ -463,11 +463,11 @@ if not GEN:
     OTFB.OTFB_1.calc_power()
     OTFB.OTFB_2.calc_power()
     dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_tot)
-    dut.plot_bbb_offset(pos_fit_arr[:72, n - 1], lxdir + sim_dir + f'fig/', N_tot)
+    dut.plot_bbb_offset(pos_fit_arr[:72, n - 1], 4, lxdir + sim_dir + f'fig/', N_tot)
 
     # Save the results to their respective directories
     if SAVE_RESULTS:
-        dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
+        dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', N_tot)
 
         if not os.path.exists(lxdir + sim_dir + f'profile_data/'):
             os.makedirs(lxdir + sim_dir + f'profile_data/')

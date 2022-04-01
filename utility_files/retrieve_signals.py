@@ -23,6 +23,8 @@ parser.add_argument("--extended", "-ext", type=int,
                     help="Option to pass one if the scan was extended or not")
 parser.add_argument("--date_str", "-ds", type=str,
                     help="Option to specify the date of the simulations„ default is 'Mar-17-2022/'.")
+parser.add_argument("--voltage_error", "-ve", type=float,
+                    help="Option to retrieve signals from simulations with an error in the voltage.")
 
 args = parser.parse_args()
 
@@ -68,6 +70,9 @@ if not os.path.exists(save_dir + save_name):
 # Search for the data within the given directory
 for i in range(len(ratio_array)):
     sim_dir_i = data_dir + f'scan_fr{FREQ_CONFIG}_tr_{100 * ratio_array[i]:.0f}/' + dir_within_sim
+    if args.voltage_error is not None:
+        sim_dir_i = data_dir + f'scan_fr{FREQ_CONFIG}_ve{100 * args.voltage_error:.0f}_tr_{100 * ratio_array[i]:.0f}/' \
+                    + dir_within_sim
 
     # Find all files for the given signal type prefix
     file_list = []

@@ -40,14 +40,14 @@ def measured_offset():
 
 
 # Options ---------------------------------------------------------------------
-FREQ_CONFIG = 2
+FREQ_CONFIG = 3
 EXTENDED = False
 MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
 omit_ind = 10
 
 # Plots
-PLT_PROFILE = True
-PLT_BBB = True
+PLT_PROFILE = False
+PLT_BBB = False
 
 # Directories -----------------------------------------------------------------
 mst_dir = os.getcwd()[:-len('analysis_files/parameter_scan')]
@@ -126,7 +126,7 @@ if PLT_BBB:
     m, ms = measured_offset()
     colormap = plt.cm.gist_ncar
     plt.figure()
-    plt.title(f'200.1 MHz scan')
+    plt.title(f'Bunch-by-bunch Offset for $f_c =$ 200.1 MHz')
     plt.gca().set_prop_cycle(plt.cycler('color', plt.cm.jet(np.linspace(0, 1, Ns))))
     plt.fill_between(xs[:,0], (m - ms) * 1e3, (m + ms) * 1e3,
                      color='b', alpha=0.3)

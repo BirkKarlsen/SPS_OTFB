@@ -26,13 +26,13 @@ plt.rcParams.update({
     })
 
 # Parameters ------------------------------------------------------------------
-FREQ_CONFIG = 1
+FREQ_CONFIG = 3
 EXTENDED = False
-VOLT_ERR = False
-voltage_error = 1
+VOLT_ERR = True
+voltage_error = 0.89
 CAV_TYPE = 3
-MODE = 1                    # MODE 1 is transmitter gain, MODE 2 is LLRF
-omit_ind = 10
+MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
+omit_ind = 5
 shift_P = 0.11                # [%]
 
 
@@ -86,7 +86,7 @@ for i in range(len(ratio_array)):
 
 # Get bunch-by-bunch offset data ----------------------------------------------
 if MODE == 1:
-    sample_data = np.load(prof_data_dir + f'profile_29999_tr{ratio_array[0]:.0f}.npy')
+    sample_data = np.load(prof_data_dir + f'profile_29000_tr{ratio_array[0]:.0f}.npy')
 else:
     sample_data = np.load(prof_data_dir + f'profile_29000_llrf{ratio_array[0]:.0f}.npy')
 
@@ -146,7 +146,7 @@ fig, ax = plt.subplots(1, 2, figsize=(12, 5))
 
 cmap = plt.get_cmap('jet')
 colors = cmap(np.linspace(0, 1, Ns))
-fig.suptitle(f'$f_r =$ 200.038 MHz, $V =$ 6.7 MV')
+fig.suptitle(f'$f_r =$ 200.1 MHz, $V =$ 5.96 MV')
 
 # Power plot
 ax[1].set_title('Power, 3-section')
@@ -180,13 +180,13 @@ colors = cmap(np.linspace(0, 1, Ns))
 ax[0].fill_between(xs[:,0], (m - ms) * 1e3, (m + ms) * 1e3, color='b', alpha=0.3)
 ax[0].plot(xs[:,0], m * 1e3, linestyle='--', color='b', alpha=1, label='M')
 
-for i in range(len(ratio_array) - omit_ind):
+for i in range(omit_ind):
     ax[0].plot(xs[:, i], bbb_offsets[:, i] * 1e3, label=f'{ratio_array[i]}', color=colors[i])
 
 
 
 handles, labels = ax[1].get_legend_handles_labels()
-#fig.legend(handles, labels, loc='center right', bbox_to_anchor=(1.01, 0.5))
+fig.legend(handles, labels, loc='center right', bbox_to_anchor=(1.01, 0.5))
 
 
 plt.show()

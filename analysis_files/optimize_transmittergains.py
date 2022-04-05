@@ -69,8 +69,8 @@ df = [0,                   # Measured
 #df = [0.71266666e6,         # Other side of omega_rf
 #      0.799e6]
 tr = 0.65
-G_tx = [0.80,
-        0.80]
+G_tx = [0.50,
+        0.37]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)
@@ -209,7 +209,6 @@ beam = Beam(ring, N_m, N_p)
 profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0]*(1000 + 0.1),
     cut_right=rfstation.t_rev[0], n_slices=2**7 * 4620))
 
-bigaussian(ring, rfstation, beam, sigma_dt)
 
 
 # SPS cavity controller

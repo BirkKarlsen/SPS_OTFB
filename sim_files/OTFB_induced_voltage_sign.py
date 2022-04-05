@@ -194,7 +194,7 @@ domega = [0, 0]
 #        0.429420301179296]
 #G_tx = [0.163212561182363 * 0.8,
 #        0.127838041632473 * 0.8]
-G_tx = [1,
+G_tx = [0.8,
         0.8]
 G_llrf = 16
 G_tx = [1.0352156647332156,
@@ -244,7 +244,7 @@ V_part = 0.5442095845867135
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
 
-Commissioning = CavityFeedbackCommissioning(open_FF=False, debug=False,
+Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
                                             rot_IQ=1, FIR_filter=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
@@ -375,8 +375,8 @@ print('T_s', OTFB.OTFB_1.T_s)
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 2
-    dt_p = 1
+    nn = 100
+    dt_p = 10
     for i in range(nn):
         OTFB.track()
         #SPS_tracker.track()

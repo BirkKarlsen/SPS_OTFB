@@ -208,10 +208,8 @@ if args.gllrf_config is not None:
                     1.502249000727316 * 0.65]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            #G_tx = [0.80,
-            #        0.80]
-            G_tx = [1.0,
-                    1.0]
+            G_tx = [0.80,
+                    0.80]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
             G_tx = [0.80,

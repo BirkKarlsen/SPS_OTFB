@@ -28,12 +28,13 @@ t = np.linspace(0, T, T_n)
 sin_sig_i = np.sin(omega_i * t)
 
 # In I/Q
-sin_sig_i_IQ = -np.ones(T_n) * 1j
+sin_sig_i_IQ = np.ones(T_n) * (0 - 1j * 1)
 
 # Modulate signal -------------------------------------------------------------
 sin_sig_mod_IQ = modulator(sin_sig_i_IQ, omega_i, omega_f, T_sampling)
 
-sin_sig_mod = np.abs(sin_sig_mod_IQ) * np.cos(omega_i * t + np.angle(sin_sig_mod_IQ))
+# omega_i * t + np.angle(sin_sig_mod_IQ)
+sin_sig_mod = np.abs(sin_sig_mod_IQ) * np.sin(omega_i * t + np.pi/2 - np.angle(sin_sig_mod_IQ))
 sin_sig_f = np.sin(omega_f * t)
 
 plt.figure()
@@ -45,7 +46,7 @@ plt.plot(sin_sig_f)
 
 
 sin_sig_mod_mod_IQ = modulator(sin_sig_mod_IQ, omega_f, omega_i, T_sampling)
-sin_sig_mod_mod = np.abs(sin_sig_mod_mod_IQ) * np.cos(omega_i * t + np.angle(sin_sig_mod_mod_IQ))
+sin_sig_mod_mod = np.abs(sin_sig_mod_mod_IQ) * np.sin(omega_i * t + np.pi/2 - np.angle(sin_sig_mod_mod_IQ))
 
 
 plt.figure()

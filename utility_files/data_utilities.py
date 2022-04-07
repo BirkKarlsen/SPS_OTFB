@@ -736,7 +736,7 @@ def plot_induced_voltage(tracker, total_ind):
     pass
 
 
-def plot_bbb_offset(pos_fit, N_batches, sdir, i):
+def plot_bbb_offset(pos_fit, N_batches, sdir, i, show=False):
     plt.figure()
     plt.title(f'bunch-by-bunch offset, turn {i}')
     pos_fit = pos_fit.reshape((N_batches, 72))
@@ -750,6 +750,10 @@ def plot_bbb_offset(pos_fit, N_batches, sdir, i):
     plt.ylabel('Offset [ns]')
     plt.legend()
     plt.savefig(sdir + f"bbb_offset_{i}")
+    if show:
+        plt.show()
+    else:
+        plt.savefig(sdir + f"bbb_offset_{i}")
 
 
 def find_induced_and_generator(OTFB, rfstation, profile, tracker):

@@ -196,7 +196,7 @@ domega = [0, 0]
 #        0.127838041632473 * 0.8]
 G_tx = [1.0,
         1.0]
-G_llrf = 16
+G_llrf = 20
 #G_tx = [1.0352156647332156,
 #        1.077709051028262]
 #domega = [0.18433333e6,  # Both at 200.222
@@ -539,6 +539,8 @@ if not GENERATE:
         plt.xlabel('$\Delta t$ [ns]')
         plt.ylabel('$V_{ind}$ [MV]')
 
+        fwhm_arr, pos_arr, pos_fit_arr, x_72, y_72 = dut.bunch_params(profile, get_72=False)
+        dut.plot_bbb_offset(pos_fit_arr, 1, '', 0, show=True)
 
 
     if PLOT_MATRIX_ELEMENTS:

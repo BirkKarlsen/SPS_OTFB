@@ -69,8 +69,8 @@ df = [0,                   # Measured
 #df = [0.71266666e6,         # Other side of omega_rf
 #      0.799e6]
 tr = 0.65
-G_tx = [1.3,
-        1.3]
+G_tx = [1.0,
+        1.0]
 
 if args.bisect is not None:
     BISECT = bool(args.bisect)

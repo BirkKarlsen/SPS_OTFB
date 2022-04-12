@@ -18,42 +18,6 @@ plt.rcParams.update({
         'font.size': 16
     })
 
-# Measurement function --------------------------------------------------------
-def get_power():
-    dt = 8e-9
-    t = np.linspace(0, dt * 65536, 65536)
-    sec3_data = np.zeros((65536, 4, 3))
-    sec4_data = np.zeros((65536, 2, 3))
-
-    for i in range(6):
-        for j in range(3):
-            if i == 0:
-                sec3_data[:, 0, j] = np.load(f'../../data_files/power_measurements/power_cav{i + 1}_meas{j}.npy')
-            elif i == 1:
-                sec3_data[:, 1, j] = np.load(f'../../data_files/power_measurements/power_cav{i + 1}_meas{j}.npy')
-            elif i == 2:
-                sec4_data[:, 0, j] = np.load(f'../../data_files/power_measurements/power_cav{i + 1}_meas{j}.npy')
-            elif i == 3:
-                sec3_data[:, 2, j] = np.load(f'../../data_files/power_measurements/power_cav{i + 1}_meas{j}.npy')
-            elif i == 4:
-                sec3_data[:, 3, j] = np.load(f'../../data_files/power_measurements/power_cav{i + 1}_meas{j}.npy')
-            elif i == 5:
-                sec4_data[:, 1, j] = np.load(f'../../data_files/power_measurements/power_cav{i + 1}_meas{j}.npy')
-
-    sec3_mean = np.mean(sec3_data, axis=2)
-    sec3_mean_tot = np.mean(sec3_mean, axis=1)
-
-    sec3_std = np.mean(sec3_data, axis=2)
-    sec3_std_tot = np.std(sec3_std, axis=1)
-
-    sec4_mean = np.mean(sec4_data, axis=2)
-    sec4_mean_tot = np.mean(sec4_mean, axis=1)
-
-    sec4_std = np.mean(sec4_data, axis=2)
-    sec4_std_tot = np.std(sec4_std, axis=1)
-
-    return sec3_mean_tot, sec3_std_tot, sec4_mean_tot, sec4_std_tot
-
 
 # Options ---------------------------------------------------------------------
 FREQ_CONFIG = 3

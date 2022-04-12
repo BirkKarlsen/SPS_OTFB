@@ -15,7 +15,7 @@ import utility_files.data_utilities as dut
 import utility_files.analysis_tools as at
 
 # Functions from related files
-from power_scan import get_power
+from analysis_files.measurement_analysis.import_data import get_power
 from profile_scan import measured_offset
 
 plt.rcParams.update({

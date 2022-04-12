@@ -37,7 +37,7 @@ def convert_to_IQ(omega, omega_c, t):
     return modulator(sig, omega_i=omega_c, omega_f=omega, T_sampling=T_s)
 
 
-def init_OTFB(df=0, set_point=0, n_pretrack=0, G_tx=1, G_llrf=20):
+def init_OTFB(df=0, set_point=0, n_pretrack=0, G_tx=1, G_llrf=20, n_sections=3):
     C = 2 * np.pi * 1100.009            # Ring circumference [m]
     gamma_t = 18.0                      # Gamma at transition
     alpha = 1 / gamma_t ** 2            # Momentum compaction factor
@@ -71,7 +71,7 @@ def init_OTFB(df=0, set_point=0, n_pretrack=0, G_tx=1, G_llrf=20):
     Commissioning = CavityFeedbackCommissioning(open_FF=True, open_loop=True, open_drive=False,
                                                 V_SET=set_point * np.ones(2 * h),
                                                 excitation=True)
-    OTFB = SPSOneTurnFeedback(rf, beam, profile, n_sections=3, n_cavities=1, G_llrf=G_llrf,
+    OTFB = SPSOneTurnFeedback(rf, beam, profile, n_sections=n_sections, n_cavities=1, G_llrf=G_llrf,
                               G_tx=G_tx, a_comb=31 / 32, df=df, V_part=1,
                               Commissioning=Commissioning)
 

@@ -72,16 +72,16 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=0.e-9,
 V_part = 0.5442095845867135
 # TODO: Run with Gtx of 1
 
-G_tx_ls = [0.2712028956, 0.58279606]
+G_tx_ls = [1.0, 1.0]
 #G_llrf_ls = [41.751786, 35.24865]
 #llrf_g = G_llrf_ls
 
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=-1)
+                                            rot_IQ=1)
 OTFB = SPSOneTurnFeedback(rfstation, beam, profile, 3, V_part=1,
-                         Commissioning=Commissioning, G_tx=1, a_comb=63/64,
-                         G_llrf=10)   # TODO: change back to only 20
+                         Commissioning=Commissioning, G_tx=0.9, a_comb=31/32,
+                         G_llrf=20)   # TODO: change back to only 20
 
 
 for i in range(N_t):

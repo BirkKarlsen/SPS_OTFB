@@ -47,7 +47,7 @@ NOISE_TYPE = 'white'
 # White noise
 noise_amp = 0.5 * 1e6
 set_point = 1e6
-noise_length = 4000
+noise_length = 2000
 
 # Sine noise
 sine_amp = 100
@@ -91,7 +91,8 @@ for i in range(len(input_freq)):
     if i % (n_samples/10) == 0:
         print(f'Turn {i}')
 
-    OTFB = naf.init_OTFB(df=df, set_point=set_point, n_pretrack=1000, G_tx=1 * 20 / 18, G_llrf=20)
+    OTFB = naf.init_OTFB(df=df, set_point=set_point, n_pretrack=1000, G_tx=1, G_llrf=20,
+                         n_sections=3)
     signal = sine_amp * naf.convert_to_IQ(input_freq[i], omega_rf, t)
     signal1 = naf.generate_sinusoid(input_freq[i] - omega_rf, t)
 
@@ -137,54 +138,57 @@ if NOISE_TYPE == 'white':
 
     TF = TransferFunction(signal, output, T_s= 2 * np.pi / omega_rf, plot=False)
     TF.analyse(data_cut=0)
-    n_harm = 10
-    ind_min = dut.find_nearest_index(TF.f_est, 0) #-n_harm * f_rev)
-    ind_max = dut.find_nearest_index(TF.f_est, n_harm * f_rev)
-
-    print(TF.f_est[ind_min], TF.f_est[ind_max])
+    n_harm = 20
 
     central_ind = dut.find_nearest_index(TF.f_est, 0)
+
+    TF.H_est[central_ind] = 0
+    TF.H_est[central_ind + 1] = 0
+    TF.H_est[central_ind - 1] = 0
+
+    max_val_ind = np.argmax(TF.H_est)
+    #dff = TF.f_est[max_val_ind]
+    dff = -356e3 + df
+    #dff = -399e3 + df
+    ind_min = dut.find_nearest_index(TF.f_est, -n_harm * f_rev + dff)
+    ind_max = dut.find_nearest_index(TF.f_est, n_harm * f_rev + dff)
+    max_val_ind = dut.find_nearest_index(TF.f_est, dff)
 
     f = TF.f_est[ind_min:ind_max]
     H = TF.H_est[ind_min:ind_max]
 
-    H[central_ind - ind_min] = 0
-    H[central_ind - ind_min + 1] = 0
-
-    Hf = H #* np.exp(1j * 120 * np.pi / 180)
+    print(TF.f_est[max_val_ind])
 
     plt.figure()
     plt.subplot(211)
-    plt.plot(f, np.log(np.abs(Hf)))
+    plt.plot(f, np.log(np.abs(H)))
     plt.subplot(212)
-    plt.plot(f, np.angle(Hf))
+    plt.plot(f, np.angle(H))
 
-    plt.figure(figsize=(10,10))
+    plt.figure()
+    plt.subplot(211)
+    plt.plot(f[:max_val_ind - ind_min], np.log(np.abs(H[:max_val_ind - ind_min])))
+    plt.plot(f[max_val_ind - ind_min - 1::-1], np.log(np.abs(H[-(max_val_ind - ind_min):])))
+    plt.subplot(212)
+    plt.plot(f[:max_val_ind - ind_min], np.angle(H[:max_val_ind - ind_min]))
+    plt.plot(f[max_val_ind - ind_min - 1::-1], np.angle(H[-(max_val_ind - ind_min):]))
+
+
+    plt.figure(figsize=(6, 6))
     plt.title('$f_{rf} = 200.394$ MHz, $f_{r} = 200.038$ MHz')
     n_points = int((ind_max - ind_min) / (n_harm))
     ddomega = 2 * np.pi * (200.038 + df)  - omega_rf
-    vec = 20 * (np.cos(ddomega * OTFB.TWC.tau / 2) + 1j * np.sin(ddomega * OTFB.TWC.tau / 2))
-    plt.plot(vec.real, vec.imag)
+    #vec = 20 * (np.cos(ddomega * OTFB.TWC.tau / 2) + 1j * np.sin(ddomega * OTFB.TWC.tau / 2))
+    #plt.plot([0, vec.real], [0, vec.imag])
     for i in range(n_harm):
-        plt.plot(Hf.real[i * n_points: (i + 1) * n_points],
-                 Hf.imag[i * n_points: (i + 1) * n_points])
-    plt.xlim((-20, 20))
-    plt.ylim((-20, 20))
+        plt.plot(H.real[i * n_points: (i + 1) * n_points],
+                 H.imag[i * n_points: (i + 1) * n_points])
+    plt.xlim((-25, 25))
+    plt.ylim((-25, 25))
+    plt.xlabel('Re')
+    plt.ylabel('Im')
     plt.grid()
 
-
-    #signal_f = nfft.fftshift(nfft.fft(signal))
-    #output_f = nfft.fftshift(nfft.fft(output))
-    #f = nfft.fftshift(nfft.fftfreq(len(signal), d=2 * np.pi / omega_rf))
-    #plt.figure()
-    #plt.title('abs')
-    #plt.plot(f, np.log(np.abs(output_f / signal_f)))
-    #plt.xlim((-10e6, 10e6))
-
-    #plt.figure()
-    #plt.title('phase')
-    #plt.plot(f, np.angle(output_f / signal_f))
-    #plt.xlim((-10e6, 10e6))
 
 
 if NOISE_TYPE == 'sine':

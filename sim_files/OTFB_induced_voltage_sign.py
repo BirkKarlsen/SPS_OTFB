@@ -375,7 +375,7 @@ print('T_s', OTFB.OTFB_1.T_s)
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 100
+    nn = 30
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -412,7 +412,7 @@ if not GENERATE:
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
     NEW_PLOTS = False
-    PLOT_MATRIX_ELEMENTS = False
+    PLOT_MATRIX_ELEMENTS = True
     if NEW_PLOTS:
         plt.figure()
         plt.title('Total Voltage')

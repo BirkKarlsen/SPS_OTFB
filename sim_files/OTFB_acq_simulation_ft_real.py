@@ -21,7 +21,7 @@ parser.add_argument("--volt_config", "-vc", type=int,
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
 parser.add_argument("--gllrf_config", "-gc", type=int,
-                    help="Different configurations of G_llrf to fo parameter scan.")
+                    help="Different configurations of G_llrf for parameter scan.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 parser.add_argument("--feedforward", "-ff", type=int,
@@ -92,7 +92,7 @@ phi = 0                                         # 200 MHz phase [-]
 V_part = 0.5442095845867135                     # Voltage partitioning [-]
 G_tx = [1,
         1]
-G_llrf = 16
+G_llrf = 20
 df = [0,
       0]
 G_ff = 1
@@ -177,18 +177,18 @@ elif VOLT_CONFIG == 3:
     V_part = 0.5434907802323814
 
 if FREQ_CONFIG == 1:
-    G_tx = [1 * tr,
-            1 * tr]
+    G_tx = [1.0 * tr,
+            1.0 * tr]
 elif FREQ_CONFIG == 2:
     df = [0.18433333e6,  # Both at 200.222
           0.2275e6]
-    G_tx = [1.0352156647332151 * tr,
-            1.077709051028262 * tr]
+    G_tx = [1.0 * tr,
+            1.0 * tr]
 elif FREQ_CONFIG == 3:
     df = [62333.333,  # Both at 200.1
           105500]
-    G_tx = [1.1180633496145078 * tr,
-            1.2439306616383181 * tr]
+    G_tx = [1.0 * tr,
+            1.0 * tr]
 
 if args.gllrf_config is not None:
     if FREQ_CONFIG == 1:
@@ -196,70 +196,70 @@ if args.gllrf_config is not None:
               0]
         if GLLRF_CONFIG == 1:
             G_llrf = 5
-            G_tx = [1.1648584800986386,
-                    1.4564159619446317]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 2:
             G_llrf = 10
-            G_tx = [1.1774737926193093,
-                    1.4983080316713226]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 3:
             G_llrf = 14
-            G_tx = [1.1815415154561475 * 0.65,
-                    1.502249000727316 * 0.65]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            G_tx = [0.80,
-                    0.80]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            G_tx = [0.80,
-                    0.80]
+            G_tx = [0.3/0.33 * tr,
+                    0.3/0.33 * tr]
     elif FREQ_CONFIG == 2:
         df = [0.18433333e6,  # Both at 200.222
               0.2275e6]
         if GLLRF_CONFIG == 1:
             G_llrf = 5
-            G_tx = [1.0317735694097596 * tr,
-                    1.0710520614580732 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 2:
             G_llrf = 10
-            G_tx = [1.0341903556357148 * tr,
-                    1.0757240557694563 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 3:
             G_llrf = 14
-            G_tx = [1.0349649477141394 * tr,
-                    1.0772235174474414 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            G_tx = [1.0352156647332156 * tr,
-                    1.077709051028262 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            G_tx = [1.035573923897336 * tr,
-                    1.0784030056522707 * tr]
+            G_tx = [0.3/0.33 * tr,
+                    0.3/0.33 * tr]
     elif FREQ_CONFIG == 3:
         df = [62333.333,  # Both at 200.1
               105500]
         if GLLRF_CONFIG == 1:
             G_llrf = 5
-            G_tx = [1.1067988416724432 * tr,
-                    1.2198386723730976 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 2:
             G_llrf = 10
-            G_tx = [1.1146994926588105 * tr,
-                    1.2367097833279674 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 3:
             G_llrf = 14
-            G_tx = [1.1172401859286643 * tr,
-                    1.2421617290781886 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 4:
             G_llrf = 16
-            G_tx = [1.1180633496145078 * tr,
-                    1.2439306616383181 * tr]
+            G_tx = [1.0 * tr,
+                    1.0 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            G_tx = [1.1192402524102003 * tr,
-                    1.246461850104049 * tr]
+            G_tx = [0.3/0.33 * tr,
+                    0.3/0.33 * tr]
 
 
 N_tot = N_t + N_ir

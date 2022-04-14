@@ -12,6 +12,7 @@ import os
 from scipy.stats import linregress
 import utility_files.data_utilities as dut
 import utility_files.analysis_tools as at
+from analysis_files.measurement_analysis.sps_cable_transferfunction_script import cables_tranfer_function
 
 plt.rcParams.update({
         'text.usetex': True,
@@ -40,14 +41,15 @@ def measured_offset():
 
 
 # Options ---------------------------------------------------------------------
-FREQ_CONFIG = 3
+FREQ_CONFIG = 1
 EXTENDED = False
 MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
 omit_ind = 10
+APPLY_CTF = False
 
 # Plots
-PLT_PROFILE = False
-PLT_BBB = False
+PLT_PROFILE = True
+PLT_BBB = True
 
 # Directories -----------------------------------------------------------------
 mst_dir = os.getcwd()[:-len('analysis_files/parameter_scan')]
@@ -92,6 +94,11 @@ for i in range(len(ratio_array)):
                 sample_i = np.load(data_dir + file)
                 profiles[:, i] = sample_i[:, 0]
                 bins[:, i] = sample_i[:, 1]
+
+if APPLY_CTF:
+    for i in range(bins.shape[1]):
+        CTF_profile_i = cables_tranfer_function(bins[:,i], profiles[:,i])
+        profiles[:,i] = CTF_profile_i * np.max(profiles[:,i]) / np.max(CTF_profile_i)
 
 if PLT_PROFILE:
     plt.figure()

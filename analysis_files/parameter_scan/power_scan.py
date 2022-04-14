@@ -8,8 +8,7 @@ Author: Birk Emil Karlsen-Bæck
 import numpy as np
 import matplotlib.pyplot as plt
 import os
-import utility_files.data_utilities as dut
-import utility_files.analysis_tools as at
+from analysis_files.measurement_analysis.import_data import get_power
 
 plt.rcParams.update({
         'text.usetex': True,

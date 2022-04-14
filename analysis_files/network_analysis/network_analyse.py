@@ -92,7 +92,7 @@ for i in range(len(input_freq)):
         print(f'Turn {i}')
 
     OTFB = naf.init_OTFB(df=df, set_point=set_point, n_pretrack=1000, G_tx=1, G_llrf=20,
-                         n_sections=3)
+                         n_sections=4)
     signal = sine_amp * naf.convert_to_IQ(input_freq[i], omega_rf, t)
     signal1 = naf.generate_sinusoid(input_freq[i] - omega_rf, t)
 
@@ -138,7 +138,7 @@ if NOISE_TYPE == 'white':
 
     TF = TransferFunction(signal, output, T_s= 2 * np.pi / omega_rf, plot=False)
     TF.analyse(data_cut=0)
-    n_harm = 20
+    n_harm = 5
 
     central_ind = dut.find_nearest_index(TF.f_est, 0)
 
@@ -148,8 +148,8 @@ if NOISE_TYPE == 'white':
 
     max_val_ind = np.argmax(TF.H_est)
     #dff = TF.f_est[max_val_ind]
-    dff = -356e3 + df
-    #dff = -399e3 + df
+    #dff = -356e3 + df
+    dff = -399e3 + df
     ind_min = dut.find_nearest_index(TF.f_est, -n_harm * f_rev + dff)
     ind_max = dut.find_nearest_index(TF.f_est, n_harm * f_rev + dff)
     max_val_ind = dut.find_nearest_index(TF.f_est, dff)
@@ -176,11 +176,11 @@ if NOISE_TYPE == 'white':
 
     plt.figure(figsize=(6, 6))
     plt.title('$f_{rf} = 200.394$ MHz, $f_{r} = 200.038$ MHz')
-    n_points = int((ind_max - ind_min) / (n_harm))
+    n_points = int((ind_max - ind_min) / (2 * n_harm))
     ddomega = 2 * np.pi * (200.038 + df)  - omega_rf
     #vec = 20 * (np.cos(ddomega * OTFB.TWC.tau / 2) + 1j * np.sin(ddomega * OTFB.TWC.tau / 2))
     #plt.plot([0, vec.real], [0, vec.imag])
-    for i in range(n_harm):
+    for i in range(2 * n_harm):
         plt.plot(H.real[i * n_points: (i + 1) * n_points],
                  H.imag[i * n_points: (i + 1) * n_points])
     plt.xlim((-25, 25))

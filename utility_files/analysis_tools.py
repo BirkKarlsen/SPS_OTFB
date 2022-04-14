@@ -510,3 +510,15 @@ def find_closes_value(array, value):
     idx = (np.abs(array - value)).argmin()
     return idx
 
+
+def find_amp_from_linear_regression(data, dist):
+    x = np.linspace(0, len(data), len(data))
+
+    a, b, rval, pval, stderr = linregress(x, data)
+    line = a * x + b
+    data_wo_line = data - line
+    data_wo_line_abs = np.abs(data_wo_line)
+    peaks, _ = find_peaks(data_wo_line_abs, distance=dist)
+
+    error = np.interp(x, peaks, data_wo_line_abs[peaks])
+    return line, error

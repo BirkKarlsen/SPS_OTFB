@@ -13,6 +13,8 @@ parser = argparse.ArgumentParser(description="This file launches simulations for
 
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
+parser.add_argument("--imp_config", "-ic", type=int,
+                    help="Different configurations of the impedance model for the SPS.")
 parser.add_argument("--v_error", "-ve", type=float,
                     help="Option to account for voltage error in measurements.")
 
@@ -22,6 +24,8 @@ args = parser.parse_args()
 input_array = np.array([1, 2, 3, 4, 5])
 gllrf_array = np.array([5, 10, 14, 16, 20])
 FREQ_CONFIG = 3
+IMP_CONFIG = 1
+imp_str = ''
 V_ERR = 1
 bash_dir = '/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/bash_files/'
 sub_dir = '/afs/cern.ch/work/b/bkarlsen/Submittion_Files/SPS_OTFB/'
@@ -29,9 +33,18 @@ sub_dir = '/afs/cern.ch/work/b/bkarlsen/Submittion_Files/SPS_OTFB/'
 if args.freq_config is not None:
     FREQ_CONFIG = args.freq_config
 
+if args.imp_config is not None:
+    IMP_CONFIG = args.imp_config
+
 if args.v_error is not None:
     V_ERR = args.v_error
 
+if IMP_CONFIG == 1:
+    imp_str = ''
+elif IMP_CONFIG == 2:
+    imp_str = '_no_otfb'
+elif IMP_CONFIG == 3:
+    imp_str = '_only_otfb'
 
 # Make necessary preparations for Sims ----------------------------------------
 
@@ -42,9 +55,9 @@ file_names = np.zeros(input_array.shape).tolist()
 print('\nMaking shell scripts...')
 
 for i in range(len(input_array)):
-    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}.sh'
-    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}.sub'
-    file_names[i] = f'scan_fr{FREQ_CONFIG}_llrf_{gllrf_array[i]:.0f}'
+    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}.sh'
+    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}.sub'
+    file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}'
 
     # Make bash file
     os.system(f'touch {bash_dir}{bash_file_names[i]}')
@@ -53,8 +66,8 @@ for i in range(len(input_array)):
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
                    f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc 1 -fc {FREQ_CONFIG} ' \
-                   f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}_llrf_{gllrf_array[i]:.0f}/ ' \
-                   f'-ve {V_ERR}'
+                   f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}/ ' \
+                   f'-ve {V_ERR} -ic {IMP_CONFIG}'
 
     os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names[i]}')
     os.system(f'chmod a+x {bash_dir}{bash_file_names[i]}')

@@ -22,6 +22,8 @@ parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
 parser.add_argument("--gllrf_config", "-gc", type=int,
                     help="Different configurations of G_llrf for parameter scan.")
+parser.add_argument("--imp_config", "-ic", type=int,
+                    help="Different configurations of the impedance model for the SPS.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 parser.add_argument("--feedforward", "-ff", type=int,
@@ -45,6 +47,7 @@ OTFB_CONFIG = 1
 VOLT_CONFIG = 1
 FREQ_CONFIG = 1
 GLLRF_CONFIG = 1
+IMP_CONFIG = 1
 FIR_FILTER = 1
 FEEDFORWARD = False
 fit_type = 'fwhm'
@@ -124,6 +127,9 @@ if args.freq_config is not None:
 
 if args.gllrf_config is not None:
     GLLRF_CONFIG = args.gllrf_config
+
+if args.imp_config is not None:
+    IMP_CONFIG = args.imp_config
 
 if args.save_dir is not None:
     mstdir = args.save_dir
@@ -261,6 +267,12 @@ if args.gllrf_config is not None:
             G_tx = [0.3/0.33 * tr,
                     0.3/0.33 * tr]
 
+if IMP_CONFIG == 1:
+    modelStr = "futurePostLS2_SPS_noMain200TWC.txt"     # Impedance without 200MHz TWC impedance
+elif IMP_CONFIG == 2:
+    modelStr = "futurePostLS2_SPS.txt"                  # Impedance with 200 MHz TWC impedance reduced by 20
+elif IMP_CONFIG == 3:
+    pass
 
 N_tot = N_t + N_ir
 if N_ir == 0:
@@ -307,28 +319,33 @@ profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (
 
 
 # SPS Cavity Feedback
-Commissioning = CavityFeedbackCommissioning(open_FF=not FEEDFORWARD, debug=False, rot_IQ=1,
-                                            FIR_filter=FIR_FILTER)
-OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
-                         Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
-                         G_llrf=G_llrf, df=df, G_ff=G_ff)
+if IMP_CONFIG != 2:
+    Commissioning = CavityFeedbackCommissioning(open_FF=not FEEDFORWARD, debug=False, rot_IQ=1,
+                                                FIR_filter=FIR_FILTER)
+    OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
+                             Commissioning=Commissioning, G_tx=G_tx, a_comb=31/32,
+                             G_llrf=G_llrf, df=df, G_ff=G_ff)
+else:
+    OTFB = None
 
+if IMP_CONFIG != 3:
+    # SPS Impedance Model
+    impScenario = scenario(modelStr)
+    impModel = impedance2blond(impScenario.table_impedance)
 
-# SPS Impedance Model
-impScenario = scenario(modelStr)
-impModel = impedance2blond(impScenario.table_impedance)
-
-impFreq = InducedVoltageFreq(beam, profile, impModel.impedanceList, freqRes)
-SPSimpedance_table = InputTable(impFreq.freq,impFreq.total_impedance.real*profile.bin_size,
-                                impFreq.total_impedance.imag*profile.bin_size)
-impedance_freq = InducedVoltageFreq(beam, profile, [SPSimpedance_table],
-                                   frequency_resolution=freqRes)
-total_imp = TotalInducedVoltage(beam, profile, [impedance_freq])
+    impFreq = InducedVoltageFreq(beam, profile, impModel.impedanceList, freqRes)
+    SPSimpedance_table = InputTable(impFreq.freq,impFreq.total_impedance.real*profile.bin_size,
+                                    impFreq.total_impedance.imag*profile.bin_size)
+    impedance_freq = InducedVoltageFreq(beam, profile, [SPSimpedance_table],
+                                       frequency_resolution=freqRes)
+    total_imp = TotalInducedVoltage(beam, profile, [impedance_freq])
+else:
+    total_imp = None
 
 
 # Tracker Object without SPS OTFB
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
-                                  CavityFeedback=None, Profile=profile)
+                                  CavityFeedback=None, Profile=profile, interpolation=True)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
 
@@ -463,7 +480,14 @@ if not GEN:
     OTFB.OTFB_1.calc_power()
     OTFB.OTFB_2.calc_power()
     dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_tot)
-    dut.plot_bbb_offset(pos_fit_arr[:72, n - 1], 4, lxdir + sim_dir + f'fig/', N_tot)
+    dut.plot_bbb_offset(pos_fit_arr[:, n - 1], 4, lxdir + sim_dir + f'fig/', N_tot)
+
+    dut.plot_params(fwhm_arr, pos_arr, pos_fit_arr,
+                    max_pow_arr, max_V_arr, lxdir + sim_dir,
+                    rfstation.t_rf[0, 0], N_tot, n - 1,
+                    MB=not SINGLE_BATCH)
+    dut.save_params(fwhm_arr, pos_arr, pos_fit_arr,
+                    max_pow_arr, max_V_arr, lxdir + sim_dir)
 
     # Save the results to their respective directories
     if SAVE_RESULTS:

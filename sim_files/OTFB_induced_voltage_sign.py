@@ -245,7 +245,7 @@ V_part = 0.5442095845867135
 #llrf_g = G_llrf_ls
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=1, FIR_filter=1)
+                                            rot_IQ=-1, FIR_filter=1)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
                          G_llrf=16, df=domega, G_ff=1)   # TODO: change back to only 20
@@ -375,7 +375,7 @@ print('T_s', OTFB.OTFB_1.T_s)
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 30
+    nn = 100
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -395,11 +395,9 @@ if not GENERATE:
 
             gV, gp = cartesian_to_polar(gen_ind)
             bV, bp = cartesian_to_polar(beam_ind)
-            gp = gp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
-            bp = bp - np.angle(OTFB.OTFB_1.V_SET[-OTFB.OTFB_1.n_coarse])
 
-            gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + gp)
-            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + bp)
+            gE = gV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + gp + np.pi/2)
+            bE = bV * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers + bp + np.pi/2)
             print('Calc')
 
 
@@ -465,16 +463,16 @@ if not GENERATE:
 
 
         plt.figure()
-        plt.title('Beam induced voltage only')
-        plt.plot(profile.bin_centers, bE, label='OTFB', marker='x', color='r')
-        plt.plot(profile.bin_centers, IMP_tot, label='IMP', color='b')
-        plt.plot(profile.bin_centers,
-                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles),
+        plt.title('Beam-Induced Voltage')
+        plt.plot(profile.bin_centers / 1e-6, bE / 1e6, label='OTFB', marker='x', color='r')
+        plt.plot(profile.bin_centers / 1e-6, IMP_tot / 1e6, label='IMP', color='b')
+        plt.plot(profile.bin_centers / 1e-6,
+                 288 * 4e6 * profile.n_macroparticles / np.sum(profile.n_macroparticles) / 1e6,
                  label='profile', color='black')
-        plt.xlim((4.985e-6, 5.04e-6))
+        plt.xlim((4.985e-6 / 1e-6, 5.04e-6 / 1e-6))
         #plt.xlim((127500 * profile.bin_size, 130000 * profile.bin_size))
-        plt.ylabel(r'Induced Voltage [V]')
-        plt.xlabel(r'$\Delta t$ [s]')
+        plt.ylabel(r'Induced Voltage [MV]')
+        plt.xlabel(r'$\Delta t$ [$\mu$s]')
         plt.legend()
 
 
@@ -539,8 +537,22 @@ if not GENERATE:
         plt.xlabel('$\Delta t$ [ns]')
         plt.ylabel('$V_{ind}$ [MV]')
 
+        plt.figure()
+        RF_current = OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:]
+        beam_ind_volt = OTFB.OTFB_1.V_IND_FINE_BEAM[-profile.n_slices:] + OTFB.OTFB_2.V_IND_FINE_BEAM[-profile.n_slices:]
+        plt.plot(profile.bin_centers, profile.n_macroparticles * beam.ratio * 1.6e-19)
+        plt.plot(profile.bin_centers,
+                 np.abs(RF_current)*profile.bin_size/2 * np.sin(rfstation.omega_rf[0, 0] * profile.bin_centers
+                                             + np.angle(RF_current) + np.pi / 2))
+        plt.plot(profile.bin_centers,
+                 np.abs(beam_ind_volt) * 18e-16 * np.sin(rfstation.omega_rf[0,0] * profile.bin_centers
+                                                + np.angle(beam_ind_volt) + np.pi / 2))
+        plt.plot(profile.bin_centers,
+                 IMP_tot * 18e-16)
+
         fwhm_arr, pos_arr, pos_fit_arr, x_72, y_72 = dut.bunch_params(profile, get_72=False)
         dut.plot_bbb_offset(pos_fit_arr, 1, '', 0, show=True)
+
 
 
     if PLOT_MATRIX_ELEMENTS:

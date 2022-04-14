@@ -268,10 +268,13 @@ if args.gllrf_config is not None:
                     0.3/0.33 * tr]
 
 if IMP_CONFIG == 1:
+    # SPS impedance model with OTFB model
     modelStr = "futurePostLS2_SPS_noMain200TWC.txt"     # Impedance without 200MHz TWC impedance
 elif IMP_CONFIG == 2:
+    # SPS impedance model only
     modelStr = "futurePostLS2_SPS.txt"                  # Impedance with 200 MHz TWC impedance reduced by 20
 elif IMP_CONFIG == 3:
+    # SPS OTFB model only
     pass
 
 N_tot = N_t + N_ir
@@ -391,7 +394,8 @@ SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
 profile.track()
-total_imp.induced_voltage_sum()
+if IMP_CONFIG != 3:
+    total_imp.induced_voltage_sum()
 
 # Set up directories for saving results ---------------------------------------
 today = date.today()
@@ -413,8 +417,9 @@ print('Voltage:')
 print('\tV =', V)
 print('\tV_part', V_part)
 print('One-Turn Feedback:')
-print('\ta_comb =', OTFB.OTFB_1.a_comb, OTFB.OTFB_2.a_comb)
-print('\tG_llrf =', OTFB.OTFB_1.G_llrf, OTFB.OTFB_2.G_llrf)
+if IMP_CONFIG != 2:
+    print('\ta_comb =', OTFB.OTFB_1.a_comb, OTFB.OTFB_2.a_comb)
+    print('\tG_llrf =', OTFB.OTFB_1.G_llrf, OTFB.OTFB_2.G_llrf)
 
 # Particle tracking -----------------------------------------------------------
 if not GEN:
@@ -435,13 +440,16 @@ if not GEN:
     for i in range(N_tot):
         SPS_tracker.track()
         profile.track()
-        total_imp.induced_voltage_sum()
-        OTFB.track()
+        if IMP_CONFIG != 3:
+            total_imp.induced_voltage_sum()
+        if IMP_CONFIG != 2:
+            OTFB.track()
 
         if i % dt_ptrack == 0:
             # Power
-            OTFB.OTFB_1.calc_power()
-            OTFB.OTFB_2.calc_power()
+            if IMP_CONFIG != 2:
+                OTFB.OTFB_1.calc_power()
+                OTFB.OTFB_2.calc_power()
 
             fwhm_arr[:, n], pos_arr[:, n], pos_fit_arr[:, n], x_72, y_72 = dut.bunch_params(profile,
                                                                                             get_72=False)
@@ -461,25 +469,29 @@ if not GEN:
 
 
         if i % dt_plot == 0:
-            OTFB.OTFB_1.calc_power()
-            OTFB.OTFB_2.calc_power()
+            if IMP_CONFIG != 2:
+                OTFB.OTFB_1.calc_power()
+                OTFB.OTFB_2.calc_power()
 
             if SAVE_RESULTS:
-                dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', i)
-                dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
+                if IMP_CONFIG != 2:
+                    dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', i)
+                    dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
+
                 dut.save_profile(profile, lxdir + sim_dir + f'sim_data/', i)
                 dut.plot_bbb_offset(pos_fit_arr[:, n-1], 4, lxdir + sim_dir + f'fig/', i)
-                if FEEDFORWARD:
+                if FEEDFORWARD and IMP_CONFIG != 2:
                     dut.save_plots_FF(OTFB, lxdir + sim_dir + f'fig/', i)
 
         if i < N_ir != 0:
             beam.intensity = ramp[i]
             beam.ratio = beam.intensity / beam.n_macroparticles
 
+    if IMP_CONFIG != 2:
+        OTFB.OTFB_1.calc_power()
+        OTFB.OTFB_2.calc_power()
+        dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_tot)
 
-    OTFB.OTFB_1.calc_power()
-    OTFB.OTFB_2.calc_power()
-    dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', N_tot)
     dut.plot_bbb_offset(pos_fit_arr[:, n - 1], 4, lxdir + sim_dir + f'fig/', N_tot)
 
     dut.plot_params(fwhm_arr, pos_arr, pos_fit_arr,
@@ -491,7 +503,8 @@ if not GEN:
 
     # Save the results to their respective directories
     if SAVE_RESULTS:
-        dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', N_tot)
+        if IMP_CONFIG != 2:
+            dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', N_tot)
 
         if not os.path.exists(lxdir + sim_dir + f'profile_data/'):
             os.makedirs(lxdir + sim_dir + f'profile_data/')
@@ -500,6 +513,6 @@ if not GEN:
         np.save(lxdir + sim_dir + f'profile_data/generated_profile_bins_{fit_type}_{N_bunches}_end_{N_t}',
                 profile.bin_centers)
 
-        np.save(lxdir + sim_dir + f"sim_data/induced_voltage", SPS_rf_tracker.totalInducedVoltage.induced_voltage)
-        np.save(lxdir + sim_dir + f"sim_data/induced_voltage_time", SPS_rf_tracker.totalInducedVoltage.time_array)
-
+        if IMP_CONFIG != 3:
+            np.save(lxdir + sim_dir + f"sim_data/induced_voltage", SPS_rf_tracker.totalInducedVoltage.induced_voltage)
+            np.save(lxdir + sim_dir + f"sim_data/induced_voltage_time", SPS_rf_tracker.totalInducedVoltage.time_array)

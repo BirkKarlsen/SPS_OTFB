@@ -245,7 +245,7 @@ V_part = 0.5442095845867135
 #llrf_g = G_llrf_ls
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=-1, FIR_filter=1)
+                                            rot_IQ=1, FIR_filter=1, open_FB=True)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
                          G_llrf=16, df=domega, G_ff=1)   # TODO: change back to only 20
@@ -510,20 +510,27 @@ if not GENERATE:
         plt.title('Antenna 3-section')
         plt.plot(np.abs(OTFB.OTFB_1.V_ANT[-h:]))
 
-        plt.figure()
-        plt.title('Power 3-section')
-        OTFB.OTFB_1.calc_power()
-        plt.plot(OTFB.OTFB_1.P_GEN[-h:])
+        #plt.figure()
+        #plt.title('Power 3-section')
+        #OTFB.OTFB_1.calc_power()
+        #plt.plot(OTFB.OTFB_1.P_GEN[-h:])
 
         plt.figure()
         plt.title('Antenna 4-section')
         plt.plot(np.abs(OTFB.OTFB_2.V_ANT[-h:]))
 
-        plt.figure()
-        plt.title('Power 4-section')
-        OTFB.OTFB_2.calc_power()
-        plt.plot(OTFB.OTFB_2.P_GEN[-h:])
+        #plt.figure()
+        #plt.title('Power 4-section')
+        #OTFB.OTFB_2.calc_power()
+        #plt.plot(OTFB.OTFB_2.P_GEN[-h:])
 
+        plt.figure()
+        plt.title('Vgen 3-section')
+        plt.plot(np.abs(OTFB.OTFB_1.V_IND_COARSE_GEN[-h:]))
+
+        plt.figure()
+        plt.title('Vgen 4-section')
+        plt.plot(np.abs(OTFB.OTFB_2.V_IND_COARSE_GEN[-h:]))
 
         beam_ind, gen_ind = dut.find_induced_and_generator(OTFB, rfstation, profile, SPS_rf_tracker)
         beam_eff_ind = dut.find_effective_induced(OTFB, rfstation, profile, SPS_rf_tracker)

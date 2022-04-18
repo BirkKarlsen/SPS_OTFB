@@ -21,11 +21,11 @@ plt.rcParams.update({
 
 # Options --------------------------------------------------------------------------------------------------------------
 beam_parameter = 'Bunch Position'
-file_name = 'pos_fit_tbt_f1_20.npy'
+file_name = 'pos_fit_tbt_only_otfb_f1_g20.npy'
 bunches = np.array([40])
 batch_length = 72
 number_of_batches = 4
-until_turn = 27000
+until_turn = 29000
 T_rev = 4620 / 200.394e6
 distance = 20
 
@@ -36,7 +36,7 @@ PLT_BL = False
 
 # Find files -----------------------------------------------------------------------------------------------------------
 dir_current_file = os.path.dirname(os.path.abspath(__file__))
-data_files_dir = dir_current_file[:-len('analysis_files/parameter_scan')] + 'data_files/'
+data_files_dir = dir_current_file[:-len('analysis_files/parameter_scan')] + 'data_files/beam_parameters_tbt/'
 
 
 until_turn //= 10
@@ -147,7 +147,7 @@ plt.plot(m, linestyle='--', color='b', alpha=1, label='M')
 
 # FWHM -----------------------------------------------------------------------------------------------------------------
 beam_parameter = 'Bunch Length'
-file_name = 'fwhm_tbt_f1_20.npy'
+file_name = 'fwhm_tbt_only_otfb_f1_g20.npy'
 
 
 data = np.load(data_files_dir + file_name)

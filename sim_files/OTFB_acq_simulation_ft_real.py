@@ -34,6 +34,8 @@ parser.add_argument("--tx_ratio", "-tr", type=float,
                     help="Option to tweak the optimal transmitter gain, default is 1.")
 parser.add_argument("--v_error", "-ve", type=float,
                     help="Option to account for voltage error in measurements.")
+parser.add_argument("--bunch_length", "-bl", type=float,
+                    help="Option to modify bunchlength by some factor, default is 1.0")
 
 args = parser.parse_args()
 
@@ -57,6 +59,7 @@ dt_ptrack = 10
 dt_plot = 1000
 dt_save = 1000
 tr = 1
+bunch_length_factor = 1.0
 
 
 # Imports ---------------------------------------------------------------------
@@ -146,6 +149,8 @@ if args.tx_ratio is not None:
 if args.v_error is not None:
     V *= float(args.v_error)
 
+if args.bunch_length is not None:
+    bunch_length_factor = args.bunch_length
 
 
 if OTFB_CONFIG == 1:
@@ -316,9 +321,14 @@ beam = Beam(ring, int(np.sum(n_macro[:N_bunches])), int(total_intensity))
 
 
 # Profile
-profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5),
-    cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 * 4 + 250 * 3 + 125),
-    n_slices=int(round(2**7 * (2.5 + 72 * 5 * 4 + 250 * 3 + 125)))))
+if GEN:
+    profile = Profile(beam, CutOptions=CutOptions(cut_left=rfstation.t_rf[0, 0] * (-2.5),
+            cut_right=rfstation.t_rf[0, 0] * (72 * 5 * 4 + 250 * 3 + 125),
+            n_slices=int(round(2 ** 7 * (2.5 + 72 * 5 * 4 + 250 * 3 + 125)))))
+else:
+    profile = Profile(beam, CutOptions = CutOptions(cut_left=rfstation.t_rf[0,0] * (1000 - 2.5),
+        cut_right=rfstation.t_rf[0,0] * (1000 + 72 * 5 * 4 + 250 * 3 + 125),
+        n_slices=int(round(2**7 * (2.5 + 72 * 5 * 4 + 250 * 3 + 125)))))
 
 
 # SPS Cavity Feedback
@@ -362,7 +372,7 @@ if GEN:
 
     bunch_length_list = bunch_lengths_fwhm * 1e-9
 
-    distribution_options_list = {'bunch_length': bunch_length_list[:N_bunches],
+    distribution_options_list = {'bunch_length': bunch_length_list[:N_bunches] * bunch_length_factor,
                                  'type': 'binomial',
                                  'density_variable': 'Hamiltonian',
                                  'bunch_length_fit': 'fwhm',
@@ -377,15 +387,19 @@ if GEN:
                                                  n_iterations=6, TotalInducedVoltage=total_imp)
     beam.dt += 1000 * rfstation.t_rf[0, 0]
 
-    np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy',
+    np.save(lxdir + f'data_files/with_impedance/generated_beams/'
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_r.npy',
             beam.dE)
-    np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy',
+    np.save(lxdir + f'data_files/with_impedance/generated_beams/'
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_r.npy',
             beam.dt)
 else:
     beam.dE = np.load(
-        lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
+        lxdir + f'data_files/with_impedance/generated_beams/'
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_r.npy')
     beam.dt = np.load(
-        lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy')
+        lxdir + f'data_files/with_impedance/generated_beams/'
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_r.npy')
 
 
 # Tracker Object with SPS Cavity Feedback -------------------------------------

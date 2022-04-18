@@ -551,7 +551,7 @@ def reshape_power_data(data, t, T_rev):
         start_ind_i = find_closes_value(t, i * T_rev)
         end_ind_i = find_closes_value(t, (i + 1) * T_rev)
 
-        data_turn_i = data[i * n_points_per_turn: (i + 1) * ]
+        #data_turn_i = data[i * n_points_per_turn: (i + 1) * ]
 
 
 def plot_power_measurement_shots(data, t):

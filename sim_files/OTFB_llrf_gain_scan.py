@@ -17,6 +17,9 @@ parser.add_argument("--imp_config", "-ic", type=int,
                     help="Different configurations of the impedance model for the SPS.")
 parser.add_argument("--v_error", "-ve", type=float,
                     help="Option to account for voltage error in measurements.")
+parser.add_argument("--bunch_length", "-bl", type=float,
+                    help="Option to modify bunchlength by some factor, default is 1.0")
+
 
 args = parser.parse_args()
 
@@ -27,6 +30,7 @@ FREQ_CONFIG = 3
 IMP_CONFIG = 1
 imp_str = ''
 V_ERR = 1
+bl_factor = 1.0
 bash_dir = '/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/bash_files/'
 sub_dir = '/afs/cern.ch/work/b/bkarlsen/Submittion_Files/SPS_OTFB/'
 
@@ -38,6 +42,9 @@ if args.imp_config is not None:
 
 if args.v_error is not None:
     V_ERR = args.v_error
+
+if args.bunch_length is not None:
+    bl_factor = args.bunch_length
 
 if IMP_CONFIG == 1:
     imp_str = ''
@@ -55,9 +62,12 @@ file_names = np.zeros(input_array.shape).tolist()
 print('\nMaking shell scripts...')
 
 for i in range(len(input_array)):
-    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}.sh'
-    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}.sub'
-    file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}'
+    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}' \
+                         f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}.sh'
+    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}' \
+                        f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}.sub'
+    file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}' \
+                    f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}'
 
     # Make bash file
     os.system(f'touch {bash_dir}{bash_file_names[i]}')
@@ -67,7 +77,7 @@ for i in range(len(input_array)):
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
                    f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc 1 -fc {FREQ_CONFIG} ' \
                    f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}/ ' \
-                   f'-ve {V_ERR} -ic {IMP_CONFIG}'
+                   f'-ve {V_ERR} -ic {IMP_CONFIG} -bl {bl_factor}'
 
     os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names[i]}')
     os.system(f'chmod a+x {bash_dir}{bash_file_names[i]}')

@@ -1,3 +1,7 @@
+'''
+File with functions for data treatment
+'''
+
 import numpy as np
 import matplotlib.pyplot as plt
 from blond_common.fitting.profile import binomial_amplitudeN_fit, FitOptions
@@ -6,6 +10,7 @@ from scipy.signal import find_peaks
 from scipy.stats import linregress
 from scipy.interpolate import interp1d
 import utility_files.analysis_tools as at
+import os
 
 
 def oscillation_study(sig):
@@ -786,3 +791,13 @@ def find_effective_induced(OTFB, rfstation, profile, tracker, n_phi = 100):
                                                          + rfstation.phi_rf[0, tracker.counter])
 
     return rf_voltage - rf_wo
+
+
+def file_names_in_dir_from_prefix(drt, prefix):
+    name_list = []
+
+    for file in os.listdir(drt[:-1]):
+        if file.startswith(prefix):
+            name_list.append(file)
+
+    return name_list

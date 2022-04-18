@@ -522,3 +522,40 @@ def find_amp_from_linear_regression(data, dist):
 
     error = np.interp(x, peaks, data_wo_line_abs[peaks])
     return line, error
+
+
+def retrieve_power(directory, file_names, cav_number, n_points):
+    power_data = np.zeros((len(file_names), n_points))
+    time_data = np.zeros((len(file_names), n_points))
+    power_data_str = f'SA.TWC200_expertIcFwdPower.C{cav_number}-ACQ'
+
+    for i in range(len(file_names)):
+        with open(directory + file_names[i]) as f:
+            data_i = json.load(f)
+
+            power_data[i,:] = data_i[power_data_str]['data']
+            sampling_period = 1 / (data_i[power_data_str]['samplingRate'] * 1e6)
+            time_data[i,:] = np.linspace(0, sampling_period * n_points, n_points)
+
+    return power_data, time_data
+
+
+def reshape_power_data(data, t, T_rev):
+    N_turns = int(round(t[-1]/T_rev))
+    n_points_per_turn = int(round(len(data)/N_turns))
+
+    data_reshaped = np.zeros((N_turns, n_points_per_turn))
+    t_turn = np.linspace(0, T_rev, n_points_per_turn)
+
+    for i in range(N_turns):
+        start_ind_i = find_closes_value(t, i * T_rev)
+        end_ind_i = find_closes_value(t, (i + 1) * T_rev)
+
+        data_turn_i = data[i * n_points_per_turn: (i + 1) * ]
+
+
+def plot_power_measurement_shots(data, t):
+
+    plt.figure()
+    for i in range(data.shape[0]):
+        plt.plot(t[i,:], data[i,:])

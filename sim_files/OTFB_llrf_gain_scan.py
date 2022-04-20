@@ -76,7 +76,8 @@ for i in range(len(input_array)):
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
                    f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc 1 -fc {FREQ_CONFIG} ' \
-                   f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}_llrf_{gllrf_array[i]:.0f}/ ' \
+                   f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}' \
+                   f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}/ ' \
                    f'-ve {V_ERR} -ic {IMP_CONFIG} -bl {bl_factor}'
 
     os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names[i]}')

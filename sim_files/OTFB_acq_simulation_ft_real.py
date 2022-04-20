@@ -110,7 +110,7 @@ modelStr = "futurePostLS2_SPS_noMain200TWC.txt" # Name of Impedance Model
 # Parameters for the Simulation
 N_m = int(5e5)                                  # Number of macro-particles for tracking
 N_t = 1000                                      # Number of turns to track
-N_ir = 5000                                     # NUmber of turns for the intensity ramp
+N_ir = 5000                                     # Number of turns for the intensity ramp
 
 # Change Simulation based on parsed arguments ---------------------------------
 if args.n_turns is not None:

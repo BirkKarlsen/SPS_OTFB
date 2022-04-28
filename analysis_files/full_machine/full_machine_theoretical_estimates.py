@@ -35,7 +35,7 @@ def beam_effective_impedance(f_r, f_c, R_beam, tau):
     domega = 2 * np.pi * (f_c - f_r)
 
     RI_eff = - (2 * R_beam / (tau**2 * domega**2)) * (1 - np.cos(domega * tau))
-    RQ_eff = (2 * R_beam / (tau * domega)) * (1 - np.sin(domega *tau) / (domega * tau))
+    RQ_eff = (2 * R_beam / (tau * domega)) * (1 - np.sin(domega * tau) / (domega * tau))
 
     return RI_eff, RQ_eff
 
@@ -93,4 +93,24 @@ def theoretical_power(f_r, f_c, R_beam, R_gen, tau, I_beam, Vant, n_cav):
 
     return P_wo, P_wi
 
+def theoretical_power_signal_cavity(V, f_c, n_sections):
+    if n_sections == 3:
+        # 3-section
+        f_r = 200.038e6     # [Hz]
+        R_beam = 485202     # [ohms]
+        R_gen = 9851        # [ohms]
+        tau = 462e-9        # [s]
+        Vant = V            # [V]
+        n_cav = 1
+    else:
+        # 4-section
+        f_r = 199.995e6     # [Hz]
+        R_beam = 876112     # [ohms]
+        R_gen = 13237       # [ohms]
+        tau = 621e-9        # [s]
+        Vant = V            # [V]
+        n_cav = 1
 
+    P_wo, P_wi = theoretical_power(f_r, f_c, R_beam, R_gen, tau, 0, Vant, n_cav)
+
+    return P_wo[0], P_wi[0]

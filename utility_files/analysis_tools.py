@@ -539,22 +539,48 @@ def retrieve_power(directory, file_names, cav_number, n_points):
 
     return power_data, time_data
 
+def retrieve_antenna_voltage(directory, file_names, cav_number, n_points):
+    vant_data = np.zeros((len(file_names), n_points))
+    time_data = np.zeros((len(file_names), n_points))
+    vant_data_str = f'SA.TWC200_expertVcavAmp.C{cav_number}-ACQ'
 
-def reshape_power_data(data, t, T_rev):
+
+    for i in range(len(file_names)):
+        with open(directory + file_names[i]) as f:
+            data_i = json.load(f)
+
+            vant_data[i, :] = data_i[vant_data_str]['data']
+            sampling_period = 1 / (data_i[vant_data_str]['samplingRate'] * 1e6)
+            time_data[i, :] = np.linspace(0, sampling_period * n_points, n_points)
+
+    return vant_data, time_data
+
+
+def reshape_data(data, t, T_rev):
     N_turns = int(round(t[-1]/T_rev))
-    n_points_per_turn = int(round(len(data)/N_turns))
+    n_points_per_turn = int(round(data.shape[1]/N_turns))
+    N_shots = data.shape[0]
 
-    data_reshaped = np.zeros((N_turns, n_points_per_turn))
+    data_reshaped = np.zeros((N_turns * N_shots, n_points_per_turn))
     t_turn = np.linspace(0, T_rev, n_points_per_turn)
+    t_reshaped = np.zeros(data_reshaped.shape)
 
-    for i in range(N_turns):
-        start_ind_i = find_closes_value(t, i * T_rev)
-        end_ind_i = find_closes_value(t, (i + 1) * T_rev)
+    k = 0
+    for j in range(N_shots):
+        for i in range(N_turns):
+            start_ind_i = find_closes_value(t, i * T_rev)
+            end_ind_i = find_closes_value(t, (i + 1) * T_rev)
 
-        #data_turn_i = data[i * n_points_per_turn: (i + 1) * ]
+            data_turn_i = data[j, start_ind_i: end_ind_i]
+            t_i = t[start_ind_i: end_ind_i] - i * T_rev
+            data_reshaped[k, :] = np.interp(t_turn, t_i, data_turn_i)
+            t_reshaped[k, :] = t_turn
+            k += 1
+
+    return data_reshaped, t_reshaped
 
 
-def plot_power_measurement_shots(data, t):
+def plot_measurement_shots(data, t):
 
     plt.figure()
     for i in range(data.shape[0]):

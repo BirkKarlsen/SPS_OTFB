@@ -16,7 +16,7 @@ from analysis_files.full_machine.full_machine_theoretical_estimates import theor
 
 # Options -------------------------------------------------------------------------------------------------------------
 PLT_POWER = True
-CAVITY = 6
+CAVITY = 1
 n_points = 65536
 HOME = False
 

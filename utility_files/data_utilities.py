@@ -754,7 +754,6 @@ def plot_bbb_offset(pos_fit, N_batches, sdir, i, show=False):
     plt.xlabel('Bunch Number')
     plt.ylabel('Offset [ns]')
     plt.legend()
-    plt.savefig(sdir + f"bbb_offset_{i}")
     if show:
         plt.show()
     else:

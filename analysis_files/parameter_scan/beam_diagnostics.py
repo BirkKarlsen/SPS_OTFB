@@ -11,12 +11,12 @@ import os
 import utility_files.analysis_tools as at
 from analysis_files.measurement_analysis.import_data import measured_offset
 
-#plt.rcParams.update({
-#        'text.usetex': True,
-#        'text.latex.preamble': r'\usepackage{fourier}',
-#        'font.family': 'serif',
-#        'font.size': 16
-#    })
+plt.rcParams.update({
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{fourier}',
+        'font.family': 'serif',
+        'font.size': 16
+    })
 
 
 # Options --------------------------------------------------------------------------------------------------------------

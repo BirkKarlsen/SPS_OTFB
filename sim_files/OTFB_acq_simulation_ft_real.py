@@ -42,6 +42,7 @@ args = parser.parse_args()
 
 # Options for the Simulation --------------------------------------------------
 GEN = False
+GEN_FLAT = True
 SAVE_RESULTS = True
 SINGLE_BATCH = False
 LXPLUS = True
@@ -380,6 +381,13 @@ if GEN:
 
     bunch_positions = (positions - positions[0]) / rfstation.t_rf[0, 0]
 
+    if GEN_FLAT:
+        normal_buckets = np.linspace(0, 71 * 5, 72)
+        normal_buckets = np.concatenate((normal_buckets, np.linspace(0, 71 * 5, 72) + 50 + normal_buckets[-1]))
+        normal_buckets = np.concatenate((normal_buckets, np.linspace(0, 71 * 5, 72) + 50 + normal_buckets[-1]))
+        normal_buckets = np.concatenate((normal_buckets, np.linspace(0, 71 * 5, 72) + 50 + normal_buckets[-1]))
+        bunch_positions = normal_buckets
+
     # If this fails, then generate without OTFB in the tracker and redefine the tracker after with OTFB.
     matched_from_distribution_density_multibunch(beam, ring, SPS_tracker, distribution_options_list,
                                                  N_bunches, bunch_positions[:N_bunches],
@@ -388,18 +396,18 @@ if GEN:
     beam.dt += 1000 * rfstation.t_rf[0, 0]
 
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'
-                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_r.npy',
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_f.npy',
             beam.dE)
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'
-                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_r.npy',
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_f.npy',
             beam.dt)
 else:
     beam.dE = np.load(
         lxdir + f'data_files/with_impedance/generated_beams/'
-                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_r.npy')
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_f.npy')
     beam.dt = np.load(
         lxdir + f'data_files/with_impedance/generated_beams/'
-                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_r.npy')
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_f.npy')
 
 
 # Tracker Object with SPS Cavity Feedback -------------------------------------

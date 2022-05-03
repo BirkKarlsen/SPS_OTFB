@@ -112,4 +112,7 @@ print(f'P_antacq = {P_antacq} +- {P_antacq_std}')
 plt.figure()
 plt.plot(vant_reshaped[0,:])
 
+# Converting data to turn-by-turn then shot-by-shot
+power_reshaped = at.reshape_power_data(power, time, T_rev=0)    # TODO: Find the value of T_rev
+
 plt.show()

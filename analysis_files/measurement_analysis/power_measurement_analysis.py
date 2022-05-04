@@ -15,8 +15,12 @@ from analysis_files.full_machine.full_machine_theoretical_estimates import theor
 
 
 # Options -------------------------------------------------------------------------------------------------------------
-PLT_POWER = True
-CAVITY = 1
+PLT_POWER = False
+PLT_VANT = False
+PRT_CAV_AN = False
+CALC_TURN_VAR = False
+PLT_CAV_VAR = True
+CAVITY = 4
 n_points = 65536
 HOME = False
 
@@ -59,8 +63,11 @@ vant, time = at.retrieve_antenna_voltage(data_folder, file_names, CAVITY, n_poin
 # Converting data to turn-by-turn then shot-by-shot
 power_reshaped, t_reshaped = at.reshape_data(power, time[0,:], T_rev=T_rev)
 vant_reshaped, t_reshaped = at.reshape_data(vant, time[0,:], T_rev=T_rev)
-at.plot_measurement_shots(power_reshaped, t_reshaped)
-at.plot_measurement_shots(vant_reshaped, t_reshaped)
+
+if PLT_POWER:
+    at.plot_measurement_shots(power_reshaped, t_reshaped)
+if PLT_VANT:
+    at.plot_measurement_shots(vant_reshaped, t_reshaped)
 
 # Comparison between th Voltage from measured antenna voltage, measured power from acquisitions and set point
 P_set, _ = theoretical_power_signal_cavity(set_voltage[CAVITY - 1], f_c, n_sections)
@@ -91,25 +98,52 @@ else:
     P_antacq_std = np.abs(P_antacq - P_antacq_low)
 
 
-
-# Print results from analysis
-print(f'------ C{CAVITY} ------')
-print(f'{n_sections}-section cavity')
-print(f'Voltages:')
-print(f'set point = {set_voltage[CAVITY -1]}')
-print(f'avg antenna = {measured_voltages[CAVITY -1]}')
-print(f'acq antenna = {np.mean(vant_reshaped[:,:650])} +- {np.std(vant_reshaped[:,:650])}')
-print(f'Power:')
-print(f'P_meas = {np.mean(power_reshaped[:,2000:])} +- {np.std(power_reshaped[:,2000:])}')
-print(f'P_set = {P_set}')
-print(f'P_ant = {P_ant} +- {P_ant_std}')
-print(f'P_antacq = {P_antacq} +- {P_antacq_std}')
+if PRT_CAV_AN:
+    # Print results from analysis
+    print(f'------ C{CAVITY} ------')
+    print(f'{n_sections}-section cavity')
+    print(f'Voltages:')
+    print(f'set point = {set_voltage[CAVITY -1]}')
+    print(f'avg antenna = {measured_voltages[CAVITY -1]}')
+    print(f'acq antenna = {np.mean(vant_reshaped[:,:650])} +- {np.std(vant_reshaped[:,:650])}')
+    print(f'Power:')
+    print(f'P_meas = {np.mean(power_reshaped[:,2000:])} +- {np.std(power_reshaped[:,2000:])}')
+    print(f'P_set = {P_set}')
+    print(f'P_ant = {P_ant} +- {P_ant_std}')
+    print(f'P_antacq = {P_antacq} +- {P_antacq_std}')
 
 #print(6.70e6 * (1 - 0.5442095845867135) / 2)
 #print(6.70e6 * (0.5442095845867135) / 4)
 #print(0.91 * 4 + 1.53 * 2)
 
-plt.figure()
-plt.plot(vant_reshaped[0,:])
+if CALC_TURN_VAR:
+    max_turn = np.zeros(6)
+    max_shot = np.zeros(max_turn.shape)
+
+    for i in range(6):
+        print(f'Cavity C{i + 1}')
+        CAVITY = i + 1
+
+        file_prefix = f'sps_otfb_data__all_buffers__cavity{CAVITY}__flattop__20211106_10'
+
+        # Retrieve data from CERNbox
+        file_names = dut.file_names_in_dir_from_prefix(data_folder, file_prefix)
+        power, time = at.retrieve_antenna_voltage(data_folder, file_names, CAVITY, n_points)
+        power_reshaped, t_reshaped = at.reshape_data(power, time[0, :], T_rev=T_rev)
+
+        var_max, var_min = at.find_turn_by_turn_variantions(power_reshaped, 3)
+        print(var_max)
+        print(var_min)
+        max_turn[i] = np.max(np.concatenate((var_max, np.abs(var_min))))
+
+        var_max, var_min = at.find_shot_by_shot_variantions(power_reshaped)
+        print(var_max)
+        print(var_min)
+        max_shot[i] = np.max(np.array([var_max, np.abs(var_min)]))
+
+    print('Max over all:')
+    print('Turn-by-turn:', max_turn)
+    print('Shot-by-shot:', max_shot)
+
 
 plt.show()

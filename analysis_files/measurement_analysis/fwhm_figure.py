@@ -12,13 +12,12 @@ from scipy.signal import find_peaks
 import utility_files.data_utilities as dut
 
 
-plt.rcParams.update({
-        'text.usetex': True,
-        'text.latex.preamble': r'\usepackage{fourier}',
-        'font.family': 'serif',
-        'font.sans-serif': 'Computer Modern Sans Serif',
-        'font.size': 16
-    })
+#plt.rcParams.update({
+#        'text.usetex': True,
+#        'text.latex.preamble': r'\usepackage{fourier}',
+#        'font.family': 'serif',
+#        'font.size': 16
+#    })
 
 # Options -------------------------------------------------------------------------------------------------------------
 PLT_BUNCH = True

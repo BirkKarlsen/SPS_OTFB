@@ -22,7 +22,7 @@ from analysis_files.measurement_analysis.import_data import measured_offset
 # Options --------------------------------------------------------------------------------------------------------------
 beam_parameter = 'Bunch Position'
 file_name = 'pos_fit_tbt_only_otfb_f1_g20.npy'
-file_name = 'pos_fit_tbt_only_otfb_f1_g20_bl100.npy'
+file_name = 'pos_fit_tbt_full_f1_g20_bl100.npy'
 bunches = np.array([15, 30, 40, 50, 72])
 batch_length = 72
 number_of_batches = 4
@@ -42,8 +42,9 @@ normal_buckets *= 4.990159369074305e-09
 
 choose_batch = 0
 
-PLT_BP = True
+PLT_BP = False
 PLT_BL = False
+COMPARE_DIFFERENT = True
 
 # Find files -----------------------------------------------------------------------------------------------------------
 dir_current_file = os.path.dirname(os.path.abspath(__file__))
@@ -154,6 +155,26 @@ for i in range(number_of_batches):
 plt.fill_between(np.linspace(0, batch_length-1, batch_length),(m - ms), (m + ms),
                  color='b', alpha=0.3)
 plt.plot(m, linestyle='--', color='b', alpha=1, label='M')
+
+if COMPARE_DIFFERENT:
+    files = ['pos_fit_tbt_full_f1_g20_bl100.npy', 'pos_fit_tbt_full_f1_g20_bl110.npy',
+             'pos_fit_tbt_only_otfb_f1_g20_bl100.npy']
+
+    batch_number = 0
+
+    plt.figure()
+    plt.title(f'Avg Dipole Osc, Batch {batch_number + 1}')
+    for file_name in files:
+        data = np.load(data_files_dir + file_name)
+
+        avg_dipole_osc_i = at.find_average_dipole_oscillation(data, normal_buckets, until_turn, distance, batch_length,
+                                                              number_of_batches)
+
+        plt.plot(avg_dipole_osc_i[batch_number,:], label=file_name)
+
+    plt.legend()
+
+
 
 
 # FWHM -----------------------------------------------------------------------------------------------------------------

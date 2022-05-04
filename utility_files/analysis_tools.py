@@ -585,3 +585,55 @@ def plot_measurement_shots(data, t):
     plt.figure()
     for i in range(data.shape[0]):
         plt.plot(t[i,:], data[i,:])
+
+
+def find_turn_by_turn_variantions(data, n_shots):
+    n_turns = data.shape[0] // n_shots
+    var_min = np.zeros(n_shots)
+    var_max = np.zeros(n_shots)
+
+    for i in range(n_shots):
+        shot_data = data[i * n_turns: (i + 1) * n_turns, :]
+
+        mean_shot = np.mean(shot_data, axis=0)
+        max_shot = np.zeros(mean_shot.shape)
+        min_shot = np.zeros(mean_shot.shape)
+
+        for j in range(len(mean_shot)):
+            max_shot[j] = np.max((shot_data[:,j] - mean_shot[j])/mean_shot[j])
+            min_shot[j] = np.min((shot_data[:,j] - mean_shot[j])/mean_shot[j])
+
+        var_max[i] = np.max(max_shot)
+        var_min[i] = np.min(min_shot)
+
+    return var_max, var_min
+
+def find_shot_by_shot_variantions(data):
+    mean_sig = np.mean(data, axis=0)
+    max_dev = np.zeros(mean_sig.shape)
+    min_dev = np.zeros(mean_sig.shape)
+
+    for j in range(len(mean_sig)):
+        max_dev[j] = np.max((data[:, j] - mean_sig[j]) / mean_sig[j])
+        min_dev[j] = np.min((data[:, j] - mean_sig[j]) / mean_sig[j])
+
+    return np.max(max_dev), np.min(min_dev)
+
+def find_average_dipole_oscillation(data, nb, until_turn, distance, batch_length, number_of_batches):
+    lines = np.zeros(data[:, :until_turn].shape)
+    errors = np.zeros(data[:, :until_turn].shape)
+
+    for i in range(data.shape[0]):
+        data_i = (data[i, :until_turn] - nb[i]) * 1e9
+        lines[i, :], errors[i, :] = find_amp_from_linear_regression(data_i, dist=distance)
+
+    avg_dipole_osc = np.zeros((number_of_batches, errors.shape[1]))
+    for i in range(number_of_batches):
+        avg_dipole_osc[i, :] = np.mean(errors[i * batch_length: (i + 1) * batch_length,:], axis=0)
+
+    return avg_dipole_osc
+
+
+
+
+

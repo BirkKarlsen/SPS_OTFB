@@ -24,6 +24,8 @@ parser.add_argument("--gllrf_config", "-gc", type=int,
                     help="Different configurations of G_llrf for parameter scan.")
 parser.add_argument("--imp_config", "-ic", type=int,
                     help="Different configurations of the impedance model for the SPS.")
+parser.add_argument("--pl_config", "-pc", type=int,
+                    help="Option to include (1) a phase loop to the simulation.")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory to save the results to.")
 parser.add_argument("--feedforward", "-ff", type=int,
@@ -50,6 +52,7 @@ VOLT_CONFIG = 1
 FREQ_CONFIG = 1
 GLLRF_CONFIG = 1
 IMP_CONFIG = 1
+PL_CONFIG = False
 FIR_FILTER = 1
 FEEDFORWARD = False
 fit_type = 'fwhm'
@@ -78,6 +81,7 @@ from blond.beam.beam import Beam, Proton
 from blond.beam.profile import Profile, CutOptions
 from blond.beam.distributions_multibunch import matched_from_distribution_density_multibunch
 from blond.llrf.cavity_feedback import SPSCavityFeedback, CavityFeedbackCommissioning
+from blond.llrf.beam_feedback import BeamFeedback
 from blond.impedances.impedance import TotalInducedVoltage, InducedVoltageFreq
 from blond.impedances.impedance_sources import InputTable
 from blond.trackers.tracker import RingAndRFTracker, FullRingAndRF
@@ -133,6 +137,9 @@ if args.gllrf_config is not None:
 
 if args.imp_config is not None:
     IMP_CONFIG = args.imp_config
+
+if args.pl_config is not None:
+    PL_CONFIG = bool(args.pl_config)
 
 if args.save_dir is not None:
     mstdir = args.save_dir
@@ -341,6 +348,17 @@ if IMP_CONFIG != 2:
 else:
     OTFB = None
 
+if PL_CONFIG:
+    PL_gain = 1 / (5 * ring.t_rev[0])
+    SL_gain = PL_gain / 10
+    pl_config = {'machine': 'LHC',
+                 'PL_gain': PL_gain,
+                 'SL_gain': SL_gain}
+
+    BeamFB = BeamFeedback(ring, rfstation, profile, pl_config)
+else:
+    BeamFB = None
+
 if IMP_CONFIG != 3:
     # SPS Impedance Model
     impScenario = scenario(modelStr)
@@ -404,7 +422,8 @@ else:
 
 # Tracker Object with SPS Cavity Feedback -------------------------------------
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
-                                  CavityFeedback=OTFB, Profile=profile, interpolation=True)
+                                  CavityFeedback=OTFB, Profile=profile, BeamFeedback=BeamFB,
+                                  interpolation=True)
 SPS_tracker = FullRingAndRF([SPS_rf_tracker])
 
 profile.track()

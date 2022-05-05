@@ -19,7 +19,8 @@ PLT_POWER = False
 PLT_VANT = False
 PRT_CAV_AN = False
 CALC_TURN_VAR = False
-PLT_CAV_VAR = True
+PLT_CAV_VAR = False
+PLT_POWER_EST = True
 CAVITY = 4
 n_points = 65536
 HOME = False
@@ -128,8 +129,10 @@ if CALC_TURN_VAR:
 
         # Retrieve data from CERNbox
         file_names = dut.file_names_in_dir_from_prefix(data_folder, file_prefix)
-        power, time = at.retrieve_antenna_voltage(data_folder, file_names, CAVITY, n_points)
+        power, time = at.retrieve_power(data_folder, file_names, CAVITY, n_points)
         power_reshaped, t_reshaped = at.reshape_data(power, time[0, :], T_rev=T_rev)
+
+        print(power_reshaped.shape)
 
         var_max, var_min = at.find_turn_by_turn_variantions(power_reshaped, 3)
         print(var_max)
@@ -144,6 +147,109 @@ if CALC_TURN_VAR:
     print('Max over all:')
     print('Turn-by-turn:', max_turn)
     print('Shot-by-shot:', max_shot)
+
+
+if PLT_CAV_VAR:
+    n_turns_per_shot = 23
+    n_shots_per_cav = 3
+    n_turns_per_cav = n_turns_per_shot * n_shots_per_cav
+    n_points_per_turns = 2849
+    n_3sec = 4
+    n_4sec = 2
+
+    all_power_turns_3sec = np.zeros((n_turns_per_shot * n_shots_per_cav * n_3sec, n_points_per_turns))
+    all_power_turns_4sec = np.zeros((n_turns_per_shot * n_shots_per_cav * n_4sec, n_points_per_turns))
+
+    power_mean_per_cav3 = np.zeros((n_3sec, n_points_per_turns))
+    power_mean_per_cav4 = np.zeros((n_4sec, n_points_per_turns))
+
+    cav3_names = np.array([1, 2, 4, 5])
+    cav4_names = np.array([3, 6])
+
+    i3 = 0
+    i4 = 0
+
+    for i in range(6):
+        print(f'Cavity C{i + 1}')
+        CAVITY = i + 1
+
+        file_prefix = f'sps_otfb_data__all_buffers__cavity{CAVITY}__flattop__20211106_10'
+
+        # Retrieve data from CERNbox
+        file_names = dut.file_names_in_dir_from_prefix(data_folder, file_prefix)
+        power, time = at.retrieve_power(data_folder, file_names, CAVITY, n_points)
+        power_reshaped, t_reshaped = at.reshape_data(power, time[0, :], T_rev=T_rev)
+
+        if CAVITY == 3 or CAVITY == 6:
+            all_power_turns_4sec[n_turns_per_cav * i4: n_turns_per_cav * (i4 + 1), :] = power_reshaped
+            power_mean_per_cav4[i4, :] = np.mean(power_reshaped, axis=0)
+            i4 += 1
+        else:
+            all_power_turns_3sec[n_turns_per_cav * i3: n_turns_per_cav * (i3 + 1), :] = power_reshaped
+            power_mean_per_cav3[i3, :] = np.mean(power_reshaped, axis=0)
+            i3 += 1
+
+    mean_3sec = np.mean(all_power_turns_3sec, axis=0)
+    mean_4sec = np.mean(all_power_turns_4sec, axis=0)
+    t = t_reshaped[0, :]
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+    P_s = 1e-3
+    t_s = 1e6
+
+    ax[0].set_title('3-section')
+    ax[0].fill_between(t * t_s, P_s * mean_3sec * 0.8, P_s * mean_3sec * 1.2,
+                 color='black', alpha=0.3)
+    ax[0].plot(t * t_s, P_s * mean_3sec, color='black', label='Mean', linestyle='--')
+    for i in range(n_3sec):
+        ax[0].plot(t * t_s, P_s * power_mean_per_cav3[i, :], label=f'C{cav3_names[i]}')
+    ax[0].set_xlim((3e-6 * t_s, 17e-6 * t_s))
+    ax[0].set_xlabel(r'$\Delta t$ [$\mu$s]')
+    ax[0].set_ylabel(r'$P$ [kW]')
+    ax[0].legend()
+
+    ax[1].set_title('4-section')
+    ax[1].fill_between(t * t_s, P_s * mean_4sec * 0.8, P_s * mean_4sec * 1.2,
+                       color='black', alpha=0.3)
+    ax[1].plot(t * t_s, P_s * mean_4sec, color='black', label='Mean', linestyle='--')
+    for i in range(n_4sec):
+        ax[1].plot(t * t_s, P_s * power_mean_per_cav4[i, :], label=f'C{cav4_names[i]}')
+    ax[1].set_xlim((3e-6 * t_s, 17e-6 * t_s))
+    ax[1].set_xlabel(r'$\Delta t$ [$\mu$s]')
+    ax[1].set_ylabel(r'$P$ [kW]')
+    ax[1].legend()
+
+if PLT_POWER_EST:
+    # Plotting different power estimates
+
+    # Mean values of estimates
+    P_set = np.array([233, 233, 411, 233, 233, 411])
+    P_antacq = np.array([232.0, 232.4, 405.9, 232.8, 233.1, 405.5])
+    P_antmeas = np.array([247.6, 202.8, 257.6, 177.1, 161.6, 330.4])
+    P_acq = np.array([244, 243, 393, 231, 235, 395])
+
+    # Errors in estimates
+    P_antacq_err = np.array([0.2, 0.2, 0.3, 0.1, 0.2, 0.3])
+    P_antmeas_err = np.array([4.8, 1.3, 2.6, 0.8, 2.7, 1.5])
+    P_acq_err = np.array([49, 49, 79, 46, 47, 79])
+
+    # Cavity names
+    cav_names = np.array(['C1', 'C2', 'C3', 'C4', 'C5', 'C6'])
+
+    plt.figure()
+    plt.title('Power Estimates')
+    plt.errorbar(cav_names, P_acq, yerr=P_acq_err, fmt='_', color='g', label=r'$P_{acq}$', markersize=10)
+    plt.plot(cav_names, P_set, '_', color='black', label=r'$P_{set}$', markersize=10)
+    plt.errorbar(cav_names, P_antacq, yerr=P_antacq_err, fmt='_', color='r', label=r'$P_{ant,acq}$', markersize=10)
+    #plt.plot(cav_names, P_antacq, '.', color='r', label=r'$P_{ant,acq}$')
+    plt.errorbar(cav_names, P_antmeas, yerr=P_antmeas_err, fmt='_', color='b', label=r'$P_{ant,meas}$', markersize=10)
+    #plt.plot(cav_names, P_antmeas, '.', color='b', label=r'$P_{ant,meas}$')
+    plt.ylabel(r'Power [kW]')
+    plt.xlabel(r'Cavity')
+
+
+    plt.legend()
+
 
 
 plt.show()

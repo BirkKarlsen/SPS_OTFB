@@ -21,6 +21,8 @@ parser.add_argument("--bunch_length", "-bl", type=float,
                     help="Option to modify bunchlength by some factor, default is 1.0")
 parser.add_argument("--pl_config", "-pc", type=int,
                     help="Option to include (1) a phase loop to the simulation.")
+parser.add_argument("--volt_config", "-vc", type=int,
+                    help="Different values for the RF voltage.")
 
 
 args = parser.parse_args()
@@ -30,6 +32,7 @@ input_array = np.array([1, 2, 3, 4, 5])
 gllrf_array = np.array([5, 10, 14, 16, 20])
 FREQ_CONFIG = 3
 IMP_CONFIG = 1
+VOLT_CONFIG = 1
 imp_str = ''
 V_ERR = 1
 PL_CONFIG = False
@@ -52,6 +55,9 @@ if args.bunch_length is not None:
 if args.pl_config is not None:
     PL_CONFIG = bool(args.pl_config)
 
+if args.volt_config is not None:
+    VOLT_CONFIG = args.volt_config
+
 if IMP_CONFIG == 1:
     imp_str = ''
 elif IMP_CONFIG == 2:
@@ -73,11 +79,11 @@ file_names = np.zeros(input_array.shape).tolist()
 print('\nMaking shell scripts...')
 
 for i in range(len(input_array)):
-    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
                          f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}.sh'
-    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
                         f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}.sub'
-    file_names[i] = f'scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+    file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
                     f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}'
 
     # Make bash file
@@ -86,7 +92,7 @@ for i in range(len(input_array)):
     bash_content = f'#!/bin/bash\n' \
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
-                   f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc 1 -fc {FREQ_CONFIG} ' \
+                   f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc {VOLT_CONFIG} -fc {FREQ_CONFIG} ' \
                    f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
                    f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}/ ' \
                    f'-ve {V_ERR} -ic {IMP_CONFIG} -bl {bl_factor} -pc {int(PL_CONFIG)}'

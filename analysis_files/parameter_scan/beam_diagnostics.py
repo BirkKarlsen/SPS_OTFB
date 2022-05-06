@@ -160,7 +160,7 @@ if COMPARE_DIFFERENT:
     files = ['pos_fit_tbt_full_f1_g20_bl100.npy', 'pos_fit_tbt_full_f1_g20_bl110.npy',
              'pos_fit_tbt_only_otfb_f1_g20_bl100.npy']
 
-    batch_number = 0
+    batch_number = 3
 
     plt.figure()
     plt.title(f'Avg Dipole Osc, Batch {batch_number + 1}')
@@ -170,8 +170,10 @@ if COMPARE_DIFFERENT:
         avg_dipole_osc_i = at.find_average_dipole_oscillation(data, normal_buckets, until_turn, distance, batch_length,
                                                               number_of_batches)
 
-        plt.plot(avg_dipole_osc_i[batch_number,:], label=file_name)
-
+        plt.plot(np.linspace(0, 10 * len(avg_dipole_osc_i[batch_number,:]), len(avg_dipole_osc_i[batch_number,:])),
+                 avg_dipole_osc_i[batch_number,:], label=file_name)
+    plt.ylabel(r'Oscillation Amplitude [ns]')
+    plt.xlabel(r'Turn [-]')
     plt.legend()
 
 

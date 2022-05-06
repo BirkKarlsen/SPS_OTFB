@@ -153,9 +153,6 @@ if args.fir_filter is not None:
 if args.tx_ratio is not None:
     tr = float(args.tx_ratio)
 
-if args.v_error is not None:
-    V *= float(args.v_error)
-
 if args.bunch_length is not None:
     bunch_length_factor = args.bunch_length
 
@@ -193,6 +190,14 @@ elif VOLT_CONFIG == 2:
 elif VOLT_CONFIG == 3:
     V = 6860740.881203784
     V_part = 0.5434907802323814
+elif VOLT_CONFIG == 4:
+    V = 5.919e6
+    V_part = 0.56343977023
+
+
+if args.v_error is not None:
+    V *= float(args.v_error)
+
 
 if FREQ_CONFIG == 1:
     G_tx = [1.0 * tr,
@@ -350,7 +355,7 @@ else:
 
 if PL_CONFIG:
     PL_gain = 1 / (5 * ring.t_rev[0])
-    SL_gain = PL_gain / 10
+    SL_gain = 0#PL_gain / 10
     pl_config = {'machine': 'LHC',
                  'PL_gain': PL_gain,
                  'SL_gain': SL_gain}
@@ -406,18 +411,18 @@ if GEN:
     beam.dt += 1000 * rfstation.t_rf[0, 0]
 
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'
-                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_r.npy',
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_f.npy',
             beam.dE)
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'
-                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_r.npy',
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_f.npy',
             beam.dt)
 else:
     beam.dE = np.load(
         lxdir + f'data_files/with_impedance/generated_beams/'
-                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_r.npy')
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_f.npy')
     beam.dt = np.load(
         lxdir + f'data_files/with_impedance/generated_beams/'
-                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_r.npy')
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_f.npy')
 
 
 # Tracker Object with SPS Cavity Feedback -------------------------------------
@@ -453,6 +458,8 @@ print('One-Turn Feedback:')
 if IMP_CONFIG != 2:
     print('\ta_comb =', OTFB.OTFB_1.a_comb, OTFB.OTFB_2.a_comb)
     print('\tG_llrf =', OTFB.OTFB_1.G_llrf, OTFB.OTFB_2.G_llrf)
+
+print(beam.intensity)
 
 # Particle tracking -----------------------------------------------------------
 if not GEN:

@@ -52,6 +52,7 @@ import os.path
 from datetime import date
 import utility_files.analysis_tools as at
 from scipy.constants import c
+from matplotlib import rc
 
 from blond.llrf.cavity_feedback import SPSCavityFeedback, CavityFeedbackCommissioning
 from blond.input_parameters.rf_parameters import RFStation
@@ -81,12 +82,12 @@ OMEGA_SCENARIO = 3
 
 if not LXPLUS:
     plt.rcParams.update({
-        'text.usetex': True,
+        #'text.usetex': True,
         'text.latex.preamble': r'\usepackage{fourier}',
         'font.family': 'serif',
         'font.size': 16
     })
-
+    rc('text', usetex=True)
 
 # Parameters ----------------------------------------------------------------------------------------------------------
 C = 2 * np.pi * 1100.009                        # Ring circumference [m]
@@ -375,7 +376,7 @@ print('T_s', OTFB.OTFB_1.T_s)
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 100
+    nn = 10
     dt_p = 10
     for i in range(nn):
         OTFB.track()

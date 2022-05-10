@@ -76,6 +76,11 @@ if PL_CONFIG:
 else:
     pl_str = ''
 
+if n_ramp == 0:
+    ramp_str = ''
+else:
+    ramp_str = 'ramped'
+
 # Make necessary preparations for Sims ----------------------------------------
 
 bash_file_names = np.zeros(input_array.shape).tolist()
@@ -102,7 +107,7 @@ for i in range(len(input_array)):
                    f'-nt 30000 -nr {n_ramp} -oc 1 ' \
                    f'-vc {VOLT_CONFIG} -fc {FREQ_CONFIG} ' \
                    f'-gc {input_array[i]} -sd ' \
-                   f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+                   f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}{ramp_str}' \
                    f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}/ ' \
                    f'-ve {V_ERR} -ic {IMP_CONFIG} -bl {bl_factor} -pc {int(PL_CONFIG)}'
 

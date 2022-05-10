@@ -459,7 +459,6 @@ if IMP_CONFIG != 2:
     print('\ta_comb =', OTFB.OTFB_1.a_comb, OTFB.OTFB_2.a_comb)
     print('\tG_llrf =', OTFB.OTFB_1.G_llrf, OTFB.OTFB_2.G_llrf)
 
-print(beam.intensity)
 
 # Particle tracking -----------------------------------------------------------
 if not GEN:

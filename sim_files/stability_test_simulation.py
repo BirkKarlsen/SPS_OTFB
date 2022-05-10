@@ -5,7 +5,7 @@ Author: Birk Emil Karlsen-Bæck
 '''
 
 # Options -------------------------------------------------------------------------------------------------------------
-LXPLUS = False
+LXPLUS = True
 mstdir = 'simple_stability/'
 fit_type = 'fwhm'
 dt_track = 1000

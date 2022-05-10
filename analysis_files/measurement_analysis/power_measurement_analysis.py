@@ -13,6 +13,12 @@ import utility_files.data_utilities as dut
 import utility_files.analysis_tools as at
 from analysis_files.full_machine.full_machine_theoretical_estimates import theoretical_power_signal_cavity
 
+plt.rcParams.update({
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{fourier}',
+        'font.family': 'serif',
+        'font.size': 16
+    })
 
 # Options -------------------------------------------------------------------------------------------------------------
 PLT_POWER = False
@@ -23,7 +29,7 @@ PLT_CAV_VAR = True
 PLT_POWER_EST = True
 CAVITY = 4
 n_points = 65536
-HOME = False
+HOME = True
 
 # Parameters
 h = 4620

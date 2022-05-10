@@ -136,11 +136,16 @@ plt.legend()
 
 
 plt.figure()
-plt.title('Average Dipole Oscillation')
+plt.title('Average Dipole Oscillation, Full Simulation')
 #plt.plot(np.mean(errors, axis=0))
+color_lst = ['r', 'b', 'g', 'black']
 for i in range(number_of_batches):
-    plt.plot(np.mean(errors[i * batch_length: (i + 1) * batch_length,:], axis=0),
-             label=f'batch {i + 1}')
+    N = np.mean(errors[i * batch_length: (i + 1) * batch_length,:], axis=0)
+    plt.plot(np.linspace(0, 10 * len(N), len(N)),
+             np.mean(errors[i * batch_length: (i + 1) * batch_length,:], axis=0),
+             label=f'Batch {i + 1}', color=color_lst[i])
+plt.xlabel(r'Turns [-]')
+plt.ylabel(r'Amplitude [ns]')
 plt.legend()
 
 

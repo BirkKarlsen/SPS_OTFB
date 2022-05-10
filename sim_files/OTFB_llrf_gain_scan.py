@@ -13,6 +13,8 @@ parser = argparse.ArgumentParser(description="This file launches simulations for
 
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
+parser.add_argument("--n_ramp", "-nr", type=int,
+                    help="The number of turns to track the intensity ramp, default is 5000")
 parser.add_argument("--imp_config", "-ic", type=int,
                     help="Different configurations of the impedance model for the SPS.")
 parser.add_argument("--v_error", "-ve", type=float,
@@ -37,6 +39,7 @@ imp_str = ''
 V_ERR = 1
 PL_CONFIG = False
 bl_factor = 1.0
+n_ramp = 0
 bash_dir = '/afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/bash_files/'
 sub_dir = '/afs/cern.ch/work/b/bkarlsen/Submittion_Files/SPS_OTFB/'
 
@@ -57,6 +60,9 @@ if args.pl_config is not None:
 
 if args.volt_config is not None:
     VOLT_CONFIG = args.volt_config
+
+if args.n_ramp is not None:
+    n_ramp = args.n_ramp
 
 if IMP_CONFIG == 1:
     imp_str = ''
@@ -92,8 +98,11 @@ for i in range(len(input_array)):
     bash_content = f'#!/bin/bash\n' \
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
-                   f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc {VOLT_CONFIG} -fc {FREQ_CONFIG} ' \
-                   f'-gc {input_array[i]} -sd scan_fr{FREQ_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+                   f'OTFB_acq_simulation_ft_real.py ' \
+                   f'-nt 30000 -nr {n_ramp} -oc 1 ' \
+                   f'-vc {VOLT_CONFIG} -fc {FREQ_CONFIG} ' \
+                   f'-gc {input_array[i]} -sd ' \
+                   f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
                    f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}/ ' \
                    f'-ve {V_ERR} -ic {IMP_CONFIG} -bl {bl_factor} -pc {int(PL_CONFIG)}'
 

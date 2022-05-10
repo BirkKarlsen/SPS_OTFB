@@ -5,7 +5,7 @@ Author: Birk Emil Karlsen-Bæck
 '''
 
 # Options -------------------------------------------------------------------------------------------------------------
-LXPLUS = True
+LXPLUS = False
 mstdir = 'simple_stability/'
 fit_type = 'fwhm'
 dt_track = 1000
@@ -74,7 +74,7 @@ rfstation = RFStation(ring, [h], [V], [0], n_rf=1)
 
 # Beam
 beam_single_bunch = Beam(ring, int(N_m), int(total_intensity / N_bunches))
-bigaussian(ring, rfstation, beam_single_bunch, sigma_dt=1.2e-9/4)
+bigaussian(ring, rfstation, beam_single_bunch, sigma_dt=1.2e-9/4, seed=1234)
 
 beam = Beam(ring, int(N_bunches * N_m), int(total_intensity))
 j = 0

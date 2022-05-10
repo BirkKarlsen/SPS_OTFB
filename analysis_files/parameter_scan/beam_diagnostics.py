@@ -12,10 +12,9 @@ import utility_files.analysis_tools as at
 from analysis_files.measurement_analysis.import_data import measured_offset
 
 plt.rcParams.update({
-        #'text.usetex': True,
+        'text.usetex': True,
         'text.latex.preamble': r'\usepackage{fourier}',
         'font.family': 'serif',
-        #'font.sans-serif': 'Computer Modern Roman',
         'font.size': 16
     })
 
@@ -24,7 +23,7 @@ plt.rcParams.update({
 beam_parameter = 'Bunch Position'
 file_name = 'pos_fit_tbt_only_otfb_f1_g20.npy'
 file_name = 'pos_fit_tbt_full_f1_g20_bl100.npy'
-bunches = np.array([15, 30, 40, 50, 72])
+bunches = np.array([40])
 batch_length = 72
 number_of_batches = 4
 until_turn = 29000
@@ -43,9 +42,9 @@ normal_buckets *= 4.990159369074305e-09
 
 choose_batch = 0
 
-PLT_BP = False
+PLT_BP = True
 PLT_BL = False
-COMPARE_DIFFERENT = True
+COMPARE_DIFFERENT = False
 
 # Find files -----------------------------------------------------------------------------------------------------------
 dir_current_file = os.path.dirname(os.path.abspath(__file__))
@@ -178,7 +177,7 @@ if COMPARE_DIFFERENT:
     plt.legend()
 
 
-
+plt.show()
 
 # FWHM -----------------------------------------------------------------------------------------------------------------
 beam_parameter = 'Bunch Length'

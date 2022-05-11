@@ -5,13 +5,13 @@ Author: Birk Emil Karlsen-Bæck
 '''
 
 # Options -------------------------------------------------------------------------------------------------------------
-LXPLUS = True
+LXPLUS = False
 mstdir = 'simple_stability/'
 fit_type = 'fwhm'
-dt_track = 1000
+dt_track = 100
 dt_ptrack = 10
-dt_plot = 1000
-dt_save = 1000
+dt_plot = 100
+dt_save = 100
 tr = 1
 bunch_length_factor = 1.0
 
@@ -81,7 +81,7 @@ j = 0
 batch_i = 0
 for i in range(N_bunches):
     beam.dE[i * N_m: (i + 1) * N_m] = beam_single_bunch.dE
-    beam.dt[i * N_m: (i + 1) * N_m] = beam_single_bunch.dt + (bnh_spc * j + batch_i * bth_spc) * rfstation.t_rf[0,0]
+    beam.dt[i * N_m: (i + 1) * N_m] = beam_single_bunch.dt + (bnh_spc * (j - batch_i) + batch_i * bth_spc) * rfstation.t_rf[0,0]
     j += 1
     if j % 72 == 0:
         batch_i += 1
@@ -142,6 +142,13 @@ for i in range(N_t):
     SPS_tracker.track()
     profile.track()
     OTFB.track()
+
+    #sig = OTFB.OTFB_1.I_FINE_BEAM[-profile.n_slices:]
+    #plt.figure()
+    #plt.plot(np.abs(sig) *
+    #         np.sin(rfstation.omega_rf[0,0] * profile.bin_centers + np.angle(sig) + np.pi / 2))
+    #plt.plot(profile.n_macroparticles * beam.ratio * 2 * 1.6e-19 / profile.bin_size)
+    #plt.show()
 
     if i % dt_ptrack == 0:
         # Power

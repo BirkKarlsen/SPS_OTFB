@@ -79,7 +79,7 @@ else:
 if n_ramp == 0:
     ramp_str = ''
 else:
-    ramp_str = 'ramped'
+    ramp_str = '_ramped'
 
 # Make necessary preparations for Sims ----------------------------------------
 

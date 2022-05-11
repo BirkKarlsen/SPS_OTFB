@@ -90,11 +90,11 @@ file_names = np.zeros(input_array.shape).tolist()
 print('\nMaking shell scripts...')
 
 for i in range(len(input_array)):
-    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+    bash_file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}{ramp_str}' \
                          f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}.sh'
-    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+    sub_file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}{ramp_str}' \
                         f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}.sub'
-    file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}' \
+    file_names[i] = f'scan_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}{ramp_str}' \
                     f'_bl{100 * bl_factor:.0f}_llrf_{gllrf_array[i]:.0f}'
 
     # Make bash file

@@ -5,13 +5,13 @@ Author: Birk Emil Karlsen-Bæck
 '''
 
 # Options -------------------------------------------------------------------------------------------------------------
-LXPLUS = False
+LXPLUS = True
 mstdir = 'simple_stability/'
 fit_type = 'fwhm'
-dt_track = 100
+dt_track = 1000
 dt_ptrack = 10
-dt_plot = 100
-dt_save = 100
+dt_plot = 1000
+dt_save = 1000
 tr = 1
 bunch_length_factor = 1.0
 

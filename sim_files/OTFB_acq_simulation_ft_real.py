@@ -97,6 +97,7 @@ p_s = 440e9                                     # Synchronous momentum [eV]
 h = 4620                                        # 200 MHz harmonic number [-]
 V = (0.911535 * 4 + 1.526871 * 2) * 1e6         # 200 MHz RF voltage [V]
 phi = 0                                         # 200 MHz phase [-]
+V_800 = 0.19 * V                                # 800 MHz RF voltage [V]
 
 # Parameters for the SPS Cavity Feedback
 V_part = 0.5442095845867135                     # Voltage partitioning [-]
@@ -289,7 +290,7 @@ if IMP_CONFIG == 1:
     modelStr = "futurePostLS2_SPS_noMain200TWC.txt"     # Impedance without 200MHz TWC impedance
 elif IMP_CONFIG == 2:
     # SPS impedance model only
-    modelStr = "futurePostLS2_SPS.txt"                  # Impedance with 200 MHz TWC impedance reduced by 20
+    modelStr = f"futurePostLS2_SPS_f{FREQ_CONFIG}.txt"  # Impedance with 200 MHz TWC impedance reduced by 20
 elif IMP_CONFIG == 3:
     # SPS OTFB model only
     pass
@@ -319,7 +320,7 @@ ring = Ring(C, alpha, p_s, Proton(), n_turns=N_tot)
 
 
 # RF Station
-rfstation = RFStation(ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
+rfstation = RFStation(ring, [h, 4 * h], [V, V_800], [0, np.pi], n_rf=2)
 
 
 # Beam
@@ -490,10 +491,37 @@ if not GEN:
                 OTFB.OTFB_1.calc_power()
                 OTFB.OTFB_2.calc_power()
 
-            fwhm_arr[:, n], pos_arr[:, n], pos_fit_arr[:, n], x_72, y_72 = dut.bunch_params(profile,
-                                                                                            get_72=False)
-            int_arr[n] = beam.intensity
-            n += 1
+            try:
+                fwhm_arr[:, n], pos_arr[:, n], pos_fit_arr[:, n], x_72, y_72 = dut.bunch_params(profile,
+                                                                                                get_72=False)
+                int_arr[n] = beam.intensity
+                n += 1
+            except:
+                dut.plot_params(fwhm_arr, pos_arr, pos_fit_arr,
+                                max_pow_arr, max_V_arr, lxdir + sim_dir,
+                                rfstation.t_rf[0, 0], i, n - 1,
+                                MB=not SINGLE_BATCH)
+
+                dut.save_params(fwhm_arr, pos_arr, pos_fit_arr,
+                                max_pow_arr, max_V_arr, lxdir + sim_dir)
+
+                dut.plot_ramp(int_arr, i, n - 1, lxdir + sim_dir)
+
+                if IMP_CONFIG != 2:
+                    OTFB.OTFB_1.calc_power()
+                    OTFB.OTFB_2.calc_power()
+
+                if SAVE_RESULTS:
+                    if IMP_CONFIG != 2:
+                        dut.save_plots_OTFB(OTFB, lxdir + sim_dir + f'fig/', i)
+                        dut.save_data(OTFB, lxdir + sim_dir + f'sim_data/', i)
+
+                    dut.save_profile(profile, lxdir + sim_dir + f'sim_data/', i)
+                    dut.plot_bbb_offset(pos_fit_arr[:, n - 1], 4, lxdir + sim_dir + f'fig/', i)
+                    if FEEDFORWARD and IMP_CONFIG != 2:
+                        dut.save_plots_FF(OTFB, lxdir + sim_dir + f'fig/', i)
+
+                break
 
         if i % dt_save == 0:
             dut.plot_params(fwhm_arr, pos_arr, pos_fit_arr,

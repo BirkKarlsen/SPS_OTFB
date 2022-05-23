@@ -236,8 +236,8 @@ if args.gllrf_config is not None:
                     1.0 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            G_tx = [1.0 * tr,
-                    1.0 * tr]
+            G_tx = [0.3 / 0.33 * tr,
+                    0.3 / 0.33 * tr]
     elif FREQ_CONFIG == 2:
         df = [0.18433333e6,  # Both at 200.222
               0.2275e6]
@@ -259,8 +259,8 @@ if args.gllrf_config is not None:
                     1.0 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            G_tx = [1.0 * tr,
-                    1.0 * tr]
+            G_tx = [0.3 / 0.33 * tr,
+                    0.3 / 0.33 * tr]
     elif FREQ_CONFIG == 3:
         df = [62333.333,  # Both at 200.1
               105500]
@@ -282,8 +282,8 @@ if args.gllrf_config is not None:
                     1.0 * tr]
         elif GLLRF_CONFIG == 5:
             G_llrf = 20
-            G_tx = [1.0 * tr,
-                    1.0 * tr]
+            G_tx = [0.3 / 0.33 * tr,
+                    0.3 / 0.33 * tr]
 
 if IMP_CONFIG == 1:
     # SPS impedance model with OTFB model

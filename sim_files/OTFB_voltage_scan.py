@@ -40,7 +40,6 @@ IMP_CONFIG = 1
 VOLT_CONFIG = 1
 GLLRF_CONFIG = 5
 imp_str = ''
-V_ERR = 1
 PL_CONFIG = False
 bl_factor = 1.0
 n_ramp = 0
@@ -54,9 +53,6 @@ if args.freq_config is not None:
 
 if args.imp_config is not None:
     IMP_CONFIG = args.imp_config
-
-if args.v_error is not None:
-    V_ERR = args.v_error
 
 if args.bunch_length is not None:
     bl_factor = args.bunch_length

@@ -14,7 +14,7 @@ parser = argparse.ArgumentParser(description="This file launches simulations for
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Different configurations of the TWC central frequencies.")
 parser.add_argument("--n_ramp", "-nr", type=int,
-                    help="The number of turns to track the intensity ramp, default is 5000")
+                    help="The number of turns to track the intensity ramp, default is 0")
 parser.add_argument("--imp_config", "-ic", type=int,
                     help="Different configurations of the impedance model for the SPS.")
 parser.add_argument("--v_error", "-ve", type=float,

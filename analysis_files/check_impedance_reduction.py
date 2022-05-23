@@ -18,6 +18,18 @@ from blond.impedances.impedance_sources import InputTable
 
 from SPS.impedance_scenario import scenario, impedance2blond
 
+plt.rcParams.update({
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{fourier}',
+        'font.family': 'serif',
+        'font.size': 16
+    })
+
+
+# Options -------------------------------------------------------------------------------------------------------------
+PLT_RED = False
+PLT_SIM_IMP = True
+
 # Setting up needed objects for BLonD InducedVoltageFreq --------------------------------------------------------------
 print("Setting up...\n")
 ring = Ring(2 * np.pi * 1100.009, 1 / (18**2), 440e9, Proton(), n_turns=1)
@@ -42,10 +54,33 @@ impModel2 = impedance2blond(impScenario2.table_impedance)
 impFreq1 = InducedVoltageFreq(beam, profile, impModel1.impedanceList, freqRes)
 impFreq2 = InducedVoltageFreq(beam, profile, impModel2.impedanceList, freqRes)
 
+sc_str_sim = "futurePostLS2_SPS_noMain200TWC.txt"
+impScenario = scenario(sc_str_sim)
+impModel = impedance2blond(impScenario.table_impedance)
+impFreq = InducedVoltageFreq(beam, profile, impModel.impedanceList, freqRes)
+
+
 # Plotting the two scenarios ------------------------------------------------------------------------------------------
 print("Plotting...\n")
-plt.figure()
-plt.plot(impFreq1.freq, impFreq1.total_impedance)
-plt.plot(impFreq2.freq, impFreq2.total_impedance)
+
+if PLT_RED:
+        plt.figure()
+        plt.plot(impFreq1.freq, impFreq1.total_impedance)
+        plt.plot(impFreq2.freq, impFreq2.total_impedance)
+
+
+if PLT_SIM_IMP:
+        f_s = 1e-9
+        plt.figure()
+        plt.title('SPS Impedance Model')
+        plt.plot(impFreq.freq * f_s, impFreq.total_impedance.real, color='r', label='Real')
+        plt.plot(impFreq.freq * f_s, impFreq.total_impedance.imag, color='b', label='Imag')
+        plt.xlim((0 * f_s, 7e9 * f_s))
+
+        plt.legend()
+        plt.xlabel(r'Frequency [GHz]')
+        plt.ylabel(r'Impedance [$\Omega$]')
+
+
 
 plt.show()

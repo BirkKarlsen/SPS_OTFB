@@ -195,8 +195,8 @@ domega = [0, 0]
 #        0.429420301179296]
 #G_tx = [0.163212561182363 * 0.8,
 #        0.127838041632473 * 0.8]
-G_tx = [1.0,
-        1.0]
+G_tx = [0.3/0.33,
+        0.3/0.33]
 G_llrf = 20
 #G_tx = [1.0352156647332156,
 #        1.077709051028262]
@@ -246,10 +246,10 @@ V_part = 0.5442095845867135
 #llrf_g = G_llrf_ls
 
 Commissioning = CavityFeedbackCommissioning(open_FF=True, debug=False,
-                                            rot_IQ=1, FIR_filter=1, open_FB=True)
+                                            rot_IQ=-1, FIR_filter=1, open_FB=False)
 OTFB = SPSCavityFeedback(rfstation, beam, profile, post_LS2=True, V_part=V_part,
                          Commissioning=Commissioning, G_tx=G_tx, a_comb=a_comb,
-                         G_llrf=16, df=domega, G_ff=1)   # TODO: change back to only 20
+                         G_llrf=G_llrf, df=domega, G_ff=1)   # TODO: change back to only 20
 
 
 # Impedance of the SPS
@@ -376,7 +376,7 @@ print('T_s', OTFB.OTFB_1.T_s)
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 10
+    nn = 100
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -411,7 +411,7 @@ if not GENERATE:
     IMP_tot = SPS_rf_tracker_with_imp.totalInducedVoltage.induced_voltage
 
     NEW_PLOTS = False
-    PLOT_MATRIX_ELEMENTS = True
+    PLOT_MATRIX_ELEMENTS = False
     if NEW_PLOTS:
         plt.figure()
         plt.title('Total Voltage')
@@ -507,31 +507,34 @@ if not GENERATE:
         rf_current = OTFB.OTFB_1.I_COARSE_BEAM[-h:]
         rf_current = np.mean(rf_current[1000:1000 + 5 * 72])
 
-        plt.figure()
-        plt.title('Antenna 3-section')
-        plt.plot(np.abs(OTFB.OTFB_1.V_ANT[-h:]))
+
+        at.plot_IQ_both_cavities(OTFB, end=1000 + 72 * 5)
+
+        #plt.figure()
+        #plt.title('Antenna 3-section')
+        #plt.plot(np.abs(OTFB.OTFB_1.V_ANT[-h:]))
 
         #plt.figure()
         #plt.title('Power 3-section')
         #OTFB.OTFB_1.calc_power()
         #plt.plot(OTFB.OTFB_1.P_GEN[-h:])
 
-        plt.figure()
-        plt.title('Antenna 4-section')
-        plt.plot(np.abs(OTFB.OTFB_2.V_ANT[-h:]))
+        #plt.figure()
+        #plt.title('Antenna 4-section')
+        #plt.plot(np.abs(OTFB.OTFB_2.V_ANT[-h:]))
 
         #plt.figure()
         #plt.title('Power 4-section')
         #OTFB.OTFB_2.calc_power()
         #plt.plot(OTFB.OTFB_2.P_GEN[-h:])
 
-        plt.figure()
-        plt.title('Vgen 3-section')
-        plt.plot(np.abs(OTFB.OTFB_1.V_IND_COARSE_GEN[-h:]))
+        #plt.figure()
+        #plt.title('Vgen 3-section')
+        #plt.plot(np.abs(OTFB.OTFB_1.V_IND_COARSE_GEN[-h:]))
 
-        plt.figure()
-        plt.title('Vgen 4-section')
-        plt.plot(np.abs(OTFB.OTFB_2.V_IND_COARSE_GEN[-h:]))
+        #plt.figure()
+        #plt.title('Vgen 4-section')
+        #plt.plot(np.abs(OTFB.OTFB_2.V_IND_COARSE_GEN[-h:]))
 
         beam_ind, gen_ind = dut.find_induced_and_generator(OTFB, rfstation, profile, SPS_rf_tracker)
         beam_eff_ind = dut.find_effective_induced(OTFB, rfstation, profile, SPS_rf_tracker)

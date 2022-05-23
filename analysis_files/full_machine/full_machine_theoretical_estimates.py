@@ -40,7 +40,7 @@ def beam_effective_impedance(f_r, f_c, R_beam, tau):
     return RI_eff, RQ_eff
 
 
-def theoretical_power(f_r, f_c, R_beam, R_gen, tau, I_beam, Vant, n_cav):
+def theoretical_power(f_r, f_c, R_beam, R_gen, tau, I_beam, Vant, n_cav, VOLT = False):
     '''
     Calculate the theoretical power consumption of the SPS generation assuming infinite gain and
     steady-state.
@@ -74,6 +74,11 @@ def theoretical_power(f_r, f_c, R_beam, R_gen, tau, I_beam, Vant, n_cav):
 
     P_wo = np.zeros(2)
     P_wi = np.zeros(2)
+    Vg_wo = np.zeros(2, dtype=complex)
+    Vg_wi = np.zeros(2, dtype=complex)
+    Ig_wo = np.zeros(2, dtype=complex)
+    Ig_wi = np.zeros(2, dtype=complex)
+    Vb_wi = np.zeros(2, dtype=complex)
 
     for i in range(2):
         Rg_eff = generator_effective_impedance(f_r[i], f_c, R_gen[i], tau[i])
@@ -84,14 +89,22 @@ def theoretical_power(f_r, f_c, R_beam, R_gen, tau, I_beam, Vant, n_cav):
         IQ_gen_wo = Vant[i] / Rg_eff / n_cav[i]
 
         P_wo[i] = 25 * (II_gen_wo**2 + IQ_gen_wo**2)
+        Vg_wo[i] = Rg_eff * n_cav[i] * (II_gen_wo + 1j * IQ_gen_wo)
+        Ig_wo[i] = (II_gen_wo + 1j * IQ_gen_wo)
 
         # Calculation with beam
         II_gen_wi = (-RbI_eff * n_cav[i] * I_beam) / Rg_eff / n_cav[i]
         IQ_gen_wi = (Vant[i] - RbQ_eff * n_cav[i] * I_beam) / Rg_eff / n_cav[i]
 
         P_wi[i] = 25 * (II_gen_wi**2 + IQ_gen_wi**2)
+        Vg_wi[i] = Rg_eff * n_cav[i] * (II_gen_wi + 1j * IQ_gen_wi)
+        Ig_wi[i] = (II_gen_wi + 1j * IQ_gen_wi)
+        Vb_wi[i] = n_cav[i] * (RbI_eff * I_beam + 1j * RbQ_eff * I_beam)
 
-    return P_wo, P_wi
+    if not VOLT:
+        return P_wo, P_wi
+    else:
+        return P_wo, P_wi, Vg_wo, Vg_wi, Ig_wo, Ig_wi, Vb_wi
 
 def theoretical_power_signal_cavity(V, f_c, n_sections):
     if n_sections == 3:

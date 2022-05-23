@@ -312,6 +312,55 @@ def plot_IQ(Va, Vg, Vb, titstr = '', start=1000, end=3040, norm = False, wind = 
     plt.grid()
 
 
+def plot_IQ_both_cavities(OTFB, start=1000, end=3040, norm=False, xlims=None, ylims=None):
+    Va1 = OTFB.OTFB_1.V_ANT[-OTFB.OTFB_1.n_coarse:]
+    Vg1 = OTFB.OTFB_1.V_IND_COARSE_GEN[-OTFB.OTFB_1.n_coarse:]
+    Vb1 = OTFB.OTFB_1.V_IND_COARSE_BEAM[-OTFB.OTFB_1.n_coarse:]
+
+    Va1 = np.array([0 + 0 * 1j, np.mean(Va1[start:end])], dtype=complex)
+    Vg1 = np.array([0 + 0 * 1j, np.mean(Vg1[start:end])], dtype=complex)
+    Vb1 = np.array([0 + 0 * 1j, np.mean(Vb1[start:end])], dtype=complex)
+
+    Va2 = OTFB.OTFB_2.V_ANT[-OTFB.OTFB_2.n_coarse:]
+    Vg2 = OTFB.OTFB_2.V_IND_COARSE_GEN[-OTFB.OTFB_2.n_coarse:]
+    Vb2 = OTFB.OTFB_2.V_IND_COARSE_BEAM[-OTFB.OTFB_2.n_coarse:]
+
+    Va2 = np.array([0 + 0 * 1j, np.mean(Va2[start:end])], dtype=complex)
+    Vg2 = np.array([0 + 0 * 1j, np.mean(Vg2[start:end])], dtype=complex)
+    Vb2 = np.array([0 + 0 * 1j, np.mean(Vb2[start:end])], dtype=complex)
+
+    fig, ax = plt.subplots(2, 1, figsize=(6.5, 6))
+
+    V_s = 1e-6
+    Xf1 = 3.5
+    Xf2 = 3
+
+    ax[0].set_title('3-section')
+    ax[0].plot(Va1.real * V_s, Va1.imag * V_s, color='r', label=r'$V_{\textrm{ant}}$')
+    ax[0].plot(Vg1.real * V_s, Vg1.imag * V_s, color='black', label=r'$V_{\textrm{gen}}$')
+    ax[0].plot(Vb1.real * V_s, Vb1.imag * V_s, color='b', label=r'$V_\textrm{beam}$')
+    ax[0].set_xlabel('In-phase [MV]')
+    ax[0].set_ylabel('Quadrature [MV]')
+    ax[0].set_xlim((-Xf1, Xf1))
+    ax[0].set_ylim((0, Xf1))
+    ax[0].grid()
+
+    ax[1].set_title('4-section')
+    ax[1].plot(Va2.real * V_s, Va2.imag * V_s, color='r', label=r'$V_\textrm{ant}$')
+    ax[1].plot(Vg2.real * V_s, Vg2.imag * V_s, color='black', label=r'$V_\textrm{gen}$')
+    ax[1].plot(Vb2.real * V_s, Vb2.imag * V_s, color='b', label=r'$V_\textrm{beam}$')
+    ax[1].set_xlabel('In-phase [MV]')
+    ax[1].set_ylabel('Quadrature [MV]')
+    ax[1].set_xlim((-Xf2, Xf2))
+    ax[1].set_ylim((0, Xf2))
+    ax[1].grid()
+
+    fig.suptitle('I/Q-voltages')
+
+    handles, labels = ax[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc='right')
+
+
 def import_profiles_from_turn(data_dir, cfg_dir, turn):
     r'''
     Loads the profile for turn turn from the data_dir with configuration cfg_dir and simulation length length_dir.

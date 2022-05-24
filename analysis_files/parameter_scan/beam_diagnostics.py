@@ -23,7 +23,8 @@ plt.rcParams.update({
 beam_parameter = 'Bunch Position'
 file_name = 'pos_fit_tbt_only_otfb_f1_g20.npy'
 file_name = 'pos_fit_tbt_full_f1_g20_bl100.npy'
-bunches = np.array([40])
+file_name = 'pos_fit_tbt_fr1_vc1_ve89_bl100_g20.npy'
+bunches = np.array([1])
 batch_length = 72
 number_of_batches = 4
 until_turn = 29000
@@ -63,15 +64,13 @@ if PLT_BP:
     plt.title(beam_parameter)
     if choose_batch is not None:
         for j in range(len(bunches)):
-            plt.plot(turns[:until_turn],
-                        (data[choose_batch * batch_length + bunches[j] - 1, :until_turn] - normal_buckets[
-                            choose_batch * batch_length + bunches[j] - 1]) * 1e9,
-                        label=f'ba{choose_batch + 1}bu{bunches[j]}')
+            plt.plot((data[choose_batch * batch_length + bunches[j] - 1, :until_turn] - normal_buckets[
+                     choose_batch * batch_length + bunches[j] - 1]) * 1e9,
+                     label=f'ba{choose_batch + 1}bu{bunches[j]}')
     else:
         for i in range(number_of_batches):
             for j in range(len(bunches)):
-                plt.plot(turns[:until_turn],
-                         (data[i * batch_length + bunches[j]-1, :until_turn] - normal_buckets[
+                plt.plot((data[i * batch_length + bunches[j]-1, :until_turn] - normal_buckets[
                              i * batch_length + bunches[j]-1]) * 1e9,
                          label=f'ba{i+1}bu{bunches[j]}')
 
@@ -87,14 +86,11 @@ if PLT_BP:
                          choose_batch * batch_length + bunches[j] - 1]) * 1e9
             line, error = at.find_amp_from_linear_regression(data_i, dist=distance)
 
-            plt.plot(turns[:until_turn],
-                     line,
+            plt.plot(line,
                      label=f'ba{choose_batch + 1}bu{bunches[j]}')
-            plt.plot(turns[:until_turn],
-                     line + error,
+            plt.plot(line + error,
                      label=f'ba{choose_batch + 1}bu{bunches[j]}')
-            plt.plot(turns[:until_turn],
-                     line - error,
+            plt.plot(line - error,
                      label=f'ba{choose_batch + 1}bu{bunches[j]}')
     else:
         for i in range(number_of_batches):
@@ -103,14 +99,11 @@ if PLT_BP:
                     i * batch_length + bunches[j] - 1]) * 1e9
                 line, error = at.find_amp_from_linear_regression(data_i, dist=distance)
 
-                plt.plot(turns[:until_turn],
-                         line,
+                plt.plot(line,
                          label=f'ba{i + 1}bu{bunches[j]}')
-                plt.plot(turns[:until_turn],
-                         line + error,
+                plt.plot(line + error,
                          label=f'ba{i + 1}bu{bunches[j]}')
-                plt.plot(turns[:until_turn],
-                         line - error,
+                plt.plot(line - error,
                          label=f'ba{i + 1}bu{bunches[j]}')
 
     plt.xlabel('turns [s]')

@@ -19,7 +19,7 @@ import numpy.linalg as npla
 import matplotlib.pyplot as plt
 import utility_files.analysis_tools as at
 
-from blond.llrf.signal_processing import feedforward_filter_TWC3, feedforward_filter_TWC4
+from blond.llrf.signal_processing import feedforward_filter_TWC3_1, feedforward_filter_TWC4_1
 from blond.llrf.impulse_response import SPS3Section200MHzTWC, SPS4Section200MHzTWC
 
 plt.rcParams.update({
@@ -32,11 +32,11 @@ plt.rcParams.update({
 if SECTION == 3:
     TWC = SPS3Section200MHzTWC()
     print(TWC.tau)
-    print(len(feedforward_filter_TWC3))
+    print(len(feedforward_filter_TWC3_1))
 else:
     TWC = SPS4Section200MHzTWC()
     print(TWC.tau)
-    print(len(feedforward_filter_TWC4))
+    print(len(feedforward_filter_TWC4_1))
 
 # Philips FIR filter coefficients ---------------------------------------------
 phopteven = np.array([8.67639e-14, -8.32667e-15, -1.59983e-13, 1.15907e-13,
@@ -57,25 +57,26 @@ phoptodd = np.array([-0.0140479, 0.0221217, 0.00230681, 0.00230681,
                      0.0177336, -0.00230681, -0.00230681, -0.00230681,
                      -0.00230681, -0.0221217, 0.0140479])
 
-
+print(len(phopteven))
 
 # Parameters for the FF -------------------------------------------------------
-fs = 40.0444e6                          # Sampling frequency, was 124/4 MS/s
+fs = 40.0444e6                              # Sampling frequency, was 124/4 MS/s
 Ts = 1 / fs
-Trev = 924 / fs                         # Revolution period, was 256/fs
+Trev = 924 / fs                             # Revolution period, was 256/fs
 Nrev = Trev * fs
 if SECTION == 3:
-    T = 461.91831e-9                              # Filling time [s]
+    T = 461.91831e-9                        # Filling time [s]
     Lfilling = round(T * fs)                # Cavity response length
     Ntap = 31                               # Filter response length. MUST BE ODD
 else:
-    T = 620.70273e-9  # Filling time [s]
-    Lfilling = round(T * fs)  # Cavity response length
-    Ntap = 37  # Filter response length. MUST BE ODD
+    T = 620.70273e-9                        # Filling time [s]
+    Lfilling = round(T * fs)                # Cavity response length
+    Ntap = 37                               # Filter response length. MUST BE ODD
 
+print('Lfilling', Lfilling)
 
 # FIR filter ------------------------------------------------------------------
-def FIR(z, H):                          # z-transform of FIR
+def FIR(z, H):                              # z-transform of FIR
     output = 0
     for i in range(len(H)):
         output += H[i] * z**(-(i - 1))
@@ -83,7 +84,7 @@ def FIR(z, H):                          # z-transform of FIR
 
 
 # Impulse response ------------------------------------------------------------
-b = 0.1                                 # tau DeltaF
+b = 0.1                                     # tau DeltaF
 x = np.linspace(-0.5, 1.5, 1000)
 t = np.linspace(-2, 2, 1000)
 hgs, hgc = at.generator_matrix(x * T, 2 * np.pi * b / T, T)
@@ -246,7 +247,7 @@ def EvenMatrix(Nt):
                 output[i,j] = 1
     return output
 
-def Hoptreal(Nt, L, P):
+def Hoptreal(Nt, L, P, Dvectoreven):
     output = np.matmul(np.transpose(Rmatrix(P, L)), Dvectoreven)
     output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
     output = np.matmul(np.transpose(EvenMatrix(Nt)), output)
@@ -262,10 +263,10 @@ def Hoptreal(Nt, L, P):
 
     return np.matmul(matrix1, output)
 
-def Hopteven(Nt, L, P):
-    return np.concatenate([Hoptreal(Nt, L, P)[1:][::-1], Hoptreal(Nt, L, P)])
+def Hopteven(Nt, L, P, Dvectoreven):
+    return np.concatenate([Hoptreal(Nt, L, P, Dvectoreven)[1:][::-1], Hoptreal(Nt, L, P, Dvectoreven)])
 
-hopteven = Hopteven(Ntap, Lfilling, Pfit)
+hopteven = Hopteven(Ntap, Lfilling, Pfit, Dvectoreven)
 
 
 # Optimal FIR for imaginary valued impedance (Odd symmetric beam loading)
@@ -279,7 +280,7 @@ def OddMatrix(Nt):
                 output[i, j] = 1
     return output
 
-def Hoptimag(Nt, L, P):
+def Hoptimag(Nt, L, P, Dvectorodd):
     output = np.matmul(WeigthingUni(P), Dvectorodd)
     output = np.matmul(np.transpose(Rmatrix(P, L)), output)
     output = np.matmul(np.transpose(Smatrix(P + L - 1, Nt)), output)
@@ -296,11 +297,11 @@ def Hoptimag(Nt, L, P):
 
     return np.matmul(matrix1, output)
 
-def Hoptodd(Nt, L, P):
-    output = np.concatenate([-Hoptimag(Nt, L, P)[::-1], np.array([0])])
-    return np.concatenate([output, Hoptimag(Nt, L, P)])
+def Hoptodd(Nt, L, P, Dvectorodd):
+    output = np.concatenate([-Hoptimag(Nt, L, P, Dvectorodd)[::-1], np.array([0])])
+    return np.concatenate([output, Hoptimag(Nt, L, P, Dvectorodd)])
 
-hoptodd = Hoptodd(Ntap, Lfilling, Pfit)
+hoptodd = Hoptodd(Ntap, Lfilling, Pfit, Dvectorodd)
 
 if PLT_OPT_FIR:
     plt.figure('Optimal FIR for real valued impedance')
@@ -319,19 +320,19 @@ if PLT_OPT_FIR:
 
 
 # Reconstructed signal. Step response of FIR + rectangular window (cavity) ----
-def Yeven(Nt, L, P):
-    output = np.matmul(Smatrix(P + L - 1, Nt), Hopteven(Nt, L, P))
+def Yeven(Nt, L, P, Dvectoreven):
+    output = np.matmul(Smatrix(P + L - 1, Nt), Hopteven(Nt, L, P, Dvectoreven))
     return np.matmul(Rmatrix(P, L), output)
 
-def Yodd(Nt, L, P):
-    output = np.matmul(Smatrix(P + L - 1, Nt), Hoptodd(Nt, L, P))
+def Yodd(Nt, L, P, Dvectorodd):
+    output = np.matmul(Smatrix(P + L - 1, Nt), Hoptodd(Nt, L, P, Dvectorodd))
     return np.matmul(Rmatrix(P, L), output)
 
-def Ytotal(Nt, L, P):
-    return Yeven(Nt, L, P) + Yodd(Nt, L, P)
+def Ytotal(Nt, L, P, Dvectoreven, Dvectorodd):
+    return Yeven(Nt, L, P, Dvectoreven) + Yodd(Nt, L, P, Dvectorodd)
 
-def Ytotal2(Nt, L, P):
-    output = Hopteven(Nt, L, P) + Hoptodd(Nt, L, P)
+def Ytotal2(Nt, L, P, Dvectoreven, Dvectorodd):
+    output = Hopteven(Nt, L, P, Dvectoreven) + Hoptodd(Nt, L, P, Dvectorodd)
     output = np.matmul(Smatrix(P + L - 1, Nt), output)
     return np.matmul(Rmatrix(P, L), output)
 
@@ -340,30 +341,30 @@ def Ytotal2(Nt, L, P):
 if PLT_REC_SIG:
     plt.figure('Yeven')
     plt.title('Yeven')
-    plt.plot(Yeven(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Yeven(Ntap, Lfilling, Pfit, Dvectoreven), '.')
 
     plt.figure('Yodd')
     plt.title('Yodd')
-    plt.plot(Yodd(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Yodd(Ntap, Lfilling, Pfit, Dvectorodd), '.')
 
     plt.figure('Ytotal')
     plt.title('Ytotal')
-    plt.plot(Ytotal(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Ytotal(Ntap, Lfilling, Pfit, Dvectoreven, Dvectorodd), '.')
     plt.plot(Dvector, '.')
 
     plt.figure('Y Error')
     plt.title('Y Error')
-    Yerror = Ytotal(Ntap, Lfilling, Pfit) - Dvector
+    Yerror = Ytotal(Ntap, Lfilling, Pfit, Dvectoreven, Dvectorodd) - Dvector
     plt.plot(Yerror, '.')
     print('---- Y Error with splitting ----')
     print('Max error:', np.max(np.abs(Yerror)))
     print('Sigma error:', np.std(Yerror))
 
 # Compare with FF coefficients from BLonD
-bl_3sec = feedforward_filter_TWC3
-bl_4sec = feedforward_filter_TWC4
+bl_3sec = feedforward_filter_TWC3_1
+bl_4sec = feedforward_filter_TWC4_1
 
-my_3sec = Hopteven(Ntap, Lfilling, Pfit) + Hoptodd(Ntap, Lfilling, Pfit)
+my_3sec = Hopteven(Ntap, Lfilling, Pfit, Dvectoreven) + Hoptodd(Ntap, Lfilling, Pfit, Dvectorodd)
 
 print(my_3sec)
 plt.figure()
@@ -413,7 +414,8 @@ if PLT_OPT_FIR_WO:
 
     plt.figure('Compare Hopt with splitting')
     plt.title('Compare Hopt with splitting')
-    plt.plot(Hopt(Ntap, Lfilling, Pfit) - Hopteven(Ntap, Lfilling, Pfit), - Hoptodd(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Hopt(Ntap, Lfilling, Pfit) - Hopteven(Ntap, Lfilling, Pfit, Dvectoreven),
+             - Hoptodd(Ntap, Lfilling, Pfit, Dvectorodd), '.')
 
 # Reconstructed signal from Hopt ----------------------------------------------
 def YT(Nt, L, P):
@@ -429,7 +431,7 @@ if PLT_REC_SIG_WO:
     plt.figure('Reconstructed signal with and without splitting')
     plt.title('Reconstructed signal with and without splitting')
     plt.plot(YT(Ntap, Lfilling, Pfit), '.')
-    plt.plot(Ytotal(Ntap, Lfilling, Pfit), '.')
+    plt.plot(Ytotal(Ntap, Lfilling, Pfit, Dvectoreven, Dvectorodd), '.')
 
     plt.figure('Error from signal without splitting')
     plt.title('Error from signal without splitting')

@@ -25,7 +25,7 @@ PLT_POWER = False
 PLT_VANT = False
 PRT_CAV_AN = False
 CALC_TURN_VAR = False
-PLT_CAV_VAR = True
+PLT_CAV_VAR = False
 PLT_POWER_EST = True
 CAVITY = 4
 n_points = 65536
@@ -244,11 +244,11 @@ if PLT_POWER_EST:
 
     plt.figure()
     plt.title('Power Estimates')
-    plt.errorbar(cav_names, P_acq, yerr=P_acq_err, fmt='_', color='g', label=r'$P_{acq}$', markersize=10)
-    plt.plot(cav_names, P_set, '_', color='black', label=r'$P_{set}$', markersize=10)
-    plt.errorbar(cav_names, P_antacq, yerr=P_antacq_err, fmt='_', color='r', label=r'$P_{ant,acq}$', markersize=10)
+    plt.errorbar(cav_names, P_acq, yerr=P_acq_err, fmt='o', color='g', label=r'$P_\textrm{acq}$', capsize=6, markersize=6)
+    plt.plot(cav_names, P_set, 'x', color='black', label=r'$P_\textrm{set}$', markersize=12)
+    plt.plot(cav_names, P_antacq, 'D', color='r', label=r'$P_\textrm{ant,acq}$', markersize=8)
     #plt.plot(cav_names, P_antacq, '.', color='r', label=r'$P_{ant,acq}$')
-    plt.errorbar(cav_names, P_antmeas, yerr=P_antmeas_err, fmt='_', color='b', label=r'$P_{ant,meas}$', markersize=10)
+    plt.plot(cav_names, P_antmeas, 'o', color='b', label=r'$P_\textrm{ant,meas}$', markersize=6)
     #plt.plot(cav_names, P_antmeas, '.', color='b', label=r'$P_{ant,meas}$')
     plt.ylabel(r'Power [kW]')
     plt.xlabel(r'Cavity')

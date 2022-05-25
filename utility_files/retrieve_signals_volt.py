@@ -18,12 +18,14 @@ parser.add_argument("--signal_type", "-st", type=str,
                     help="The signal that is being retrived from parameter scan; default is profiles")
 parser.add_argument("--save_dir", "-sd", type=str,
                     help="Name of directory and file to save the signals into.")
+parser.add_argument("--date_str", "-ds", type=str,
+                    help="Option to specify the date of the simulations„ default is 'Mar-17-2022/'.")
+parser.add_argument("--tbt_param", "-tb", type=int,
+                    help="Option to determine whether or not it is a turn-by-turn signal, default is true (1)")
 
 # Arguments related to finding the specific set of simulations
 parser.add_argument("--freq_config", "-fc", type=int,
                     help="Resonant frequency configuration for scan; default is measured (1)")
-parser.add_argument("--date_str", "-ds", type=str,
-                    help="Option to specify the date of the simulations„ default is 'Mar-17-2022/'.")
 parser.add_argument("--n_ramp", "-nr", type=int,
                     help="The number of turns to track the intensity ramp, default is 0")
 parser.add_argument("--imp_config", "-ic", type=int,
@@ -48,6 +50,7 @@ args = parser.parse_args()
 # Define parameters for script ----------------------------------------------------------------------------------------
 signal_name = 'profile_'
 mst_dir = os.getcwd()[:-len('utility_files')]
+TBT_PARAM = True
 FREQ_CONFIG = 1
 date_string = 'Mar-17-2022/'
 IMP_CONFIG = 1
@@ -106,6 +109,9 @@ if args.extent is not None:
 if args.n_simulations is not None:
     n_sims = args.n_simulations
 
+if args.tbt_param is not None:
+    TBT_PARAM = bool(args.tbt_param)
+
 if IMP_CONFIG == 1:
     imp_str = ''
 elif IMP_CONFIG == 2:
@@ -145,18 +151,23 @@ for i in range(len(input_array)):
                    f'_bl{100 * bl_factor:.0f}_llrf_{G_llrf:.0f}/'
     sim_dir_i = data_dir + sim_folder_i + dir_within_sim
 
-    # Find all files for the given signal type prefix
-    file_list = []
-    turns = []
-    for file in os.listdir(sim_dir_i[:-1]):
-        if file.startswith(signal_name):
-            file_list.append(file)
-            turns.append(file[len(signal_name):-4])
-    turns = np.array(turns, dtype=int)
+    if TBT_PARAM:
+        # Find all files for the given signal type prefix
+        file_list = []
+        turns = []
+        for file in os.listdir(sim_dir_i[:-1]):
+            if file.startswith(signal_name):
+                file_list.append(file)
+                turns.append(file[len(signal_name):-4])
+        turns = np.array(turns, dtype=int)
 
-    # Find latest turn that the signals was recorded and saved
-    final_index = np.where(turns == np.amax(turns))[0][0]
-    file_i = file_list[final_index]
+        # Find latest turn that the signals was recorded and saved
+        final_index = np.where(turns == np.amax(turns))[0][0]
+        file_i = file_list[final_index]
+    else:
+        for file in os.listdir(sim_dir_i[:-1]):
+            if file.startswith(signal_name):
+                file_i = file
 
     os.system(f"cp {sim_dir_i}{file_i} {save_dir + save_name}{file_i[:-4]}"
               f"_fr{FREQ_CONFIG}_vc{VOLT_CONFIG}_ve{100 * input_array[i]:.0f}"

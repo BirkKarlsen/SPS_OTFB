@@ -503,6 +503,10 @@ def beam_matrix(t, domega , tau):
     hbc = (1/tau) * tri(t/tau) * np.sin(domega * t) + (1/tau) * tri(t/tau) * np.sign(t/tau) * np.sin(domega * t)
     return hbs, hbc
 
+def beam_even_odd(t, domega, tau):
+    hbs_e = (1/tau) * tri(t/tau) * np.cos(domega * t)
+    hbs_o = (1/tau) * tri(t/tau) * np.sign(t/tau) * np.cos(domega * t)
+    return hbs_e, hbs_o
 
 def plot_OTFB_signals(OTFB, h, t_rf):
     t_c = np.linspace(0, h * t_rf, h)

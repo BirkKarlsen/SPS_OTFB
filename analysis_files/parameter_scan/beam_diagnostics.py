@@ -24,6 +24,8 @@ beam_parameter = 'Bunch Position'
 file_name = 'pos_fit_tbt_only_otfb_f1_g20.npy'
 file_name = 'pos_fit_tbt_full_f1_g20_bl100.npy'
 file_name = 'pos_fit_tbt_fr1_vc1_ve89_no_otfb_bl100_g20.npy'
+file_name = 'tx_scan_fr1_vc1_ve100_bl100_g20/pos_fit_tbt_tr90.npy'
+file_name = '200MHz_volt_scan/pos_fit_tbt_fr1_vc1_ve120_bl100_llrf_20.npy'
 bunches = np.array([1])
 batch_length = 72
 number_of_batches = 4
@@ -143,16 +145,16 @@ plt.legend()
 
 
 
-plt.figure()
-plt.title('Mean position')
-m, ms = measured_offset()
-for i in range(number_of_batches):
+#plt.figure()
+#plt.title('Mean position')
+#m, ms = measured_offset()
+#for i in range(number_of_batches):
     # plt.plot(np.mean(errors[i * batch_length: (i + 1) * batch_length, -30:], axis=1))
-    plt.plot(np.max(lines[i * batch_length: (i + 1) * batch_length, -1:] - 0.5e9 * tb, axis=1))
+#    plt.plot(np.max(lines[i * batch_length: (i + 1) * batch_length, -1:] - 0.5e9 * tb, axis=1))
 
-plt.fill_between(np.linspace(0, batch_length-1, batch_length),(m - ms), (m + ms),
-                 color='b', alpha=0.3)
-plt.plot(m, linestyle='--', color='b', alpha=1, label='M')
+#plt.fill_between(np.linspace(0, batch_length-1, batch_length),(m - ms), (m + ms),
+#                 color='b', alpha=0.3)
+#plt.plot(m, linestyle='--', color='b', alpha=1, label='M')
 
 if COMPARE_DIFFERENT:
     files = ['pos_fit_tbt_full_f1_g20_bl100.npy', 'pos_fit_tbt_full_f1_g20_bl110.npy',

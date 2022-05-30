@@ -22,22 +22,22 @@ plt.rcParams.update({
 FREQ_CONFIG = 3
 EXTENDED = False
 CAV_TYPE = 3
-MODE = 2                    # MODE 1 is transmitter gain, MODE 2 is LLRF
-omit_ind = 5
+MODE = 1                    # MODE 1 is transmitter gain, MODE 2 is LLRF
+omit_ind = 10
 shift_P = 0.11                # [%]
 
 # Plots
-PLT_POWER = False
+PLT_POWER = True
 PLT_POWER_PTP = False
 
 # Directories -----------------------------------------------------------------
 mst_dir = os.getcwd()[:-len('analysis_files/parameter_scan')]
 
 if MODE == 1:
-    data_folder = f'power_scan_tr_fr{FREQ_CONFIG}/'
+    data_folder = f'tx_scan_fr{FREQ_CONFIG}_vc1_ve100_bl100_g20/'
 else:
     data_folder = f'power_scan_llrf_fr{FREQ_CONFIG}/'
-data_dir = mst_dir + 'data_files/' + data_folder
+data_dir = mst_dir + 'data_files/beam_parameters_tbt/' + data_folder
 
 if EXTENDED:
     ratio_array = np.linspace(0.8, 1.2, 10) * 100
@@ -54,7 +54,7 @@ else:
 
 # Get data --------------------------------------------------------------------
 if MODE == 1:
-    sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_29000_tr{ratio_array[0]:.0f}.npy')
+    sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_30000_tr{ratio_array[0]:.0f}.npy')
 else:
     sample_data = np.load(data_dir + f'{CAV_TYPE}sec_power_29000_llrf{ratio_array[0]:.0f}.npy')
 

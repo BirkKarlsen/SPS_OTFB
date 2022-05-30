@@ -45,11 +45,10 @@ FREQ_CONFIG = 1
 EXTENDED = False
 MODE = 1                    # MODE 1 is transmitter gain, MODE 2 is LLRF
 omit_ind = 10
-APPLY_CTF = False
 
 # Plots
-PLT_PROFILE = True
-PLT_BBB = True
+PLT_BBB = False
+PLT_BUNCH_VAR_OVER_TURNS = True
 
 # Directories -----------------------------------------------------------------
 mst_dir = os.getcwd()[:-len('analysis_files/parameter_scan')]
@@ -74,60 +73,36 @@ else:
 
 # Get data --------------------------------------------------------------------
 if MODE == 1:
-    sample_data = np.load(data_dir + f'profile_29000_tr{ratio_array[0]:.0f}.npy')
+    sample_data = np.load(data_dir + f'pos_fit_tbt_tr{ratio_array[0]:.0f}.npy')
 else:
     sample_data = np.load(data_dir + f'profile_29000_llrf{ratio_array[0]:.0f}.npy')
 
-profiles = np.zeros((sample_data.shape[0], len(ratio_array)))
-bins = np.zeros((sample_data.shape[0], len(ratio_array), ))
+pos = np.zeros((sample_data.shape[0], sample_data.shape[1], len(ratio_array)))
 
 print('Fetching profiles...\n')
 for i in range(len(ratio_array)):
     for file in os.listdir(data_dir[:-1]):
         if MODE == 1:
-            if file.endswith(f'tr{ratio_array[i]:.0f}.npy'):
+            if file.endswith(f'tr{ratio_array[i]:.0f}.npy') and file.startswith('pos_fit'):
                 sample_i = np.load(data_dir + file)
-                profiles[:, i] = sample_i[:, 0]
-                bins[:, i] = sample_i[:, 1]
+                pos[:, :, i] = sample_i
         else:
             if file.endswith(f'llrf{ratio_array[i]:.0f}.npy'):
                 sample_i = np.load(data_dir + file)
-                profiles[:, i] = sample_i[:, 0]
-                bins[:, i] = sample_i[:, 1]
-
-if APPLY_CTF:
-    for i in range(bins.shape[1]):
-        CTF_profile_i = cables_tranfer_function(bins[:,i], profiles[:,i])
-        profiles[:,i] = CTF_profile_i * np.max(profiles[:,i]) / np.max(CTF_profile_i)
-
-if PLT_PROFILE:
-    plt.figure()
-    colormap = plt.cm.gist_ncar
-    plt.gca().set_prop_cycle(plt.cycler('color', plt.cm.jet(np.linspace(0, 1, Ns))))
-    plt.plot(bins, profiles)
+                pos[:, :, i] = sample_i
 
 
-# Find bunch-by-bunch offset --------------------------------------------------
-print('Finding bunch positions...\n')
-N_bunches, Bunch_positions, Bunch_peaks, Bunch_lengths, Bunch_intensities, Bunch_positionsFit, \
-    Bunch_peaksFit, Bunch_Exponent, Goodness_of_fit, x_71, y_71 \
-        = dut.getBeamPattern_3(bins[:,0], profiles,
-                           distance=2**7 * 3, fit_option='fwhm', heightFactor=50,
-                           wind_len=5, save_72_fits=False)
-
-
-bbb_offsets = np.zeros(Bunch_positionsFit[:,:72].T.shape)
-xs = np.zeros(Bunch_positionsFit[:,:72].T.shape)
+bbb_offsets = np.zeros(pos[:72, -1, :].shape)
+xs = np.zeros(pos[:72, -1, :].shape)
 
 print('Computing bunch-by-bunch offset...\n')
 for i in range(len(ratio_array)):
-    bbb_offsets[:, i] = at.find_offset(Bunch_positionsFit[i,:72])
-    xs[:, i] = np.linspace(0, len(Bunch_positionsFit[0,:72]), len(Bunch_positionsFit[0,:72]))
+    bbb_offsets[:, i] = at.find_offset(pos[:72, -1, i])
+    xs[:, i] = np.linspace(0, len(bbb_offsets[:, i]), len(bbb_offsets[:, i]))
 
 
-bbb_offsets = bbb_offsets[:,:omit_ind]
+bbb_offsets = bbb_offsets[:,:omit_ind] * 1e9
 xs = xs[:,:omit_ind]
-
 
 if PLT_BBB:
     m, ms = measured_offset()
@@ -138,19 +113,53 @@ if PLT_BBB:
     plt.fill_between(xs[:,0], (m - ms) * 1e3, (m + ms) * 1e3,
                      color='b', alpha=0.3)
     plt.plot(xs[:,0], m * 1e3, linestyle='--', color='b', alpha=1, label='M')
-    for i in range(len(ratio_array)):
-        plt.plot(xs[:,i], bbb_offsets[:,i] * 1e3, label=f'{ratio_array[i]}')
-    plt.legend()
+    if MODE == 2:
+        for i in range(len(ratio_array)):
+            plt.plot(xs[:,i], bbb_offsets[:,i] * 1e3, label=f'{ratio_array[i]}')
+    else:
+        for i in range(len(ratio_array)):
+            plt.plot(xs[:,i], bbb_offsets[:,i] * 1e3)
     plt.ylabel(f'$\Delta t$ [ps]')
     plt.xlabel(f'Bunch number [-]')
 
     plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 
+# Plot variantion of BBB offset over a few turns
+from_i = 20
+sim_i = 1
+
+bbb_offsets = np.zeros(pos[:72, -from_i:, sim_i].shape)
+xs = np.zeros(pos[:72, -from_i:, sim_i].shape)
+
+print('Computing bunch-by-bunch offset...\n')
+for i in range(bbb_offsets.shape[1]):
+    bbb_offsets[:, i] = at.find_offset(pos[:72, -from_i + i, sim_i])
+    xs[:, i] = np.linspace(0, len(bbb_offsets[:, i]), len(bbb_offsets[:, i]))
 
 
+bbb_offsets = bbb_offsets * 1e9
+xs = xs
 
+if PLT_BUNCH_VAR_OVER_TURNS:
+    m, ms = measured_offset()
+    colormap = plt.cm.gist_ncar
+    plt.figure()
+    plt.title(f'Bunch-by-bunch Offset for $f_c =$ 200.1 MHz')
+    plt.gca().set_prop_cycle(plt.cycler('color', plt.cm.jet(np.linspace(0, 1, Ns))))
+    plt.fill_between(xs[:,0], (m - ms) * 1e3, (m + ms) * 1e3,
+                     color='b', alpha=0.3)
+    plt.plot(xs[:,0], m * 1e3, linestyle='--', color='b', alpha=1, label='M')
+    if MODE == 2:
+        for i in range(bbb_offsets.shape[1]):
+            plt.plot(xs[:,i], bbb_offsets[:,i] * 1e3, label=f'{ratio_array[i]}')
+    else:
+        for i in range(bbb_offsets.shape[1]):
+            plt.plot(xs[:,i], bbb_offsets[:,i] * 1e3)
+    plt.ylabel(f'$\Delta t$ [ps]')
+    plt.xlabel(f'Bunch number [-]')
 
+    plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
 
 
 

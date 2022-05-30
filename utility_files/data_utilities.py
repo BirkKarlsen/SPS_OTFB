@@ -801,3 +801,26 @@ def file_names_in_dir_from_prefix(drt, prefix):
             name_list.append(file)
 
     return name_list
+
+
+def mk_file_names_volt_scan(volts, prefix):
+    file_names = []
+
+    for i in range(len(volts)):
+        suffix = f'_fr1_vc1_ve{100 * volts[i]:.0f}_bl100_llrf_20.npy'
+        file_names.append(prefix + suffix)
+
+    return np.array(file_names)
+
+def get_data_from_files(dir_folder, file_names):
+
+    # Import test data to know the length of the arrays
+    td = np.load(dir_folder + file_names[0])
+    data_shape = td.shape
+
+    data = np.zeros((len(file_names), data_shape[0], data_shape[1]))
+
+    for i in range(len(file_names)):
+        data[i,:,:] = np.load(dir_folder + file_names[i])
+
+    return data

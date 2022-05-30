@@ -683,6 +683,16 @@ def find_average_dipole_oscillation(data, nb, until_turn, distance, batch_length
     return avg_dipole_osc
 
 
+def get_bunch_pos_in_buckets(start_bunch, bunch_spacing, batch_spacing, number_of_batches, batch_length):
+
+    normal_buckets = np.linspace(0, (batch_length-1) * bunch_spacing, batch_length)
+    for i in range(number_of_batches - 1):
+        normal_buckets = np.concatenate((normal_buckets,
+                                         np.linspace(0, (batch_length - 1) * bunch_spacing, batch_length)
+                                         + batch_spacing + normal_buckets[-1]))
+
+    return normal_buckets + start_bunch
+
 
 
 

@@ -23,11 +23,11 @@ plt.rcParams.update({
 beam_parameter = 'Bunch Position'
 file_name = 'pos_fit_tbt_only_otfb_f1_g20.npy'
 file_name = 'pos_fit_tbt_full_f1_g20_bl100.npy'
-file_name = 'pos_fit_tbt_fr1_vc1_ve89_bl100_g20.npy'
+file_name = 'pos_fit_tbt_fr1_vc1_ve89_no_otfb_bl100_g20.npy'
 bunches = np.array([1])
 batch_length = 72
 number_of_batches = 4
-until_turn = 29000
+until_turn = 30000#29000
 T_rev = 4620 / 200.394e6
 distance = 20
 tb = 4.990159369074305e-09
@@ -129,16 +129,16 @@ plt.legend()
 
 
 plt.figure()
-plt.title('Average Dipole Oscillation, Full Simulation')
+plt.title('Average Dipole Oscillation, No OTFB')
 #plt.plot(np.mean(errors, axis=0))
 color_lst = ['r', 'b', 'g', 'black']
 for i in range(number_of_batches):
     N = np.mean(errors[i * batch_length: (i + 1) * batch_length,:], axis=0)
     plt.plot(np.linspace(0, 10 * len(N), len(N)),
-             np.mean(errors[i * batch_length: (i + 1) * batch_length,:], axis=0),
+             np.mean(errors[i * batch_length: (i + 1) * batch_length,:] * 1e3, axis=0),
              label=f'Batch {i + 1}', color=color_lst[i])
 plt.xlabel(r'Turns [-]')
-plt.ylabel(r'Amplitude [ns]')
+plt.ylabel(r'Amplitude [ps]')
 plt.legend()
 
 

@@ -217,7 +217,8 @@ if SINGLE_RF:
 else:
     rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
 
-print('RF frequency',rfstation.omega_rf[0,0] / 2 / np.pi)
+print('RF frequency', rfstation.omega_rf[0,0] / 2 / np.pi)
+print('Revolution frequency', 1 / rfstation.t_rev[0])
 
 # SINGLE BUNCH FIRST
 # Beam

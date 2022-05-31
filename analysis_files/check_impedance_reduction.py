@@ -28,7 +28,8 @@ plt.rcParams.update({
 
 # Options -------------------------------------------------------------------------------------------------------------
 PLT_RED = False
-PLT_SIM_IMP = True
+PLT_SIM_IMP = False
+PLT_SIM_IMP_2 = True
 
 # Setting up needed objects for BLonD InducedVoltageFreq --------------------------------------------------------------
 print("Setting up...\n")
@@ -71,16 +72,45 @@ if PLT_RED:
 
 if PLT_SIM_IMP:
         f_s = 1e-9
+        f_0 = 43375.411573351994
+        Z_0 = impFreq.total_impedance * profile.bin_size
+        n = impFreq.freq / f_0
+        #Z_0 = Z_0 / n
+        Z_0 = np.log10(np.abs(Z_0))
         plt.figure()
         plt.title('SPS Impedance Model')
-        plt.plot(impFreq.freq * f_s, impFreq.total_impedance.real, color='r', label='Real')
-        plt.plot(impFreq.freq * f_s, impFreq.total_impedance.imag, color='b', label='Imag')
-        plt.xlim((0 * f_s, 7e9 * f_s))
+        plt.plot(impFreq.freq * f_s, Z_0, color='r', label='Real')
+        #plt.plot(impFreq.freq * f_s, Z_0.imag, color='b', label='Imag')
+        plt.xlim((0 * f_s, 5e9 * f_s))
 
         plt.legend()
         plt.xlabel(r'Frequency [GHz]')
-        plt.ylabel(r'Impedance [$\Omega$]')
+        plt.ylabel(r'$Z_0 / n$ [$\Omega$]')
 
+
+if PLT_SIM_IMP_2:
+        f_s = 1e-9
+        f_0 = 43375.411573351994
+        Z_0 = impFreq.total_impedance * profile.bin_size
+        n = impFreq.freq / f_0
+        Z_0_over_n = Z_0 / n
+        fig, ax = plt.subplots(1, 2, figsize=(10, 5))
+        fig.suptitle('SPS Impedance Model')
+
+        ax[0].plot(impFreq.freq * f_s, np.abs(Z_0 * 1e-6), color='black')
+        ax[0].set_xlim((0 * f_s, 5e9 * f_s))
+        ax[0].set_ylim((1e-3, 4e6 * 1e-6))
+        ax[0].set_xlabel(r'Frequency [GHz]')
+        ax[0].set_ylabel(r'$\left | Z_0 \right |$ [$M\Omega$]')
+        ax[0].set_yscale('log')
+
+        ax[1].plot(impFreq.freq * f_s, Z_0_over_n.real, color='r', label='Real', zorder=1)
+        ax[1].plot(impFreq.freq * f_s, Z_0_over_n.imag, color='b', label='Imag', zorder=0)
+        ax[1].set_xlim((0 * f_s, 5e9 * f_s))
+        ax[1].set_ylim((-2, 4))
+        ax[1].legend()
+        ax[1].set_xlabel(r'Frequency [GHz]')
+        ax[1].set_ylabel(r'$Z_0 / n$ [$\Omega$]')
 
 
 plt.show()

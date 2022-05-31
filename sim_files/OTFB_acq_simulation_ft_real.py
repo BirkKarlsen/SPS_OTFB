@@ -38,6 +38,8 @@ parser.add_argument("--v_error", "-ve", type=float,
                     help="Option to account for voltage error in measurements.")
 parser.add_argument("--bunch_length", "-bl", type=float,
                     help="Option to modify bunchlength by some factor, default is 1.0")
+parser.add_argument("--delta_freq", "-df", type=float,
+                    help="Option to shift the central frequency for both cavities together.")
 
 args = parser.parse_args()
 
@@ -294,6 +296,11 @@ elif IMP_CONFIG == 2:
 elif IMP_CONFIG == 3:
     # SPS OTFB model only
     pass
+
+if args.delta_freq is not None:
+    delta_freq = args.delta_freq
+    df = [-43166.67 + delta_freq,
+          0 + delta_freq]
 
 N_tot = N_t + N_ir
 if N_ir == 0:

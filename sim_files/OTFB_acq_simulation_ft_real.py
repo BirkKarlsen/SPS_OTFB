@@ -14,8 +14,6 @@ parser.add_argument("--n_turns", '-nt', type=int,
                     help="The number of turns to simulates, default is 1000")
 parser.add_argument("--n_ramp", "-nr", type=int,
                     help="The number of turns to track the intensity ramp, default is 5000")
-parser.add_argument("--otfb_config", "-oc", type=int,
-                    help="Different configurations of the OTFB parameters.")
 parser.add_argument("--volt_config", "-vc", type=int,
                     help="Different values for the RF voltage.")
 parser.add_argument("--freq_config", "-fc", type=int,
@@ -40,6 +38,8 @@ parser.add_argument("--bunch_length", "-bl", type=float,
                     help="Option to modify bunchlength by some factor, default is 1.0")
 parser.add_argument("--delta_freq", "-df", type=float,
                     help="Option to shift the central frequency for both cavities together.")
+parser.add_argument("--more_particles", "-mp", type=int,
+                    help="Option to double the amount of macro particles per bunch.")
 
 args = parser.parse_args()
 
@@ -49,7 +49,6 @@ GEN = False
 SAVE_RESULTS = True
 SINGLE_BATCH = False
 LXPLUS = True
-OTFB_CONFIG = 1
 VOLT_CONFIG = 1
 FREQ_CONFIG = 1
 GLLRF_CONFIG = 1
@@ -57,6 +56,7 @@ IMP_CONFIG = 1
 PL_CONFIG = False
 FIR_FILTER = 1
 FEEDFORWARD = False
+MORE_PART = False
 fit_type = 'fwhm'
 mstdir = ''
 dt_track = 1000
@@ -116,6 +116,7 @@ modelStr = "futurePostLS2_SPS_noMain200TWC.txt" # Name of Impedance Model
 
 # Parameters for the Simulation
 N_m = int(5e5)                                  # Number of macro-particles for tracking
+N_m_string = 'f'
 N_t = 1000                                      # Number of turns to track
 N_ir = 5000                                     # Number of turns for the intensity ramp
 
@@ -125,9 +126,6 @@ if args.n_turns is not None:
 
 if args.n_ramp is not None:
     N_ir = args.n_ramp
-
-if args.otfb_config is not None:
-    OTFB_CONFIG = args.otfb_config
 
 if args.volt_config is not None:
     VOLT_CONFIG = args.volt_config
@@ -159,29 +157,13 @@ if args.tx_ratio is not None:
 if args.bunch_length is not None:
     bunch_length_factor = args.bunch_length
 
+if args.more_particles is not None:
+    MORE_PART = bool(args.more_particles)
 
-if OTFB_CONFIG == 1:
-    pass
-elif OTFB_CONFIG == 2:
-    rr = 0.9
-    G_tx = [0.1611031942822209 * rr,
-            0.115855991237277 * rr]
-elif OTFB_CONFIG == 3:
-    G_llrf = 16
-    G_tx = [0.163212561182363,
-            0.127838041632473]
-elif OTFB_CONFIG == 4:
-    rr = 0.95
-    G_llrf = 16
-    G_tx = [0.163212561182363 * rr,
-            0.127838041632473 * rr]
-elif OTFB_CONFIG == 5:
-    rr = 0.80
-    G_llrf = 16
-    G_tx = [0.163212561182363 * rr,
-            0.127838041632473 * rr]
-elif OTFB_CONFIG == 6:
-    G_llrf = 0
+if MORE_PART:
+    N_m = int(1e6)
+    N_m_string = 'b'
+
 
 
 
@@ -419,18 +401,18 @@ if GEN:
     beam.dt += 1000 * rfstation.t_rf[0, 0]
 
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'
-                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_f.npy',
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_{N_m_string}.npy',
             beam.dE)
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'
-                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_f.npy',
+                    f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_{N_m_string}.npy',
             beam.dt)
 else:
     beam.dE = np.load(
         lxdir + f'data_files/with_impedance/generated_beams/'
-                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_f.npy')
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dE_{N_m_string}.npy')
     beam.dt = np.load(
         lxdir + f'data_files/with_impedance/generated_beams/'
-                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_f.npy')
+                f'generated_beam_{fit_type}_{N_bunches}_{100 * bunch_length_factor:.0f}_dt_{N_m_string}.npy')
 
 
 # Tracker Object with SPS Cavity Feedback -------------------------------------

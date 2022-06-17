@@ -803,11 +803,11 @@ def file_names_in_dir_from_prefix(drt, prefix):
     return name_list
 
 
-def mk_file_names_volt_scan(volts, prefix):
+def mk_file_names_volt_scan(volts, prefix, fr=1):
     file_names = []
 
     for i in range(len(volts)):
-        suffix = f'_fr1_vc1_ve{100 * volts[i]:.0f}_bl100_llrf_20.npy'
+        suffix = f'_fr{fr}_vc1_ve{100 * volts[i]:.0f}_bl100_llrf_20.npy'
         file_names.append(prefix + suffix)
 
     return np.array(file_names)

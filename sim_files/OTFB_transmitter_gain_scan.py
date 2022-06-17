@@ -51,7 +51,7 @@ for i in range(len(ratio_array)):
     bash_content = f'#!/bin/bash\n' \
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
-                   f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -oc 1 -vc 1 -fc {FREQ_CONFIG} ' \
+                   f'OTFB_acq_simulation_ft_real.py -nt 30000 -nr 0 -vc 1 -fc {FREQ_CONFIG} ' \
                    f'-gc 5 ' \
                    f'-tr {ratio_array[i]} -sd scan_fr{FREQ_CONFIG}_tr_{100 * ratio_array[i]:.0f}/'
 

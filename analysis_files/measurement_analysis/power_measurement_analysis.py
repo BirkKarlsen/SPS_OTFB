@@ -24,9 +24,11 @@ plt.rcParams.update({
 PLT_POWER = False
 PLT_VANT = False
 PRT_CAV_AN = False
-CALC_TURN_VAR = False
-PLT_CAV_VAR = False
-PLT_POWER_EST = True
+CALC_TURN_VAR = True
+PLT_CAV_VAR = True
+PLT_MEAN = True
+PLT_IND_CAV = False
+PLT_POWER_EST = False
 CAVITY = 4
 n_points = 65536
 HOME = True
@@ -204,22 +206,26 @@ if PLT_CAV_VAR:
     t_s = 1e6
 
     ax[0].set_title('3-section')
-    ax[0].fill_between(t * t_s, P_s * mean_3sec * 0.8, P_s * mean_3sec * 1.2,
-                 color='black', alpha=0.3)
-    ax[0].plot(t * t_s, P_s * mean_3sec, color='black', label='Mean', linestyle='--')
-    for i in range(n_3sec):
-        ax[0].plot(t * t_s, P_s * power_mean_per_cav3[i, :], label=f'C{cav3_names[i]}')
+    if PLT_MEAN:
+        ax[0].fill_between(t * t_s, P_s * mean_3sec * 0.8, P_s * mean_3sec * 1.2,
+                     color='black', alpha=0.3)
+        ax[0].plot(t * t_s, P_s * mean_3sec, color='black', label='Mean', linestyle='--')
+    if PLT_IND_CAV:
+        for i in range(n_3sec):
+            ax[0].plot(t * t_s, P_s * power_mean_per_cav3[i, :], label=f'C{cav3_names[i]}')
     ax[0].set_xlim((3e-6 * t_s, 17e-6 * t_s))
     ax[0].set_xlabel(r'$\Delta t$ [$\mu$s]')
     ax[0].set_ylabel(r'$P$ [kW]')
     ax[0].legend()
 
     ax[1].set_title('4-section')
-    ax[1].fill_between(t * t_s, P_s * mean_4sec * 0.8, P_s * mean_4sec * 1.2,
-                       color='black', alpha=0.3)
-    ax[1].plot(t * t_s, P_s * mean_4sec, color='black', label='Mean', linestyle='--')
-    for i in range(n_4sec):
-        ax[1].plot(t * t_s, P_s * power_mean_per_cav4[i, :], label=f'C{cav4_names[i]}')
+    if PLT_MEAN:
+        ax[1].fill_between(t * t_s, P_s * mean_4sec * 0.8, P_s * mean_4sec * 1.2,
+                           color='black', alpha=0.3)
+        ax[1].plot(t * t_s, P_s * mean_4sec, color='black', label='Mean', linestyle='--')
+    if PLT_IND_CAV:
+        for i in range(n_4sec):
+            ax[1].plot(t * t_s, P_s * power_mean_per_cav4[i, :], label=f'C{cav4_names[i]}')
     ax[1].set_xlim((3e-6 * t_s, 17e-6 * t_s))
     ax[1].set_xlabel(r'$\Delta t$ [$\mu$s]')
     ax[1].set_ylabel(r'$P$ [kW]')

@@ -640,10 +640,13 @@ def plot_measurement_shots(data, t):
         plt.plot(t[i,:], data[i,:])
 
 
-def find_turn_by_turn_variantions(data, n_shots):
+def find_turn_by_turn_variantions(data, n_shots, ABS=False, IND_MAX=False):
     n_turns = data.shape[0] // n_shots
     var_min = np.zeros(n_shots)
     var_max = np.zeros(n_shots)
+
+    var_min_ind = np.zeros(n_shots)
+    var_max_ind = np.zeros(n_shots)
 
     for i in range(n_shots):
         shot_data = data[i * n_turns: (i + 1) * n_turns, :]
@@ -653,24 +656,48 @@ def find_turn_by_turn_variantions(data, n_shots):
         min_shot = np.zeros(mean_shot.shape)
 
         for j in range(len(mean_shot)):
-            max_shot[j] = np.max((shot_data[:,j] - mean_shot[j])/mean_shot[j])
-            min_shot[j] = np.min((shot_data[:,j] - mean_shot[j])/mean_shot[j])
+            if ABS:
+                max_shot[j] = np.max((shot_data[:, j] - mean_shot[j]))
+                min_shot[j] = np.min((shot_data[:, j] - mean_shot[j]))
+            else:
+                max_shot[j] = np.max((shot_data[:, j] - mean_shot[j])/mean_shot[j])
+                min_shot[j] = np.min((shot_data[:, j] - mean_shot[j])/mean_shot[j])
 
         var_max[i] = np.max(max_shot)
         var_min[i] = np.min(min_shot)
+        var_max_ind[i] = np.argmax(max_shot)
+        var_min_ind[i] = np.argmin(min_shot)
 
-    return var_max, var_min
+    if IND_MAX:
+        return var_max, var_min, var_max_ind, var_min_ind
+    else:
+        return var_max, var_min
 
-def find_shot_by_shot_variantions(data):
+def find_shot_by_shot_variantions(data, ABS=False, IND_MAX=False):
     mean_sig = np.mean(data, axis=0)
     max_dev = np.zeros(mean_sig.shape)
     min_dev = np.zeros(mean_sig.shape)
 
     for j in range(len(mean_sig)):
-        max_dev[j] = np.max((data[:, j] - mean_sig[j]) / mean_sig[j])
-        min_dev[j] = np.min((data[:, j] - mean_sig[j]) / mean_sig[j])
+        if ABS:
+            max_dev[j] = np.max((data[:, j] - mean_sig[j]))
+            min_dev[j] = np.min((data[:, j] - mean_sig[j]))
+        else:
+            max_dev[j] = np.max((data[:, j] - mean_sig[j]) / mean_sig[j])
+            min_dev[j] = np.min((data[:, j] - mean_sig[j]) / mean_sig[j])
 
-    return np.max(max_dev), np.min(min_dev)
+    if IND_MAX:
+        return np.max(max_dev), np.min(min_dev), np.argmax(max_dev), np.argmin(min_dev)
+    else:
+        return np.max(max_dev), np.min(min_dev)
+
+def plot_bunch_pos(data, n_turns, acqn, bunch):
+
+    bunch_pos = data[acqn * n_turns: (acqn + 1) * n_turns, bunch]
+
+    plt.figure()
+    plt.plot(bunch_pos)
+
 
 def find_average_dipole_oscillation(data, nb, until_turn, distance, batch_length, number_of_batches):
     lines = np.zeros(data[:, :until_turn].shape)

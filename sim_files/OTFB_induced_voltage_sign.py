@@ -71,7 +71,7 @@ from SPS.impedance_scenario import scenario, impedance2blond
 
 # TODO: change back - DONE
 fit_type = 'fwhm'
-SINGLE_BATCH = True
+SINGLE_BATCH = False
 GENERATE = False                           # TODO: True
 SAVE_RESULTS = False
 LXPLUS = False                              # TODO: change back before copy to lxplus
@@ -101,7 +101,7 @@ phi = 0                                         # 200 MHz phase [-]
 
 
 # Parameters for the Simulation
-N_m = int(5e5)                                  # Number of macro-particles for tracking
+N_m = int(1e6)                                  # Number of macro-particles for tracking
 N_t = 1000                                      # Number of turns to track
 
 dt_plot = 2 # TODO: 1000
@@ -330,8 +330,8 @@ if GENERATE:
     np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy', beam.dE)
     np.save(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy', beam.dt)
 else:
-    beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dE_r.npy')
-    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_dt_r.npy') + 0.0 * rfstation.t_rf[0,0]
+    beam.dE = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_100_dE_b.npy')
+    beam.dt = np.load(lxdir + f'data_files/with_impedance/generated_beams/generated_beam_{fit_type}_{N_bunches}_100_dt_b.npy') + 0.0 * rfstation.t_rf[0,0]
 
 SPS_rf_tracker = RingAndRFTracker(rfstation, beam, TotalInducedVoltage=total_imp,
                                   CavityFeedback=OTFB, Profile=profile, interpolation=True)
@@ -377,7 +377,7 @@ print('T_s', OTFB.OTFB_1.T_s)
 if not GENERATE:
     # Tracking ------------------------------------------------------------------------------------------------------------
     # Tracking with the beam
-    nn = 100
+    nn = 1
     dt_p = 10
     for i in range(nn):
         OTFB.track()
@@ -563,7 +563,7 @@ if not GENERATE:
                  IMP_tot * 18e-16)
 
         fwhm_arr, pos_arr, pos_fit_arr, x_72, y_72 = dut.bunch_params(profile, get_72=False)
-        dut.plot_bbb_offset(pos_fit_arr, 1, '', 0, show=True)
+        dut.plot_bbb_offset(pos_fit_arr, 4, '', 0, show=True)
 
 
 

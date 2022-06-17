@@ -81,7 +81,10 @@ plt.plot(t_array, (RFdrive_phase + np.pi / 2) % (np.pi * 2))
 plt.xlim((0, 2e-5))
 
 
-
+'''
+phase loop gain 150
+otfb_static
+'''
 
 
 

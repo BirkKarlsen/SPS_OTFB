@@ -9,7 +9,7 @@ import numpy as np
 
 
 
-part = np.load(f'../data_files/with_impedance/generated_beams/generated_beam_fwhm_288_100_dE_r.npy')
+part = np.load(f'../data_files/with_impedance/generated_beams/generated_beam_fwhm_288_100_dE_b.npy')
 
 
 print(part.shape[0])

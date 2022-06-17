@@ -31,16 +31,17 @@ batch_length = 72
 distance = 20
 until_turn = 3000
 V = 6.7         # [MV]
+fr = 3
 
 tb = 4.990159369074305e-09
 T_rev = 4620 / 200.394e6
 
 # Directory and Files -------------------------------------------------------------------------------------------------
-data_folder = f'../../data_files/beam_parameters_tbt/200MHz_volt_scan/'
+data_folder = f'../../data_files/beam_parameters_tbt/200MHz_volt_scan_fr{fr}/'
 volt_errors = np.linspace(1 - extent, 1 + extent, n_sims)
 
-pos_files = dut.mk_file_names_volt_scan(volt_errors, 'pos_fit_tbt')
-fwhm_files = dut.mk_file_names_volt_scan(volt_errors, 'fwhm_tbt')
+pos_files = dut.mk_file_names_volt_scan(volt_errors, 'pos_fit_tbt', fr=fr)
+fwhm_files = dut.mk_file_names_volt_scan(volt_errors, 'fwhm_tbt', fr=fr)
 
 # Bunch Position Analysis ---------------------------------------------------------------------------------------------
 pos_data = dut.get_data_from_files(data_folder, pos_files)
@@ -60,7 +61,7 @@ for i in range(len(pos_files)):
     max_avg_dipole_osc[i,:] = np.max(avg_dipole_osc[i,:,exclude_start:], axis=1)
 
 plt.figure()
-plt.title('Maximum Average Dipole Oscillation')
+plt.title(r'Maximum Average Dipole Oscillation, 2018 $f_r$')
 V_array = V * volt_errors
 y_s = 1e3
 plt.plot(V_array, max_avg_dipole_osc[:,0] * y_s, label='Batch 1', color='r')
@@ -71,8 +72,15 @@ plt.legend()
 plt.xlabel('200 MHz RF Voltage [MV]')
 plt.ylabel('Dipole Oscillation Amplitude [ps]')
 plt.xlim((V_array[0], V_array[-1]))
-plt.show()
 
+print(max_avg_dipole_osc[-1,0] * y_s, max_avg_dipole_osc[-1,1] * y_s,
+      max_avg_dipole_osc[-1,2] * y_s, max_avg_dipole_osc[-1,3] * y_s)
+
+print(np.mean(max_avg_dipole_osc[-1,:] * y_s))
+
+print(np.mean(np.array([6.85, 6.93, 6.79 ])))
+
+plt.show()
 
 
 

@@ -125,7 +125,7 @@ for i in range(len(input_array)):
                    f'source /afs/cern.ch/user/b/bkarlsen/.bashrc\n' \
                    f'python /afs/cern.ch/work/b/bkarlsen/Simulation_Files/SPS_OTFB/sim_files/' \
                    f'OTFB_acq_simulation_ft_real.py ' \
-                   f'-nt 30000 -nr {n_ramp} -oc 1 ' \
+                   f'-nt 30000 -nr {n_ramp} ' \
                    f'-vc {VOLT_CONFIG} -fc 1 ' \
                    f'-gc {GLLRF_CONFIG} -sd ' \
                    f'scan_fr{1e-3 * freq_array[i]:.0f}kHz_vc{VOLT_CONFIG}_ve{100 * V_ERR:.0f}{imp_str}{pl_str}{ramp_str}' \

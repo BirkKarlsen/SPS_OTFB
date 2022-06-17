@@ -13,7 +13,7 @@ import utility_files.analysis_tools as at
 
 
 # Options -------------------------------------------------------------------------------------------------------------
-HOME = False
+HOME = True
 TURN_BY_TURN = True
 PLT_TBT = False
 SHOT_BY_SHOT = True
@@ -29,7 +29,7 @@ N_batches = 4
 
 # Functions -----------------------------------------------------------------------------------------------------------
 if HOME:
-    meas_dir = ''
+    meas_dir = f'../../data_files/profiles_SPS_OTFB_flattop/'
 else:
     meas_dir = f'/Users/bkarlsen/cernbox/SPSOTFB_benchmark_data/data/2021-11-05/profiles_SPS_OTFB_flattop/'
 
@@ -47,6 +47,11 @@ sbs_bbb_offset_b3 = np.zeros((len(files), 72))
 sbs_bbb_offset_b4 = np.zeros((len(files), 72))
 
 if TURN_BY_TURN:
+    bbb_offsets_1t = np.zeros((n_turns * profiles_data.shape[0], 72))
+    bbb_offsets_2t = np.zeros((n_turns * profiles_data.shape[0], 72))
+    bbb_offsets_3t = np.zeros((n_turns * profiles_data.shape[0], 72))
+    bbb_offsets_4t = np.zeros((n_turns * profiles_data.shape[0], 72))
+
     for i in range(profiles_data.shape[0]):
         profile_data_corr = profiles_data_corr[i, :]
         profile_data_corr = profile_data_corr.reshape((n_turns, turn_points))
@@ -67,6 +72,17 @@ if TURN_BY_TURN:
             bbb_offsets_2[j, :] = at.find_offset(pos_fit[1, :])
             bbb_offsets_3[j, :] = at.find_offset(pos_fit[2, :])
             bbb_offsets_4[j, :] = at.find_offset(pos_fit[3, :])
+
+        bbb_offsets_1t[i * n_turns: (i + 1) * n_turns, :] = bbb_offsets_1
+        bbb_offsets_2t[i * n_turns: (i + 1) * n_turns, :] = bbb_offsets_2
+        bbb_offsets_3t[i * n_turns: (i + 1) * n_turns, :] = bbb_offsets_3
+        bbb_offsets_4t[i * n_turns: (i + 1) * n_turns, :] = bbb_offsets_4
+
+        PLT_B_43 = True
+        if PLT_B_43 and i == 8:
+            plt.figure()
+            plt.title('Bunch 43, shot 9')
+            plt.plot(Bunch_positionsFit[:, 43])
 
         if PLT_TBT:
             plt.figure()
@@ -92,6 +108,53 @@ if TURN_BY_TURN:
             sbs_bbb_offset_b2[i, :] = np.mean(bbb_offsets_2, axis=0)
             sbs_bbb_offset_b3[i, :] = np.mean(bbb_offsets_3, axis=0)
             sbs_bbb_offset_b4[i, :] = np.mean(bbb_offsets_4, axis=0)
+
+    print(bbb_offsets_1t.shape)
+    print(profiles_data.shape[0])
+
+    print('Turn-by-turn')
+    print('Batch 1')
+    var_max, var_min, max_ind, min_ind = at.find_turn_by_turn_variantions(bbb_offsets_1t, profiles_data.shape[0],
+                                                                          ABS=True, IND_MAX=True)
+    print(var_max, var_min, max_ind, min_ind)
+    print(np.max(np.concatenate((var_max, np.abs(var_min)))))
+    at.plot_bunch_pos(bbb_offsets_1t, 100, 8, 43)
+
+    print('Batch 2')
+    var_max, var_min = at.find_turn_by_turn_variantions(bbb_offsets_2t, profiles_data.shape[0], ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.concatenate((var_max, np.abs(var_min)))))
+
+    print('Batch 3')
+    var_max, var_min = at.find_turn_by_turn_variantions(bbb_offsets_3t, profiles_data.shape[0], ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.concatenate((var_max, np.abs(var_min)))))
+
+    print('Batch 4')
+    var_max, var_min = at.find_turn_by_turn_variantions(bbb_offsets_4t, profiles_data.shape[0], ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.concatenate((var_max, np.abs(var_min)))))
+
+    print('Shot-by-shot')
+    print('Batch 1')
+    var_max, var_min = at.find_shot_by_shot_variantions(bbb_offsets_1t, ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.array([var_max, np.abs(var_min)])))
+
+    print('Batch 2')
+    var_max, var_min = at.find_shot_by_shot_variantions(bbb_offsets_2t, ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.array([var_max, np.abs(var_min)])))
+
+    print('Batch 3')
+    var_max, var_min = at.find_shot_by_shot_variantions(bbb_offsets_3t, ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.array([var_max, np.abs(var_min)])))
+
+    print('Batch 4')
+    var_max, var_min = at.find_shot_by_shot_variantions(bbb_offsets_4t, ABS=True)
+    print(var_max, var_min)
+    print(np.max(np.array([var_max, np.abs(var_min)])))
 
 if PLT_SBS and SHOT_BY_SHOT:
     plt.figure()

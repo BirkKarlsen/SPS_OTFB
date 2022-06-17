@@ -47,7 +47,7 @@ MODE = 1                    # MODE 1 is transmitter gain, MODE 2 is LLRF
 omit_ind = 10
 
 # Plots
-PLT_BBB = False
+PLT_BBB = True
 PLT_BUNCH_VAR_OVER_TURNS = True
 
 # Directories -----------------------------------------------------------------

@@ -175,6 +175,7 @@ if args.save_dir is not None:
 
 
 # Make bash file
+print(f'Launching {file_names}...')
 os.system(f'touch {bash_dir}{bash_file_names}')
 
 bash_content = f'#!/bin/bash\n' \

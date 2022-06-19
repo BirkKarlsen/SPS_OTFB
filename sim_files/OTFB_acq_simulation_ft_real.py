@@ -119,6 +119,8 @@ N_m = int(5e5)                                  # Number of macro-particles for 
 N_m_string = 'f'
 N_t = 1000                                      # Number of turns to track
 N_ir = 5000                                     # Number of turns for the intensity ramp
+if GEN:
+    N_ir = 0
 
 # Change Simulation based on parsed arguments ---------------------------------
 if args.n_turns is not None:
@@ -392,12 +394,13 @@ if GEN:
                                  'exponent': exponents[:N_bunches]}
 
     bunch_positions = (positions - positions[0]) / rfstation.t_rf[0, 0]
+    bunch_positions = np.round(bunch_positions)
 
     # If this fails, then generate without OTFB in the tracker and redefine the tracker after with OTFB.
     matched_from_distribution_density_multibunch(beam, ring, SPS_tracker, distribution_options_list,
                                                  N_bunches, bunch_positions[:N_bunches],
                                                  intensity_list=bunch_intensities[:N_bunches],
-                                                 n_iterations=6, TotalInducedVoltage=total_imp)
+                                                 n_iterations=4, TotalInducedVoltage=total_imp)
     beam.dt += 1000 * rfstation.t_rf[0, 0]
 
     np.save(lxdir + f'data_files/with_impedance/generated_beams/'

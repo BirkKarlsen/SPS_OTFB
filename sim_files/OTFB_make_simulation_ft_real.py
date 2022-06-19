@@ -153,17 +153,17 @@ print('\nMaking shell scripts...')
 
 bash_file_names = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
                   f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
-                  f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config]:.0f}.sh'
+                  f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}.sh'
 sub_file_names = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
                  f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
-                 f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config]:.0f}.sub'
+                 f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}.sub'
 file_names = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
              f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
-             f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config]:.0f}'
+             f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}'
 
 save_dir = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
            f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
-           f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config]:.0f}/'
+           f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}/'
 
 if args.sim_name is not None:
     bash_file_names = args.sim_name + '.sh'

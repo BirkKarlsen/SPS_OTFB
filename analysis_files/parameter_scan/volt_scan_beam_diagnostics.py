@@ -22,6 +22,7 @@ plt.rcParams.update({
 
 # Options -------------------------------------------------------------------------------------------------------------
 PLT_SMTH = False
+SCAN_MODE = 'volt'
 
 # Parameters
 extent = 0.2
@@ -37,11 +38,23 @@ tb = 4.990159369074305e-09
 T_rev = 4620 / 200.394e6
 
 # Directory and Files -------------------------------------------------------------------------------------------------
-data_folder = f'../../data_files/beam_parameters_tbt/200MHz_volt_scan_fr{fr}/'
-volt_errors = np.linspace(1 - extent, 1 + extent, n_sims)
+if SCAN_MODE == 'volt':
+    data_folder = f'../../data_files/beam_parameters_tbt/200MHz_volt_scan_fr{fr}/'
+    volt_errors = np.linspace(1 - extent, 1 + extent, n_sims)
 
-pos_files = dut.mk_file_names_volt_scan(volt_errors, 'pos_fit_tbt', fr=fr)
-fwhm_files = dut.mk_file_names_volt_scan(volt_errors, 'fwhm_tbt', fr=fr)
+    pos_files = dut.mk_file_names_volt_scan(volt_errors, 'pos_fit_tbt', fr=fr)
+    fwhm_files = dut.mk_file_names_volt_scan(volt_errors, 'fwhm_tbt', fr=fr)
+elif SCAN_MODE == 'freq':
+    data_folder = f'../../data_files/beam_parameters_tbt/200MHz_volt_scan_fr{fr}/'
+    
+    TWC3_freq = 200.03766667e6
+    TWC4_freq = 199.9945e6
+    Design_freq = 200.222e6
+
+    volt_errors = np.linspace(TWC4_freq, Design_freq, n_sims)
+
+    pos_files = dut.mk_file_names_volt_scan(volt_errors, 'pos_fit_tbt', fr=fr)
+    fwhm_files = dut.mk_file_names_volt_scan(volt_errors, 'fwhm_tbt', fr=fr)
 
 # Bunch Position Analysis ---------------------------------------------------------------------------------------------
 pos_data = dut.get_data_from_files(data_folder, pos_files)
@@ -69,7 +82,10 @@ plt.plot(V_array, max_avg_dipole_osc[:,1] * y_s, label='Batch 2', color='b')
 plt.plot(V_array, max_avg_dipole_osc[:,2] * y_s, label='Batch 3', color='g')
 plt.plot(V_array, max_avg_dipole_osc[:,3] * y_s, label='Batch 4', color='black')
 plt.legend()
-plt.xlabel('200 MHz RF Voltage [MV]')
+if SCAN_MODE == 'volt':
+    plt.xlabel('200 MHz RF Voltage [MV]')
+elif SCAN_MODE == 'freq':
+    plt.xlabel('200 MHz TWC $f_r$ [MHz]')
 plt.ylabel('Dipole Oscillation Amplitude [ps]')
 plt.xlim((V_array[0], V_array[-1]))
 

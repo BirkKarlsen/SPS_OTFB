@@ -46,7 +46,7 @@ if SCAN_MODE == 'volt':
     fwhm_files = dut.mk_file_names_volt_scan(volt_errors, 'fwhm_tbt', fr=fr)
 elif SCAN_MODE == 'freq':
     data_folder = f'../../data_files/beam_parameters_tbt/200MHz_volt_scan_fr{fr}/'
-    
+
     TWC3_freq = 200.03766667e6
     TWC4_freq = 199.9945e6
     Design_freq = 200.222e6

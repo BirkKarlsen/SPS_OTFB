@@ -80,9 +80,6 @@ if args.signal_type is not None:
 if args.date_str is not None:
     date_string = str(args.date_str)
 
-if args.freq_config is not None:
-    FREQ_CONFIG = int(args.freq_config)
-
 if args.imp_config is not None:
     IMP_CONFIG = args.imp_config
 
@@ -171,6 +168,7 @@ for i in range(len(freq_array)):
     else:
         for file in os.listdir(sim_dir_i[:-1]):
             if file.startswith(signal_name):
+                print(f'Found {file} in {sim_folder_i}!\n')
                 file_i = file
 
     os.system(f"cp {sim_dir_i}{file_i} {save_dir + save_name}{file_i[:-4]}"

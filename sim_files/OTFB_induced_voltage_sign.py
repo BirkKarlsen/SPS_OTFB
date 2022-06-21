@@ -210,15 +210,23 @@ print('Initializing Objects...\n')
 # Ring
 SPS_ring = Ring(C, alpha, p_s, Proton(), N_t)
 
+phi1 = np.zeros(N_t + 1)
+phi2 = np.zeros(N_t + 1)
+phi2[:] = np.pi
+
 # RFStation
-SINGLE_RF = True
+SINGLE_RF = False
 if SINGLE_RF:
     rfstation = RFStation(SPS_ring, [h], [V], [0], n_rf=1)
 else:
-    rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [0, np.pi], n_rf=2)
+    rfstation = RFStation(SPS_ring, [h, 4 * h], [V, 0.19 * V], [phi1, phi2], n_rf=2)
+
 
 print('RF frequency', rfstation.omega_rf[0,0] / 2 / np.pi)
 print('Revolution frequency', 1 / rfstation.t_rev[0])
+
+print(rfstation.phi_rf_d)
+print(rfstation.phi_rf)
 
 # SINGLE BUNCH FIRST
 # Beam

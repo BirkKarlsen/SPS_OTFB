@@ -40,6 +40,9 @@ parser.add_argument("--delta_freq", "-df", type=float,
                     help="Option to shift the central frequency for both cavities together.")
 parser.add_argument("--more_particles", "-mp", type=int,
                     help="Option to double the amount of macro particles per bunch.")
+parser.add_argument("--phase_kick", "-pk", type=float,
+                    help="Option to give the beam a phase kick at turn 10000, units of ns. If "
+                         "no value is given then there will be no phase kick.")
 
 args = parser.parse_args()
 
@@ -313,6 +316,9 @@ ring = Ring(C, alpha, p_s, Proton(), n_turns=N_tot)
 # RF Station
 rfstation = RFStation(ring, [h, 4 * h], [V, V_800], [0, np.pi], n_rf=2)
 
+if args.phase_kick is not None and N_t > 10000:
+    rfstation.phi_rf_d[0, N_ir + 10000:] = args.phase_kick * 1e-9 * rfstation.omega_rf[0, 0]
+    rfstation.phi_rf[0, N_ir + 10000:] = args.phase_kick * 1e-9 * rfstation.omega_rf[0, 0]
 
 # Beam
 bunch_intensities = np.load(lxdir + 'data_files/beam_parameters/avg_bunch_intensities_red.npy')

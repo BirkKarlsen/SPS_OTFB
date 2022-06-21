@@ -50,6 +50,9 @@ parser.add_argument("--delta_freq", "-df", type=float,
                     help="Option to shift the central frequency for both cavities together.")
 parser.add_argument("--more_particles", "-mp", type=int,
                     help="Option to double the amount of macro particles per bunch.")
+parser.add_argument("--phase_kick", "-pk", type=float,
+                    help="Option to give the beam a phase kick at turn 10000, units of ns. If "
+                         "no value is given then there will be no phase kick.")
 
 
 args = parser.parse_args()
@@ -145,6 +148,14 @@ if bool(more_particles):
 else:
     mp_str = ''
 
+if args.phase_kick is not None:
+    phase_kick = args.phase_kick
+    add_pk = f'-pk {phase_kick}'
+    pk_str = f'_pk{100 * phase_kick:.0f}ps'
+else:
+    add_pk = ''
+    pk_str = ''
+
 # Make necessary preparations for Sims --------------------------------------------------------------------------------
 
 
@@ -152,17 +163,17 @@ print('\nMaking shell scripts...')
 
 
 bash_file_names = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
-                  f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
+                  f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}{pk_str}' \
                   f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}.sh'
 sub_file_names = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
-                 f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
+                 f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}{pk_str}' \
                  f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}.sub'
 file_names = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
-             f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
+             f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}{pk_str}' \
              f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}'
 
 save_dir = f'sim_fr{freq_config}_vc{volt_config}_ve{100 * v_error:.0f}' \
-           f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}' \
+           f'{imp_str}{pl_str}{ramp_str}{ff_str}{mp_str}{pk_str}' \
            f'_bl{100 * bunch_length:.0f}_llrf_{gllrf_array[gllrf_config-1]:.0f}/'
 
 if args.sim_name is not None:
@@ -185,7 +196,7 @@ bash_content = f'#!/bin/bash\n' \
                f'-nt {n_turns} -nr {n_ramp} -vc {volt_config} -fc {freq_config} -gc {gllrf_config} ' \
                f'-ic {imp_config} -pc {pl_config} -ff {feedforward} -fir {fir_filter} ' \
                f'-tr {tx_ratio} -ve {v_error} -bl {bunch_length} -df {delta_freq} -mp {more_particles} ' \
-               f'-sd {save_dir} ' \
+               f'-sd {save_dir} {add_pk}' \
 
 os.system(f'echo "{bash_content}" > {bash_dir}{bash_file_names}')
 os.system(f'chmod a+x {bash_dir}{bash_file_names}')

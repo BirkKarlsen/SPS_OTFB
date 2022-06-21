@@ -250,11 +250,17 @@ if JUST_BBB:
 
 
 if COMPARE_CTF:
+    plt.rcParams.update({
+        'text.usetex': True,
+        'text.latex.preamble': r'\usepackage{fourier}',
+        'font.family': 'serif',
+        'font.size': 16
+    })
     choose_sim = 5
     CHOOSE = True
 
     plt.figure()
-    plt.title('Bunch-by-bunch Offset with/without Cable Transfer Function')
+    plt.title(f'Bunch-by-bunch Offset, {sim_name[choose_sim]}')
     plt.ylabel(r'$\Delta t$ [ps]')
     plt.xlabel(r'Bunch Number [-]')
 
@@ -266,15 +272,15 @@ if COMPARE_CTF:
 
     if CHOOSE:
         plt.plot(xs[:, choose_sim], bbb_offsets[:, choose_sim] * 1e3,
-                 label=f'{sim_name[choose_sim]}', color=colors[choose_sim])
-        plt.plot(xs[:, choose_sim], bbb_offsets_wo_CTF[:, choose_sim] * 1e3,
-                 color=colors[choose_sim], linestyle='--')
+                 label=f'with CTF', color='r')
+        plt.plot(xs[:, choose_sim], bbb_offsets_wo_CTF[:, choose_sim] * 1e3, label='without CTF',
+                 color='r', linestyle='--')
     else:
         for i in range(len(files)):
             plt.plot(xs[:, i], bbb_offsets[:, i] * 1e3, label=f'{sim_name[i]}', color=colors[i])
             plt.plot(xs[:, i], bbb_offsets_wo_CTF[:, i] * 1e3, color=colors[i], linestyle='--')
 
-    #plt.legend()
+    plt.legend()
 
 
 if PRT_PP_DIFF:

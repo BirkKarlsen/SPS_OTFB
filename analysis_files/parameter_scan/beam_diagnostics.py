@@ -26,6 +26,7 @@ file_name = 'pos_fit_tbt_full_f1_g20_bl100.npy'
 file_name = 'pos_fit_tbt_fr1_vc1_ve89_no_otfb_bl100_g20.npy'
 file_name = 'tx_scan_fr1_vc1_ve100_bl100_g20/pos_fit_tbt_tr90.npy'
 file_name = '200MHz_volt_scan_fr1/pos_fit_tbt_fr1_vc1_ve88_bl100_llrf_20.npy'
+file_name = f'baseline_case/pos_fit_tbt.npy'
 bunches = np.array([1])
 batch_length = 72
 number_of_batches = 4
@@ -131,7 +132,7 @@ plt.legend()
 
 
 plt.figure()
-plt.title('Average Dipole Oscillation, No OTFB')
+plt.title('Average Dipole Oscillation, Baseline')
 #plt.plot(np.mean(errors, axis=0))
 color_lst = ['r', 'b', 'g', 'black']
 for i in range(number_of_batches):

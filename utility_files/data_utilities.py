@@ -812,6 +812,15 @@ def mk_file_names_volt_scan(volts, prefix, fr=1):
 
     return np.array(file_names)
 
+def mk_file_names_freq_scan(freqs, prefix, fr=1):
+    file_names = []
+
+    for i in range(len(freqs)):
+        suffix = f'_fr{1e-3 * freqs[i]:.0f}kHz_vc1_ve89_bl100_llrf_20.npy'
+        file_names.append(prefix + suffix)
+
+    return np.array(file_names)
+
 def get_data_from_files(dir_folder, file_names):
 
     # Import test data to know the length of the arrays
